@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0d0d0f;
+  --color-surface: #141418;
+  --color-border: #1e2130;
+  --color-accent: #2563ff;
+  --color-danger: #e8303a;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-text: #f0f2f7;
+  --color-text-secondary: #8892a4;
+  --color-text-muted: #3d4560;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.prose-compound h2 {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-compound p {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+}
+
+.prose-compound ul {
+  color: var(--color-text-secondary);
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.calc-input {
+  width: 100%;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.calc-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
