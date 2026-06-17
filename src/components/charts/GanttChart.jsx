@@ -13,11 +13,13 @@ export default function GanttChart({ cycle, cycleCompounds = [], doseLogs = [], 
   const weeks = cycle.duration_wk
   const currentWeek = cycle.status === 'active' ? getCurrentWeek(cycle) : null
 
+  const chartMinWidth = Math.max(weeks * 28, 200)
+
   return (
-    <div className={`bg-surface border border-border rounded-md ${compact ? 'p-3' : 'p-4'}`}>
-      <div className="flex mb-3 text-[10px] font-mono text-text-muted uppercase tracking-wider">
-        <div className="w-36 shrink-0">Compound</div>
-        <div className="flex-1 flex">
+    <div className={`bg-surface border border-border rounded-md ${compact ? 'p-3' : 'p-4'} chart-scroll`}>
+      <div className="flex mb-3 text-[10px] font-mono text-text-muted uppercase tracking-wider min-w-fit">
+        <div className="w-28 sm:w-36 shrink-0 sticky left-0 bg-surface z-[1]">Compound</div>
+        <div className="flex" style={{ minWidth: chartMinWidth }}>
           {Array.from({ length: weeks }, (_, i) => (
             <div
               key={i}
@@ -31,7 +33,10 @@ export default function GanttChart({ cycle, cycleCompounds = [], doseLogs = [], 
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 min-w-fit">
+        {cycleCompounds.length === 0 && (
+          <p className="text-sm text-text-muted py-4 text-center">No compounds in this cycle.</p>
+        )}
         {cycleCompounds.map((cc) => {
           const compound = cc.compounds ?? cc.compound
           const start = (cc.start_week || 1) - 1
@@ -41,15 +46,15 @@ export default function GanttChart({ cycle, cycleCompounds = [], doseLogs = [], 
           const logs = doseLogs.filter((l) => l.cycle_compound_id === cc.id)
 
           return (
-            <div key={cc.id} className="flex items-center gap-2">
-              <div className="w-36 shrink-0 flex items-center gap-2 min-w-0">
+            <div key={cc.id} className="flex items-center gap-2 min-w-fit">
+              <div className="w-28 sm:w-36 shrink-0 flex items-center gap-2 min-w-0 sticky left-0 bg-surface z-[1]">
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: compound?.color_hex ?? '#2563FF' }}
                 />
                 <span className="text-xs truncate">{compound?.name}</span>
               </div>
-              <div className="flex-1 relative h-7 bg-bg rounded-sm border border-border/50">
+              <div className="relative h-7 bg-bg rounded-sm border border-border/50 flex-1" style={{ minWidth: chartMinWidth }}>
                 <div
                   className="absolute top-1 bottom-1 rounded-sm opacity-80"
                   style={{

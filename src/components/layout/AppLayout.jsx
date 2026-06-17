@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import { NavLink, Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 
 export default function AppLayout() {
@@ -34,28 +34,32 @@ export default function AppLayout() {
           <span className="font-display font-semibold">ROIDERS.CLUB</span>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 pb-20 lg:p-6 lg:pb-6 overflow-auto">
           <Outlet />
         </main>
 
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-surface border-t border-border flex justify-around py-2 px-1 z-40">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-surface/95 backdrop-blur-sm border-t border-border flex justify-around py-2 px-1 z-40 safe-area-pb">
           {[
-            { to: '/', label: 'Home' },
+            { to: '/', label: 'Home', end: true },
             { to: '/cycles', label: 'Cycles' },
             { to: '/bloodwork', label: 'Labs' },
-            { to: '/library', label: 'Library' },
+            { to: '/health', label: 'Health' },
             { to: '/profile', label: 'Profile' },
           ].map((item) => (
-            <Link
+            <NavLink
               key={item.to}
               to={item.to}
-              className="text-[10px] text-text-secondary hover:text-accent px-2 py-1"
+              end={item.end}
+              className={({ isActive }) =>
+                `flex flex-col items-center text-[10px] px-2 py-1 min-w-[48px] ${
+                  isActive ? 'text-accent' : 'text-text-secondary'
+                }`
+              }
             >
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
-        <div className="lg:hidden h-14" />
       </div>
     </div>
   )

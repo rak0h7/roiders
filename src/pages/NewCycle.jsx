@@ -44,7 +44,7 @@ export default function NewCycle() {
   const [activeSearchIdx, setActiveSearchIdx] = useState(null)
   const [error, setError] = useState('')
 
-  const { data: allCompounds = [] } = useQuery({
+  const { data: allCompounds = [], isLoading: compoundsLoading, isError: compoundsError } = useQuery({
     queryKey: ['compounds'],
     queryFn: async () => {
       const { data, error: err } = await supabase.from('compounds').select('*').order('name')
@@ -189,6 +189,19 @@ export default function NewCycle() {
 
           <div className="bg-surface border border-border rounded-md p-4">
             <h2 className="font-display font-semibold mb-4">Compounds</h2>
+
+            {!compoundsLoading && allCompounds.length === 0 && (
+              <div className="mb-4 p-3 bg-warning/10 border border-warning/30 rounded-md text-sm">
+                <p className="text-warning font-medium">No compounds in database yet.</p>
+                <p className="text-text-secondary mt-1">
+                  The 15 compound files exist in <code className="font-mono text-xs">/compounds</code> but need seeding into Supabase. Add <code className="font-mono text-xs">SUPABASE_SERVICE_ROLE_KEY</code> to <code className="font-mono text-xs">.env.local</code>, then run <code className="font-mono text-xs">npm run seed</code>.
+                </p>
+              </div>
+            )}
+            {compoundsError && (
+              <p className="mb-4 text-sm text-danger">Failed to load compounds — check Supabase connection and that the migration has been run.</p>
+            )}
+
             <div className="space-y-4">
               {compounds.map((row, idx) => (
                 <div key={idx} className="border border-border rounded-md p-3 space-y-3">
@@ -215,9 +228,11 @@ export default function NewCycle() {
                             placeholder="Search compounds..."
                             className="w-full bg-bg border border-border rounded-sm px-3 py-2 text-sm"
                           />
-                          {activeSearchIdx === idx && filtered.length > 0 && (
+                          {activeSearchIdx === idx && !compoundsLoading && (
                             <div className="absolute z-10 mt-1 w-full bg-surface border border-border rounded-sm shadow-lg max-h-40 overflow-y-auto">
-                              {filtered.slice(0, 8).map((c) => (
+                              {filtered.length === 0 ? (
+                                <p className="px-3 py-2 text-sm text-text-muted">No matches</p>
+                              ) : filtered.slice(0, 8).map((c) => (
                                 <button
                                   key={c.id}
                                   type="button"

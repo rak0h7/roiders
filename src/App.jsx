@@ -13,6 +13,7 @@ import Library from './pages/Library'
 import CompoundDetail from './pages/CompoundDetail'
 import Calculators from './pages/Calculators'
 import Profile from './pages/Profile'
+import HealthLog from './pages/HealthLog'
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="cycles/new" element={<NewCycle />} />
             <Route path="cycles/:id" element={<CycleDetail />} />
             <Route path="bloodwork" element={<Bloodwork />} />
+            <Route path="health" element={<HealthLog />} />
             <Route path="library" element={<Library />} />
             <Route path="library/:slug" element={<CompoundDetail />} />
             <Route path="calculators" element={<Calculators />} />

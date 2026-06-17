@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Button from '../components/ui/Button'
+import { formatAuthError } from '../lib/auth-errors'
 
 export default function Signup() {
   const { session, signUp } = useAuth()
@@ -11,17 +12,22 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [confirmEmail, setConfirmEmail] = useState(false)
+  const [hint, setHint] = useState('')
 
   if (session) return <Navigate to="/" replace />
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setHint('')
+    setConfirmEmail(false)
     setLoading(true)
     const { data, error: err } = await signUp(email, password)
     setLoading(false)
     if (err) {
-      setError(err.message)
+      const formatted = formatAuthError(err.message)
+      setError(formatted.message)
+      setHint(formatted.hint ?? '')
       return
     }
     if (data?.session) {
@@ -42,7 +48,12 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-md p-6 space-y-4">
           <h2 className="font-display text-lg font-semibold">Create account</h2>
 
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && (
+            <div className="text-sm text-danger space-y-1">
+              <p>{error}</p>
+              {hint && <p className="text-text-secondary">{hint}</p>}
+            </div>
+          )}
           {confirmEmail && (
             <p className="text-sm text-success">Check your email to confirm your account, then sign in.</p>
           )}

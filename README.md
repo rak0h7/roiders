@@ -22,11 +22,16 @@ npm run dev
    VITE_SUPABASE_URL=https://xxxx.supabase.co
    VITE_SUPABASE_ANON_KEY=eyJ...
    ```
-5. Seed compounds (needs service role key in `.env`):
+5. **Disable email confirmation for development** (avoids Supabase's strict built-in email rate limits):
+   - Supabase Dashboard → **Authentication** → **Providers** → **Email**
+   - Turn off **Confirm email**
+   - Signups will work immediately without a confirmation email
+6. Seed compounds — add the **service role key** to `.env.local` (never commit this):
    ```
    SUPABASE_SERVICE_ROLE_KEY=eyJ...
    npm run seed
    ```
+   You should see `Done. Upserted 15 compounds.` Compounds will then appear in the cycle builder and Library.
 
 ## Deploy to Vercel
 

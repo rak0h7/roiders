@@ -3,7 +3,10 @@ import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import matter from 'gray-matter'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '.env.local' })
+dotenv.config()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const compoundsDir = path.join(__dirname, '..', 'compounds')

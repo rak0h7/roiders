@@ -17,6 +17,7 @@ const navSections = [
     title: 'Tools',
     items: [
       { to: '/bloodwork', label: 'Bloodwork' },
+      { to: '/health', label: 'Health Log' },
       { to: '/calculators', label: 'Calculators' },
     ],
   },
@@ -69,7 +70,7 @@ export default function Sidebar({ onNavigate }) {
   })
 
   return (
-    <aside className="w-60 shrink-0 bg-surface border-r border-border flex flex-col h-full">
+    <aside className="w-60 shrink-0 bg-surface border-r border-border flex flex-col h-full min-h-screen">
       <div className="p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-accent rounded-sm flex items-center justify-center font-display font-bold text-sm text-white">

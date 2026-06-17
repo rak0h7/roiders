@@ -37,7 +37,8 @@ export default function PKChart({ curves = [], combined = [], height = 300 }) {
   })
 
   return (
-    <div className="bg-surface border border-border rounded-md p-4">
+    <div className="bg-surface border border-border rounded-md p-4 chart-scroll">
+      <div style={{ minWidth: 320, width: '100%', height }}>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="#1E2130" strokeDasharray="3 3" />
@@ -75,6 +76,7 @@ export default function PKChart({ curves = [], combined = [], height = 300 }) {
           <Line type="monotone" dataKey="total" name="Combined" stroke="#F0F2F7" strokeWidth={2} strokeDasharray="4 4" dot={false} />
         </ComposedChart>
       </ResponsiveContainer>
+      </div>
     </div>
   )
 }

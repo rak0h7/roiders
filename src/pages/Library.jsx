@@ -40,6 +40,17 @@ export default function Library() {
 
       {isLoading && <p className="text-text-secondary">Loading...</p>}
 
+      {!isLoading && compounds.length === 0 && (
+        <div className="bg-surface border border-border rounded-md p-8 text-center">
+          <p className="text-text-secondary mb-2">No compounds loaded.</p>
+          <p className="text-sm text-text-muted">Run <code className="font-mono text-xs">npm run seed</code> to populate the database.</p>
+        </div>
+      )}
+
+      {!isLoading && filtered.length === 0 && compounds.length > 0 && (
+        <p className="text-text-muted text-sm">No compounds match this filter.</p>
+      )}
+
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filtered.map((c) => (
           <Link

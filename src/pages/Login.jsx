@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Button from '../components/ui/Button'
 import { isSupabaseConfigured } from '../lib/supabase'
+import { formatAuthError } from '../lib/auth-errors'
 
 export default function Login() {
   const { session, signIn, resetPassword } = useAuth()
@@ -12,17 +13,21 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [resetSent, setResetSent] = useState(false)
+  const [hint, setHint] = useState('')
 
   if (session) return <Navigate to="/" replace />
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setHint('')
     setLoading(true)
     const { error: err } = await signIn(email, password)
     setLoading(false)
     if (err) {
-      setError(err.message)
+      const formatted = formatAuthError(err.message)
+      setError(formatted.message)
+      setHint(formatted.hint ?? '')
       return
     }
     navigate('/')
@@ -34,8 +39,13 @@ export default function Login() {
       return
     }
     const { error: err } = await resetPassword(email)
-    if (err) setError(err.message)
-    else setResetSent(true)
+    if (err) {
+      const formatted = formatAuthError(err.message)
+      setError(formatted.message)
+      setHint(formatted.hint ?? '')
+    } else {
+      setResetSent(true)
+    }
   }
 
   return (
@@ -55,7 +65,12 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="bg-surface border border-border rounded-md p-6 space-y-4">
           <h2 className="font-display text-lg font-semibold">Sign in</h2>
 
-          {error && <p className="text-sm text-danger">{error}</p>}
+          {error && (
+            <div className="text-sm text-danger space-y-1">
+              <p>{error}</p>
+              {hint && <p className="text-text-secondary">{hint}</p>}
+            </div>
+          )}
           {resetSent && <p className="text-sm text-success">Password reset email sent.</p>}
 
           <div>

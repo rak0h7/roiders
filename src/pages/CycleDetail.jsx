@@ -23,6 +23,9 @@ import {
   frequencyLabel,
 } from '../lib/pk-engine'
 import { format } from 'date-fns'
+import { findMissedDoses } from '../lib/dose-schedule'
+import MissedDosesPanel from '../components/doses/MissedDosesPanel'
+import DoseLogRow from '../components/ui/DoseLogRow'
 
 const TABS = ['Overview', 'Log Dose', 'Timeline', 'PK Levels']
 
@@ -121,13 +124,26 @@ export default function CycleDetail() {
     durationDays
   )
 
-  const handleSelectCompound = (ccId) => {
+  const missedDoses = findMissedDoses(cycle, cycleCompounds, doseLogs)
+
+  const handleSelectCompound = (ccId, preset = {}) => {
     const cc = cycleCompounds.find((c) => c.id === ccId)
     setLogForm((f) => ({
       ...f,
       cycle_compound_id: ccId,
-      dose_mg: cc?.dose_mg ?? '',
+      dose_mg: preset.doseMg ?? cc?.dose_mg ?? '',
+      logged_at: preset.scheduledAt
+        ? format(preset.scheduledAt, "yyyy-MM-dd'T'HH:mm")
+        : f.logged_at,
     }))
+  }
+
+  const handleLogMissedDose = (dose) => {
+    setTab('Log Dose')
+    handleSelectCompound(dose.cycleCompoundId, {
+      doseMg: dose.doseMg,
+      scheduledAt: dose.scheduledAt,
+    })
   }
 
   return (
@@ -152,16 +168,21 @@ export default function CycleDetail() {
         </div>
       </div>
 
-      <div className="flex gap-1 border-b border-border">
+      <div className="flex gap-1 border-b border-border overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 scrollbar-none">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-4 py-2 text-sm border-b-2 -mb-px transition-colors ${
+            className={`px-4 py-2 text-sm border-b-2 -mb-px transition-colors whitespace-nowrap shrink-0 ${
               tab === t ? 'border-accent text-accent' : 'border-transparent text-text-secondary hover:text-text'
             }`}
           >
             {t}
+            {t === 'Log Dose' && missedDoses.length > 0 && (
+              <span className="ml-1.5 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-mono bg-warning/20 text-warning rounded-sm">
+                {missedDoses.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -174,8 +195,12 @@ export default function CycleDetail() {
             <StatCard label="Total mg logged" value={totalMg} unit="mg" accent />
           </div>
 
-          <div className="bg-surface border border-border rounded-md overflow-hidden">
-            <table className="w-full text-sm">
+          {missedDoses.length > 0 && (
+            <MissedDosesPanel missedDoses={missedDoses} onLogDose={handleLogMissedDose} />
+          )}
+
+          <div className="bg-surface border border-border rounded-md overflow-x-auto">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="border-b border-border text-left text-[10px] uppercase tracking-wider text-text-muted">
                   <th className="p-3">Compound</th>
@@ -187,9 +212,11 @@ export default function CycleDetail() {
               <tbody>
                 {cycleCompounds.map((cc) => (
                   <tr key={cc.id} className="border-b border-border/50">
-                    <td className="p-3 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cc.compounds?.color_hex }} />
-                      {cc.compounds?.name}
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cc.compounds?.color_hex }} />
+                        <span className="truncate">{cc.compounds?.name}</span>
+                      </div>
                     </td>
                     <td className="p-3 font-mono">{cc.dose_mg}mg</td>
                     <td className="p-3"><Badge>{frequencyLabel(cc.frequency)}</Badge></td>
@@ -208,18 +235,21 @@ export default function CycleDetail() {
       )}
 
       {tab === 'Log Dose' && (
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <MissedDosesPanel missedDoses={missedDoses} onLogDose={handleLogMissedDose} />
+
+          <div className="grid lg:grid-cols-2 gap-6">
           <form
             onSubmit={(e) => { e.preventDefault(); logMutation.mutate() }}
             className="bg-surface border border-border rounded-md p-4 space-y-4"
           >
             <h2 className="font-display font-semibold">Quick log</h2>
             <div>
-              <label className="text-xs text-text-secondary">Compound</label>
+              <label className="field-label">Compound</label>
               <select
                 value={logForm.cycle_compound_id}
                 onChange={(e) => handleSelectCompound(e.target.value)}
-                className="w-full mt-1 bg-bg border border-border rounded-sm px-3 py-2 text-sm"
+                className="field-input mt-1"
                 required
               >
                 <option value="">Select...</option>
@@ -229,30 +259,30 @@ export default function CycleDetail() {
               </select>
             </div>
             <div>
-              <label className="text-xs text-text-secondary">Date & time</label>
+              <label className="field-label">Date & time</label>
               <input
                 type="datetime-local"
                 value={logForm.logged_at}
                 onChange={(e) => setLogForm((f) => ({ ...f, logged_at: e.target.value }))}
-                className="w-full mt-1 bg-bg border border-border rounded-sm px-3 py-2 text-sm font-mono"
+                className="field-input mt-1 font-mono"
                 required
               />
             </div>
             <div>
-              <label className="text-xs text-text-secondary">Dose (mg)</label>
+              <label className="field-label">Dose (mg)</label>
               <input
                 type="number"
                 value={logForm.dose_mg}
                 onChange={(e) => setLogForm((f) => ({ ...f, dose_mg: e.target.value }))}
-                className="w-full mt-1 bg-bg border border-border rounded-sm px-3 py-2 text-sm font-mono"
+                className="field-input mt-1 font-mono"
               />
             </div>
             <div>
-              <label className="text-xs text-text-secondary">Injection site</label>
+              <label className="field-label">Injection site</label>
               <select
                 value={logForm.injection_site}
                 onChange={(e) => setLogForm((f) => ({ ...f, injection_site: e.target.value }))}
-                className="w-full mt-1 bg-bg border border-border rounded-sm px-3 py-2 text-sm"
+                className="field-input mt-1"
               >
                 <option value="">—</option>
                 {INJECTION_SITES.map((s) => (
@@ -261,11 +291,11 @@ export default function CycleDetail() {
               </select>
             </div>
             <div>
-              <label className="text-xs text-text-secondary">Notes</label>
+              <label className="field-label">Notes</label>
               <input
                 value={logForm.notes}
                 onChange={(e) => setLogForm((f) => ({ ...f, notes: e.target.value }))}
-                className="w-full mt-1 bg-bg border border-border rounded-sm px-3 py-2 text-sm"
+                className="field-input mt-1"
               />
             </div>
             <Button type="submit" disabled={logMutation.isPending}>Log dose</Button>
@@ -278,16 +308,11 @@ export default function CycleDetail() {
             ) : (
               <div className="space-y-2">
                 {doseLogs.map((d) => (
-                  <div key={d.id} className="flex items-center gap-3 text-sm border-b border-border/50 pb-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d.cycle_compounds?.compounds?.color_hex }} />
-                    <span className="flex-1">{d.cycle_compounds?.compounds?.name}</span>
-                    <span className="font-mono text-text-secondary">{formatDateTime(d.logged_at)}</span>
-                    <span className="font-mono">{d.dose_mg}mg</span>
-                    {d.injection_site && <span className="text-[10px] font-mono text-text-muted">{d.injection_site}</span>}
-                  </div>
+                  <DoseLogRow key={d.id} dose={d} />
                 ))}
               </div>
             )}
+          </div>
           </div>
         </div>
       )}

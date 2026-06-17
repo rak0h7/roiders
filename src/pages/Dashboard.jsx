@@ -10,13 +10,15 @@ import Button from '../components/ui/Button'
 import {
   getCurrentWeek,
   getDaysElapsed,
-  formatDateTime,
   cycleWeeklyTotal,
 } from '../lib/cycle-utils'
 import {
   calculateMultiCompoundPK,
   generateDoseDaysFromLogs,
 } from '../lib/pk-engine'
+import { findMissedDoses } from '../lib/dose-schedule'
+import MissedDosesPanel from '../components/doses/MissedDosesPanel'
+import DoseLogRow from '../components/ui/DoseLogRow'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -116,6 +118,7 @@ export default function Dashboard() {
     : { curves: [], combined: [] }
 
   const flaggedCount = latestPanel?.bloodwork_markers?.filter((m) => m.flagged).length ?? 0
+  const missedDoses = findMissedDoses(activeCycle, cycleCompounds, doseLogs)
 
   if (!activeCycle) {
     return (
@@ -138,6 +141,12 @@ export default function Dashboard() {
         </div>
         <Link to={`/cycles/${activeCycle.id}`}><Button variant="secondary">View cycle</Button></Link>
       </div>
+
+      {missedDoses.length > 0 && (
+        <Link to={`/cycles/${activeCycle.id}`} className="block">
+          <MissedDosesPanel missedDoses={missedDoses} />
+        </Link>
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard label="Cycle week" value={getCurrentWeek(activeCycle)} />
@@ -168,17 +177,7 @@ export default function Dashboard() {
           ) : (
             <div className="space-y-2">
               {recentDoses.map((d) => (
-                <div key={d.id} className="flex items-center justify-between text-sm border-b border-border/50 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2 h-2 rounded-full"
-                      style={{ backgroundColor: d.cycle_compounds?.compounds?.color_hex }}
-                    />
-                    <span>{d.cycle_compounds?.compounds?.name}</span>
-                  </div>
-                  <span className="font-mono text-text-secondary">{formatDateTime(d.logged_at)}</span>
-                  <span className="font-mono">{d.dose_mg}mg</span>
-                </div>
+                <DoseLogRow key={d.id} dose={d} />
               ))}
             </div>
           )}
