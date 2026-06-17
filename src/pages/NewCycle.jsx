@@ -114,7 +114,7 @@ export default function NewCycle() {
     },
     onSuccess: (cycle) => {
       queryClient.invalidateQueries({ queryKey: ['cycles'] })
-      navigate(`/cycles/${cycle.id}`)
+      navigate(`/planner/${cycle.id}`)
     },
     onError: (err) => setError(err.message),
   })
@@ -139,7 +139,7 @@ export default function NewCycle() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="font-display text-2xl font-bold mb-6">New Cycle</h1>
+      <h1 className="font-display text-2xl font-bold mb-6">New Cycle Plan</h1>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

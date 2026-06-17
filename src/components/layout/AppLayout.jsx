@@ -41,9 +41,9 @@ export default function AppLayout() {
         <nav className="lg:hidden fixed bottom-0 inset-x-0 bg-surface/95 backdrop-blur-sm border-t border-border flex justify-around py-2 px-1 z-40 safe-area-pb">
           {[
             { to: '/', label: 'Home', end: true },
-            { to: '/cycles', label: 'Cycles' },
+            { to: '/planner', label: 'Plan' },
+            { to: '/log', label: 'Log' },
             { to: '/bloodwork', label: 'Labs' },
-            { to: '/health', label: 'Health' },
             { to: '/profile', label: 'Profile' },
           ].map((item) => (
             <NavLink

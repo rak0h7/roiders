@@ -10,7 +10,8 @@ const navSections = [
     title: 'Tracker',
     items: [
       { to: '/', label: 'Dashboard', end: true },
-      { to: '/cycles', label: 'My Cycles' },
+      { to: '/planner', label: 'Cycle Planner' },
+      { to: '/log', label: 'Cycle Log' },
     ],
   },
   {
