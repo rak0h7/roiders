@@ -56,3 +56,37 @@ export function findMissedDoses(cycle, cycleCompounds = [], doseLogs = [], windo
 
   return missed.sort((a, b) => b.scheduledAt - a.scheduledAt)
 }
+
+export function getTodaysScheduledDoses(cycle, cycleCompounds = [], doseLogs = [], windowHours = MISSED_WINDOW_HOURS) {
+  if (!cycle?.start_date || cycle.status !== 'active') return []
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const windowMs = windowHours * 60 * 60 * 1000
+  const results = []
+
+  for (const cc of cycleCompounds) {
+    const scheduled = generateScheduledDoseTimes(cycle, cc)
+    const logs = doseLogs.filter((l) => l.cycle_compound_id === cc.id)
+
+    for (const dose of scheduled) {
+      const doseDay = new Date(dose.scheduledAt)
+      doseDay.setHours(0, 0, 0, 0)
+      if (doseDay.getTime() !== today.getTime()) continue
+
+      const logged = logs.some((log) => {
+        return Math.abs(new Date(log.logged_at).getTime() - dose.scheduledAt.getTime()) <= windowMs
+      })
+
+      results.push({
+        ...dose,
+        cycleCompoundId: cc.id,
+        compoundName: cc.compounds?.name,
+        compoundColor: cc.compounds?.color_hex,
+        logged,
+      })
+    }
+  }
+
+  return results
+}

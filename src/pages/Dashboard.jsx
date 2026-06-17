@@ -24,7 +24,11 @@ import {
   weeklyDoseMg,
   frequencyLabel,
 } from '../lib/pk-engine'
-import { findMissedDoses } from '../lib/dose-schedule'
+import { findMissedDoses, getTodaysScheduledDoses } from '../lib/dose-schedule'
+import TodaysPinsPanel from '../components/cycles/TodaysPinsPanel'
+import PlanCard from '../components/cycles/PlanCard'
+import { activateCycle } from '../lib/cycle-mutations'
+import { isMidCycleCompound } from '../lib/cycle-utils'
 import { completeCycle } from '../lib/cycle-mutations'
 
 export default function Dashboard() {
@@ -128,6 +132,40 @@ export default function Dashboard() {
 
   const flaggedCount = latestPanel?.bloodwork_markers?.filter((m) => m.flagged).length ?? 0
   const missedDoses = findMissedDoses(activeCycle, cycleCompounds, doseLogs)
+  const todaysPins = getTodaysScheduledDoses(activeCycle, cycleCompounds, doseLogs)
+
+  const { data: draftPlans = [] } = useQuery({
+    queryKey: ['cycle-plans', user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cycles')
+        .select('*, cycle_compounds(dose_mg, frequency, custom_days, compounds(name, color_hex))')
+        .eq('user_id', user.id)
+        .eq('status', 'planned')
+        .order('created_at', { ascending: false })
+        .limit(3)
+      if (error) throw error
+      return data
+    },
+    enabled: !!user && !activeCycle,
+  })
+
+  const activateMutation = useMutation({
+    mutationFn: (cycleId) => activateCycle(supabase, user.id, cycleId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active-cycle'] })
+      queryClient.invalidateQueries({ queryKey: ['cycle-plans'] })
+    },
+  })
+
+  const handleLogDose = (dose) => {
+    setDosePreset({
+      cycle_compound_id: dose.cycleCompoundId,
+      dose_mg: dose.doseMg,
+      logged_at: format(dose.scheduledAt, "yyyy-MM-dd'T'HH:mm"),
+    })
+    document.getElementById('dose-log-section')?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   const handleLogMissedDose = (dose) => {
     setDosePreset({
@@ -140,15 +178,34 @@ export default function Dashboard() {
 
   if (!activeCycle) {
     return (
-      <div className="max-w-2xl">
-        <h1 className="font-display text-2xl font-bold mb-2">Dashboard</h1>
-        <p className="text-text-secondary mb-6">
-          No active cycle. Plan a stack in Cycle Planner, then activate it to start tracking here.
-        </p>
-        <div className="flex gap-3">
-          <Link to="/planner/new"><Button>+ New plan</Button></Link>
-          <Link to="/planner"><Button variant="secondary">Cycle Planner</Button></Link>
+      <div className="space-y-8 max-w-4xl">
+        <div>
+          <h1 className="font-display text-2xl font-bold mb-2">Dashboard</h1>
+          <p className="text-text-secondary">
+            Your daily pin log lives here. Build a stack in Cycle Planner, then hit <strong className="text-text">Start</strong>.
+          </p>
         </div>
+        {draftPlans.length > 0 ? (
+          <section>
+            <h2 className="font-display text-sm font-semibold text-text-secondary uppercase tracking-wider mb-3">Ready to start</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              {draftPlans.map((plan) => (
+                <PlanCard
+                  key={plan.id}
+                  cycle={plan}
+                  onActivate={(id) => activateMutation.mutate(id)}
+                  activating={activateMutation.isPending}
+                />
+              ))}
+            </div>
+          </section>
+        ) : (
+          <div className="bg-surface border border-border rounded-md p-8 text-center">
+            <p className="text-text-secondary mb-4">No stack running. Build one to start logging.</p>
+            <Link to="/planner/new"><Button>+ Build stack</Button></Link>
+          </div>
+        )}
+        <Link to="/planner" className="text-sm text-accent hover:underline">Open Cycle Planner →</Link>
       </div>
     )
   }
@@ -165,7 +222,7 @@ export default function Dashboard() {
         </div>
         <div className="flex flex-wrap gap-2">
           <Link to={`/planner/${activeCycle.id}`}>
-            <Button variant="ghost" className="text-xs">View original plan</Button>
+            <Button variant="ghost" className="text-xs">View plan</Button>
           </Link>
           {!showCompleteConfirm ? (
             <Button variant="secondary" onClick={() => setShowCompleteConfirm(true)}>Complete cycle</Button>
@@ -181,6 +238,7 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <TodaysPinsPanel todaysDoses={todaysPins} onLogDose={handleLogDose} />
       <MissedDosesPanel missedDoses={missedDoses} onLogDose={handleLogMissedDose} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -228,7 +286,7 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cc.compounds?.color_hex }} />
                       <span className="truncate">{cc.compounds?.name}</span>
-                      {cc.notes?.includes('Added during') && <Badge variant="warning">new</Badge>}
+                      {isMidCycleCompound(cc) && <Badge variant="warning">new</Badge>}
                     </div>
                   </td>
                   <td className="py-2 font-mono">{cc.dose_mg}mg</td>

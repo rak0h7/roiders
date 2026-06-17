@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge'
 import GanttChart from '../components/charts/GanttChart'
 import PKChart from '../components/charts/PKChart'
 import DoseLogRow from '../components/ui/DoseLogRow'
+import { isMidCycleCompound } from '../lib/cycle-utils'
 
 import {
   calculateMultiCompoundPK,
@@ -123,7 +124,7 @@ export default function LogDetail() {
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cc.compounds?.color_hex }} />
                         {cc.compounds?.name}
-                        {cc.notes?.includes('Added during') && (
+                        {isMidCycleCompound(cc) && (
                           <Badge variant="warning" className="ml-1">added</Badge>
                         )}
                       </div>

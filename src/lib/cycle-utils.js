@@ -1,6 +1,12 @@
 import { differenceInDays, addWeeks, format } from 'date-fns'
 import { weeklyDoseMg } from './pk-engine'
 
+export const MID_CYCLE_TAG = 'added_mid_cycle'
+
+export function isMidCycleCompound(cc) {
+  return cc?.notes?.includes(MID_CYCLE_TAG) || cc?.notes?.includes('Added during')
+}
+
 export function getCycleDurationDays(cycle) {
   return (cycle?.duration_wk ?? 0) * 7
 }
@@ -73,3 +79,25 @@ export const COMMON_MARKERS = [
   { marker: 'LDL', unit: 'mg/dL', ref_low: 0, ref_high: 100 },
   { marker: 'Triglycerides', unit: 'mg/dL', ref_low: 0, ref_high: 150 },
 ]
+
+export const FREQUENCIES = [
+  { value: 'daily', label: 'Daily', short: 'ED' },
+  { value: 'eod', label: 'EOD', short: 'EOD' },
+  { value: 'mwf', label: 'Mon / Wed / Fri', short: 'MWF' },
+  { value: 'custom', label: 'Custom days', short: 'CUSTOM' },
+]
+
+export const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+export const DAY_FULL = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+export function emptyCompoundRow() {
+  return {
+    compound_id: '',
+    compound: null,
+    dose_mg: '',
+    frequency: 'mwf',
+    custom_days: [1, 3, 5],
+    start_week: 1,
+    end_week: null,
+  }
+}

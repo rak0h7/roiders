@@ -3,6 +3,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import Button from '../ui/Button'
 import { getCurrentWeek } from '../../lib/cycle-utils'
+import { midCycleNote } from '../../lib/cycle-mutations'
 
 const FREQUENCIES = [
   { value: 'daily', label: 'Daily' },
@@ -40,7 +41,7 @@ export default function AddCompoundPanel({ cycleId, cycle, onSuccess }) {
         dose_mg: Number(doseMg) || selected.default_dose_mg,
         frequency: selected.is_oral ? 'daily' : frequency,
         start_week: startWeek,
-        notes: 'Added during active cycle',
+        notes: midCycleNote(),
       })
       if (error) throw error
     },
