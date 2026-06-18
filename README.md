@@ -20,9 +20,9 @@ npm run dev                  # http://localhost:1337
 
 ## Supabase setup
 
-Project: `https://tfcplpxcorcqbjqbukem.supabase.co`
+Project: `https://uhssspbmgsijvygrxvaw.supabase.co`
 
-1. [SQL Editor](https://supabase.com/dashboard/project/tfcplpxcorcqbjqbukem/sql/new) → run `supabase/schema.sql`
+1. [SQL Editor](https://supabase.com/dashboard/project/uhssspbmgsijvygrxvaw/sql/new) → run `supabase/schema.sql`
 2. **Authentication → Providers** → disable email signups (optional; keys are used instead)
 3. Copy keys from **Project Settings → API** into `.env.local`:
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (anon public)

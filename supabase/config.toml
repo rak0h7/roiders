@@ -1,0 +1,12 @@
+# Roiders Club — linked Supabase project
+#   npx supabase login
+#   npx supabase link --project-ref uhssspbmgsijvygrxvaw
+
+project_id = "uhssspbmgsijvygrxvaw"
+
+[api]
+enabled = true
+
+[db]
+port = 54322
+major_version = 15

@@ -22,18 +22,20 @@ export const ui = {
     "h-11 w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/90 px-3.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-2)] backdrop-blur-sm focus:border-[var(--accent)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 transition",
 
   btnPrimary:
-    "inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 text-sm font-semibold text-white shadow-[0_4px_20px_var(--labs-glow)] transition hover:brightness-110 active:scale-[0.98] [background:var(--gradient-primary)]",
+    "btn-hover inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 text-sm font-semibold text-white shadow-[0_4px_20px_var(--labs-glow)] active:scale-[0.98] [background:var(--gradient-primary)]",
   btnProtocol:
-    "inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--protocol)] px-5 text-sm font-semibold text-[var(--bg-base)] shadow-[0_4px_16px_var(--protocol-glow)] transition hover:brightness-110 active:scale-[0.98]",
+    "btn-hover inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--protocol)] px-5 text-sm font-semibold text-[var(--bg-base)] shadow-[0_4px_16px_var(--protocol-glow)] active:scale-[0.98]",
   btnSecondary:
-    "inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-strong)] glass px-4 text-sm font-medium text-[var(--foreground)] transition hover:bg-[var(--bg-hover)]",
+    "btn-hover inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-strong)] glass px-4 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--bg-hover)]",
   btnGhost:
     "inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-3 py-2 text-sm font-medium text-[var(--muted)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--foreground)]",
 
   pillActive:
-    "inline-flex h-9 items-center justify-center rounded-full px-4 text-xs font-semibold text-white shadow-[0_2px_12px_var(--labs-glow)] [background:var(--gradient-primary)]",
+    "btn-hover inline-flex h-9 items-center justify-center rounded-full px-4 text-xs font-semibold text-white shadow-[0_2px_12px_var(--labs-glow)] [background:var(--gradient-primary)]",
   pillInactive:
-    "inline-flex h-9 items-center justify-center rounded-full border border-[var(--border)] glass px-4 text-xs font-medium text-[var(--muted)] transition hover:border-[var(--accent)]/30 hover:text-[var(--foreground)]",
+    "btn-hover inline-flex h-9 items-center justify-center rounded-full border border-[var(--border)] glass px-4 text-xs font-medium text-[var(--muted)] hover:border-[var(--accent)]/30 hover:text-[var(--foreground)]",
+
+  icon: "shrink-0 [width:var(--icon-size)] [height:var(--icon-size)]",
   pillProtocolActive:
     "inline-flex h-9 items-center justify-center rounded-full bg-[var(--protocol)] px-4 text-xs font-semibold text-[var(--bg-base)] shadow-[0_2px_12px_var(--protocol-glow)]",
 

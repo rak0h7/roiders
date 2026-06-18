@@ -5,6 +5,7 @@ import type { RangeMode } from "@/lib/types";
 import {
   DEFAULT_THEME,
   applyThemeToDocument,
+  normalizeTheme,
   type ThemeConfig,
   type ThemePresetId,
   presetToTheme,
@@ -40,7 +41,7 @@ function mergeSettings(raw: Partial<AppSettings>): AppSettings {
   return {
     ...DEFAULTS,
     ...raw,
-    theme: { ...DEFAULT_THEME, ...raw.theme },
+    theme: normalizeTheme(raw.theme),
   };
 }
 
@@ -72,14 +73,21 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const updateTheme = useCallback(
     (patch: Partial<ThemeConfig>) => {
-      const isColorEdit = "accentPrimary" in patch || "accentSecondary" in patch || "accentTertiary" in patch;
+      const isColorEdit =
+        "accentPrimary" in patch ||
+        "accentSecondary" in patch ||
+        "accentTertiary" in patch ||
+        "customSwatches" in patch ||
+        "baseColor" in patch ||
+        "surfaceColor" in patch ||
+        "elevatedColor" in patch;
       persist({
         ...settings,
-        theme: {
+        theme: normalizeTheme({
           ...settings.theme,
           ...patch,
           preset: patch.preset ?? (isColorEdit ? "custom" : settings.theme.preset),
-        },
+        }),
       });
     },
     [settings, persist]
@@ -91,7 +99,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       if (!preset) return;
       persist({
         ...settings,
-        theme: { ...settings.theme, ...presetToTheme(preset), preset: presetId },
+        theme: normalizeTheme({
+          ...settings.theme,
+          ...presetToTheme(preset, settings.theme),
+        }),
       });
     },
     [settings, persist]

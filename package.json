@@ -9,6 +9,7 @@
     "lint": "eslint",
     "create-admin": "node scripts/create-admin-account.mjs",
     "db:migrate": "node scripts/apply-migrations.mjs",
+    "db:migrate:print": "node scripts/apply-migrations.mjs --print-sql",
     "db:bootstrap": "node scripts/post-migrate-bootstrap.mjs",
     "deploy": "vercel --prod --yes",
     "deploy:preview": "vercel --yes"
@@ -32,6 +33,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

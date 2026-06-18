@@ -42,6 +42,9 @@ export function AppShell() {
   const { settings, routeEnabled } = useSiteConfig();
   const { secondaryTab, setSecondaryTab, showComparison, logView, setMainTab } = useApp();
   const { reducedMotion, theme, compactSidebar } = useSettings();
+  const pageTransitionDuration = reducedMotion
+    ? 0
+    : Math.max(0.08, 0.38 - (theme.pageTransitionSpeed / 100) * 0.3);
   const { setView, compounds } = useCycleStore();
   const { setGymView } = useGymStore();
   const { setNutritionView } = useNutritionStore();
@@ -164,7 +167,7 @@ export function AppShell() {
                 initial={reducedMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
+                transition={{ duration: pageTransitionDuration, ease: "easeOut" }}
               >
                 {renderContent()}
               </motion.div>

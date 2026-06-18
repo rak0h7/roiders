@@ -180,7 +180,7 @@ export function AdminPanel() {
             <h2 className={ui.sectionTitle}>Quick links</h2>
             <div className="mt-4 space-y-2">
               <a
-                href="https://supabase.com/dashboard/project/tfcplpxcorcqbjqbukem"
+                href="https://supabase.com/dashboard/project/uhssspbmgsijvygrxvaw"
                 target="_blank"
                 rel="noreferrer"
                 className={cn(ui.btnSecondary, "w-full justify-between")}

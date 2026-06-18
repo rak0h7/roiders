@@ -48,7 +48,7 @@ export function SettingsView() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="w-full space-y-6">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
         <h2 className={ui.pageTitle}>Settings</h2>
         <p className={ui.pageSub}>Preferences, data management, and exports.</p>

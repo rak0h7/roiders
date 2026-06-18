@@ -69,7 +69,9 @@ html {
 body {
   background: var(--bg-base);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans-active, var(--font-sans)), system-ui, sans-serif;
+  letter-spacing: var(--letter-spacing, 0);
+  line-height: var(--line-height, 1.5);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -92,7 +94,95 @@ body {
 }
 
 .font-display {
-  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-display-active, var(--font-display)), var(--font-sans), system-ui, sans-serif;
+}
+
+[data-bg-pattern="grid"] body::before,
+[data-bg-pattern="dots"] body::before,
+[data-bg-pattern="scanlines"] body::before,
+[data-bg-pattern="hex"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+}
+
+[data-bg-pattern="grid"] body::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+[data-bg-pattern="dots"] body::before {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+[data-bg-pattern="scanlines"] body::before {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.03) 2px,
+    rgba(255, 255, 255, 0.03) 4px
+  );
+}
+
+[data-bg-pattern="hex"] body::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5-13-7.5v-15l13-7.5z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  background-image: var(--bg-custom-image);
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.4s ease;
+}
+
+[data-custom-bg="true"] body::after {
+  opacity: 0.22;
+}
+
+[data-particles="true"] .ambient-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(255, 255, 255, 0.35), transparent),
+    radial-gradient(1px 1px at 80% 40%, var(--labs-glow), transparent),
+    radial-gradient(1.5px 1.5px at 45% 75%, var(--intel-glow), transparent),
+    radial-gradient(1px 1px at 65% 15%, var(--protocol-glow), transparent);
+  background-size: 200% 200%;
+  animation: particle-drift 24s linear infinite;
+  opacity: calc(0.35 + var(--parallax-strength, 0.4) * 0.4);
+}
+
+@keyframes particle-drift {
+  0% { background-position: 0% 0%, 100% 50%, 50% 100%, 80% 0%; }
+  100% { background-position: 100% 100%, 0% 50%, 50% 0%, 20% 100%; }
+}
+
+.btn-hover {
+  transition:
+    transform calc(0.2s / max(var(--btn-hover-intensity, 0.65), 0.2)) ease,
+    filter calc(0.2s / max(var(--btn-hover-intensity, 0.65), 0.2)) ease,
+    box-shadow calc(0.25s / max(var(--btn-hover-intensity, 0.65), 0.2)) ease,
+    background-color calc(0.2s / max(var(--btn-hover-intensity, 0.65), 0.2)) ease,
+    border-color calc(0.2s / max(var(--btn-hover-intensity, 0.65), 0.2)) ease;
+}
+
+.btn-hover:hover {
+  filter: brightness(calc(1 + var(--btn-hover-intensity, 0.65) * 0.2));
+  transform: translateY(calc(var(--btn-hover-intensity, 0.65) * -2px));
 }
 
 .text-gradient {
@@ -100,6 +190,10 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.text-gradient-glow {
+  filter: drop-shadow(0 0 20px var(--labs-glow));
 }
 
 .glass {
@@ -173,8 +267,14 @@ select {
 }
 
 @keyframes ambient-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(1.2%, -0.8%) scale(1.02); }
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform:
+      translate(calc(1.2% * var(--parallax-strength, 0.4)), calc(-0.8% * var(--parallax-strength, 0.4)))
+      scale(calc(1 + 0.02 * var(--parallax-strength, 0.4)));
+  }
 }
 
 @keyframes shimmer {

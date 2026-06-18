@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist_Mono, Syne } from "next/font/google";
+import { DM_Sans, Geist_Mono, Inter, Orbitron, Syne } from "next/font/google";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SiteConfigProvider } from "@/context/SiteConfigContext";
@@ -24,6 +24,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
   title: "Roiders Club — Labs & Protocol",
   description:
@@ -43,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-show-ambient-bg="true" data-content-width="default" className={`${dmSans.variable} ${syne.variable} ${geistMono.variable} h-full`}>
+    <html lang="en" data-show-ambient-bg="true" data-content-width="default" className={`${dmSans.variable} ${syne.variable} ${geistMono.variable} ${inter.variable} ${orbitron.variable} h-full`}>
       <body className="min-h-full antialiased">
         <SiteConfigProvider>
           <AuthProvider>

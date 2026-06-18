@@ -13,8 +13,8 @@ export function InterfaceSettings() {
   return (
     <div className={cn(ui.card, ui.cardPad, "space-y-6")}>
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] border border-[var(--intel)]/30 bg-[var(--intel-dim)]">
-          <Sliders className="h-5 w-5 text-[var(--intel)]" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--intel)]/30 bg-[var(--intel-dim)]">
+          <Sliders className={cn(ui.icon, "text-[var(--intel)]")} />
         </div>
         <div>
           <h3 className={ui.sectionTitle}>Module defaults</h3>

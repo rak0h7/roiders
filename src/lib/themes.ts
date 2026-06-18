@@ -5,9 +5,23 @@ export type ThemePresetId =
   | "ocean"
   | "rose-gold"
   | "matrix"
+  | "cyberpunk-neon"
+  | "deep-void"
+  | "solar-flare"
+  | "arctic-frost"
   | "custom";
 
 export type ContentWidth = "narrow" | "default" | "wide" | "full";
+export type FontFamilyId = "dm-sans" | "inter" | "satoshi" | "orbitron" | "syne" | "jetbrains";
+export type IconStyleId = "outline" | "filled" | "minimal" | "bold";
+export type BackgroundPatternId = "none" | "grid" | "dots" | "scanlines" | "hex";
+export type LayoutPresetId = "compact" | "spacious" | "dashboard" | "minimal";
+
+export interface SavedPalette {
+  id: string;
+  name: string;
+  colors: string[];
+}
 
 export interface ThemeConfig {
   preset: ThemePresetId;
@@ -29,6 +43,25 @@ export interface ThemeConfig {
   density: "comfortable" | "compact";
   radiusScale: number;
   contentWidth: ContentWidth;
+  paletteHue: number;
+  paletteSaturation: number;
+  paletteLightness: number;
+  customSwatches: string[];
+  savedPalettes: SavedPalette[];
+  fontFamily: FontFamilyId;
+  fontWeight: number;
+  letterSpacing: number;
+  lineHeight: number;
+  iconStyle: IconStyleId;
+  iconSize: number;
+  buttonHoverIntensity: number;
+  pageTransitionSpeed: number;
+  parallaxStrength: number;
+  particleEffects: boolean;
+  backgroundImage: string | null;
+  backgroundPattern: BackgroundPatternId;
+  gradientAngle: number;
+  layoutPreset: LayoutPresetId;
 }
 
 export const DEFAULT_THEME: ThemeConfig = {
@@ -51,6 +84,25 @@ export const DEFAULT_THEME: ThemeConfig = {
   density: "comfortable",
   radiusScale: 1,
   contentWidth: "default",
+  paletteHue: 350,
+  paletteSaturation: 85,
+  paletteLightness: 55,
+  customSwatches: ["#ff2e4a", "#ff6b8a", "#c084fc", "#07080c", "#11141c", "#0c0e14"],
+  savedPalettes: [],
+  fontFamily: "syne",
+  fontWeight: 600,
+  letterSpacing: 0,
+  lineHeight: 1.5,
+  iconStyle: "outline",
+  iconSize: 20,
+  buttonHoverIntensity: 65,
+  pageTransitionSpeed: 50,
+  parallaxStrength: 40,
+  particleEffects: true,
+  backgroundImage: null,
+  backgroundPattern: "none",
+  gradientAngle: 135,
+  layoutPreset: "spacious",
 };
 
 export const CONTENT_WIDTH_CLASS: Record<ContentWidth, string> = {
@@ -76,7 +128,73 @@ export const THEME_PRESETS: ThemePreset[] = [
   { id: "ocean", name: "Ocean", description: "Cool cyan and teal currents", primary: "#06b6d4", secondary: "#22d3ee", tertiary: "#34d399" },
   { id: "rose-gold", name: "Rose Gold", description: "Luxury rose with gold highlights", primary: "#e11d48", secondary: "#fda4af", tertiary: "#fbbf24" },
   { id: "matrix", name: "Matrix", description: "Electric green cyber tones", primary: "#22c55e", secondary: "#4ade80", tertiary: "#06b6d4" },
+  { id: "cyberpunk-neon", name: "Cyberpunk Neon", description: "Magenta pulse & cyan voltage", primary: "#ff00ff", secondary: "#00ffff", tertiary: "#7c3aed" },
+  { id: "deep-void", name: "Deep Void", description: "Ultraviolet abyss & indigo bloom", primary: "#6366f1", secondary: "#8b5cf6", tertiary: "#312e81" },
+  { id: "solar-flare", name: "Solar Flare", description: "Blazing gold & coral eruption", primary: "#ff4500", secondary: "#ff8c00", tertiary: "#ffd700" },
+  { id: "arctic-frost", name: "Arctic Frost", description: "Icy blue & platinum shimmer", primary: "#38bdf8", secondary: "#a5f3fc", tertiary: "#e0f2fe" },
 ];
+
+export const ADVANCED_PRESET_IDS: ThemePresetId[] = [
+  "cyberpunk-neon",
+  "deep-void",
+  "solar-flare",
+  "arctic-frost",
+];
+
+export const BASE_PRESET_IDS: ThemePresetId[] = [
+  "crimson",
+  "ember",
+  "violet",
+  "ocean",
+  "rose-gold",
+  "matrix",
+];
+
+export const FONT_FAMILY_OPTIONS: { id: FontFamilyId; label: string; stack: string }[] = [
+  { id: "dm-sans", label: "DM Sans", stack: "var(--font-dm-sans), system-ui, sans-serif" },
+  { id: "inter", label: "Inter", stack: "var(--font-inter), var(--font-dm-sans), system-ui, sans-serif" },
+  { id: "satoshi", label: "Satoshi", stack: "'Satoshi', var(--font-dm-sans), system-ui, sans-serif" },
+  { id: "orbitron", label: "Orbitron", stack: "var(--font-orbitron), var(--font-syne), sans-serif" },
+  { id: "syne", label: "Syne", stack: "var(--font-syne), system-ui, sans-serif" },
+  { id: "jetbrains", label: "JetBrains Mono", stack: "var(--font-geist-mono), monospace" },
+];
+
+export const LAYOUT_PRESET_PATCHES: Record<
+  LayoutPresetId,
+  Partial<ThemeConfig>
+> = {
+  compact: {
+    layoutPreset: "compact",
+    density: "compact",
+    contentWidth: "narrow",
+    fontScale: 94,
+    radiusScale: 0.92,
+  },
+  spacious: {
+    layoutPreset: "spacious",
+    density: "comfortable",
+    contentWidth: "wide",
+    fontScale: 102,
+    radiusScale: 1.05,
+  },
+  dashboard: {
+    layoutPreset: "dashboard",
+    density: "compact",
+    contentWidth: "full",
+    fontScale: 98,
+    shadowDepth: 60,
+  },
+  minimal: {
+    layoutPreset: "minimal",
+    density: "comfortable",
+    contentWidth: "default",
+    fontScale: 100,
+    gradientIntensity: 35,
+    glassBlur: 10,
+    glassOpacity: 4,
+    borderGlow: false,
+  },
+};
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
@@ -104,6 +222,35 @@ function buildAmbientGradient(p: string, s: string, t: string, intensity: number
     `radial-gradient(ellipse 120% 100% at 50% 58%, ${rgba(t, 0.07 + intensity * 0.07)} 0%, ${rgba(t, 0.025 + intensity * 0.02)} 48%, ${base} 78%)`,
     base,
   ].join(", ");
+}
+
+export function hslToHex(h: number, s: number, l: number): string {
+  const sat = s / 100;
+  const light = l / 100;
+  const a = sat * Math.min(light, 1 - light);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = light - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+export function hexToHsl(hex: string): { h: number; s: number; l: number } {
+  const [r, g, b] = hexToRgb(hex).map((v) => v / 255);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l: Math.round(l * 100) };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+  else if (max === g) h = ((b - r) / d + 2) * 60;
+  else h = ((r - g) / d + 4) * 60;
+  return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
 export function applyThemeToDocument(theme: ThemeConfig): void {
@@ -135,7 +282,10 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   root.style.setProperty("--intel-dim", rgba(t, 0.1 + intensity * 0.05));
   root.style.setProperty("--intel-glow", rgba(t, 0.12 + intensity * 0.18));
 
-  root.style.setProperty("--gradient-primary", `linear-gradient(135deg, ${p} 0%, ${s} 50%, ${p} 100%)`);
+  root.style.setProperty(
+    "--gradient-primary",
+    `linear-gradient(${theme.gradientAngle}deg, ${p} 0%, ${s} 50%, ${p} 100%)`,
+  );
   root.style.setProperty("--gradient-ambient", buildAmbientGradient(p, s, t, intensity));
   root.style.setProperty("--gradient-glass", `linear-gradient(145deg, ${rgba(p, 0.08)} 0%, ${rgba(s, 0.04)} 40%, transparent 100%)`);
 
@@ -151,17 +301,107 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   root.style.setProperty("--space-unit", theme.density === "compact" ? "0.85" : "1");
   root.style.setProperty("--font-scale", String(theme.fontScale / 100));
   root.style.setProperty("--shadow-depth", String(theme.shadowDepth / 100));
+  root.style.setProperty("--letter-spacing", `${theme.letterSpacing / 100}em`);
+  root.style.setProperty("--line-height", String(theme.lineHeight));
+  root.style.setProperty("--icon-size", `${theme.iconSize}px`);
+  root.style.setProperty("--btn-hover-intensity", String(theme.buttonHoverIntensity / 100));
+  root.style.setProperty("--page-transition-speed", String(theme.pageTransitionSpeed / 100));
+  root.style.setProperty("--parallax-strength", String(theme.parallaxStrength / 100));
+
+  const fontStack =
+    FONT_FAMILY_OPTIONS.find((f) => f.id === theme.fontFamily)?.stack ??
+    FONT_FAMILY_OPTIONS[0].stack;
+  root.style.setProperty("--font-sans-active", fontStack);
+  root.style.setProperty("--font-display-active", fontStack);
+  root.style.fontWeight = String(theme.fontWeight);
+
   root.dataset.animatedBg = theme.animatedBackground ? "true" : "false";
   root.dataset.borderGlow = theme.borderGlow ? "true" : "false";
   root.dataset.showAmbientBg = theme.showAmbientBackground ? "true" : "false";
   root.dataset.contentWidth = theme.contentWidth;
+  root.dataset.iconStyle = theme.iconStyle;
+  root.dataset.bgPattern = theme.backgroundPattern;
+  root.dataset.particles = theme.particleEffects ? "true" : "false";
+  root.dataset.layoutPreset = theme.layoutPreset;
+  root.dataset.customBg = theme.backgroundImage ? "true" : "false";
+
+  if (theme.backgroundImage) {
+    root.style.setProperty(
+      "--bg-custom-image",
+      `url("${theme.backgroundImage.replace(/"/g, "%22")}")`,
+    );
+  } else {
+    root.style.removeProperty("--bg-custom-image");
+  }
 }
 
-export function presetToTheme(preset: ThemePreset): Partial<ThemeConfig> {
+export function buildSwatchesFromAccents(
+  primary: string,
+  secondary: string,
+  tertiary: string,
+  surfaces?: Partial<Pick<ThemeConfig, "baseColor" | "surfaceColor" | "elevatedColor">>,
+): string[] {
+  return [
+    primary,
+    secondary,
+    tertiary,
+    surfaces?.baseColor ?? DEFAULT_THEME.baseColor,
+    surfaces?.surfaceColor ?? DEFAULT_THEME.surfaceColor,
+    surfaces?.elevatedColor ?? DEFAULT_THEME.elevatedColor,
+  ];
+}
+
+function clamp(n: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, n));
+}
+
+export function normalizeTheme(raw: Partial<ThemeConfig> | undefined): ThemeConfig {
+  const merged = { ...DEFAULT_THEME, ...raw };
+
+  const swatches = Array.isArray(raw?.customSwatches) ? [...raw.customSwatches] : [...DEFAULT_THEME.customSwatches];
+  while (swatches.length < 6) {
+    swatches.push(DEFAULT_THEME.customSwatches[swatches.length] ?? DEFAULT_THEME.surfaceColor);
+  }
+
+  const hsl = hexToHsl(merged.accentPrimary);
+
+  return {
+    ...merged,
+    customSwatches: swatches.slice(0, 6),
+    savedPalettes: Array.isArray(raw?.savedPalettes) ? raw.savedPalettes : [],
+    paletteHue: typeof raw?.paletteHue === "number" ? raw.paletteHue : hsl.h,
+    paletteSaturation: typeof raw?.paletteSaturation === "number" ? raw.paletteSaturation : hsl.s,
+    paletteLightness: typeof raw?.paletteLightness === "number" ? raw.paletteLightness : hsl.l,
+    gradientIntensity: clamp(merged.gradientIntensity, 0, 100),
+    glassBlur: clamp(merged.glassBlur, 4, 32),
+    glassOpacity: clamp(merged.glassOpacity, 2, 16),
+    shadowDepth: clamp(merged.shadowDepth, 0, 100),
+    fontScale: clamp(merged.fontScale, 85, 115),
+    radiusScale: clamp(merged.radiusScale, 0.8, 1.4),
+    iconSize: clamp(merged.iconSize, 16, 28),
+    buttonHoverIntensity: clamp(merged.buttonHoverIntensity, 0, 100),
+    pageTransitionSpeed: clamp(merged.pageTransitionSpeed, 0, 100),
+    parallaxStrength: clamp(merged.parallaxStrength, 0, 100),
+    gradientAngle: clamp(merged.gradientAngle, 0, 360),
+    fontWeight: clamp(merged.fontWeight, 400, 800),
+    letterSpacing: clamp(merged.letterSpacing, -20, 40),
+    lineHeight: clamp(merged.lineHeight, 1.1, 2),
+  };
+}
+
+export function presetToTheme(
+  preset: ThemePreset,
+  current?: Pick<ThemeConfig, "baseColor" | "surfaceColor" | "elevatedColor">,
+): Partial<ThemeConfig> {
+  const hsl = hexToHsl(preset.primary);
   return {
     preset: preset.id,
     accentPrimary: preset.primary,
     accentSecondary: preset.secondary,
     accentTertiary: preset.tertiary,
+    customSwatches: buildSwatchesFromAccents(preset.primary, preset.secondary, preset.tertiary, current),
+    paletteHue: hsl.h,
+    paletteSaturation: hsl.s,
+    paletteLightness: hsl.l,
   };
 }

@@ -21,7 +21,8 @@ export function loadEnv() {
       ) {
         value = value.slice(1, -1);
       }
-      if (process.env[key] === undefined) process.env[key] = value;
+      // Later files (.env.local) override earlier ones and shell exports for local tooling
+      process.env[key] = value;
     }
   }
 }

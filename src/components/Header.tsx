@@ -29,20 +29,13 @@ export function Header({ section }: HeaderProps) {
 
   return (
     <header className="relative z-10 text-center">
-      <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.3em] text-zinc-500">
+      <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.3em] text-[var(--muted)]">
         {eyebrow}
       </p>
-      <h1
-        className="text-4xl font-black tracking-tight text-transparent sm:text-5xl md:text-6xl"
-        style={{
-          background: "linear-gradient(135deg, #ff2e4a 0%, #ff6b8a 50%, #ff2e4a 100%)",
-          WebkitBackgroundClip: "text",
-          filter: "drop-shadow(0 0 20px rgba(255,46,74,0.4))",
-        }}
-      >
+      <h1 className="text-gradient-glow text-4xl font-black tracking-tight text-gradient sm:text-5xl md:text-6xl">
         {title}
       </h1>
-      <p className="mx-auto mt-3 max-w-2xl text-sm text-zinc-400">{description}</p>
+      <p className="mx-auto mt-3 max-w-2xl text-sm text-[var(--muted)]">{description}</p>
     </header>
   );
 }

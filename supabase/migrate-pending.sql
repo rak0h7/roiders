@@ -1,5 +1,5 @@
 -- Run this ONCE in Supabase SQL Editor if login gets stuck on /welcome
--- https://supabase.com/dashboard/project/tfcplpxcorcqbjqbukem/sql/new
+-- https://supabase.com/dashboard/project/uhssspbmgsijvygrxvaw/sql/new
 
 -- 1) Admin role
 alter table public.profiles add column if not exists is_admin boolean not null default false;
@@ -43,3 +43,6 @@ alter table public.site_settings add column if not exists module_cycle_enabled b
 alter table public.site_settings add column if not exists module_gym_enabled boolean not null default true;
 alter table public.site_settings add column if not exists module_nutrition_enabled boolean not null default true;
 alter table public.site_settings add column if not exists announcement_link text not null default '';
+
+-- Refresh PostgREST schema cache (safe to run; no-op if already current)
+notify pgrst, 'reload schema';
