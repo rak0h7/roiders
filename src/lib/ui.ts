@@ -10,6 +10,11 @@ export const ui = {
   cardIntel: "glass-panel rounded-[var(--radius-lg)] border-[var(--intel)]/25 bg-[var(--intel-dim)]",
   cardInner: "rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/80",
   cardPad: "p-[calc(1.25rem*var(--space-unit))] sm:p-[calc(1.5rem*var(--space-unit))]",
+  choiceCard: "flex h-full min-h-[13.5rem] flex-col p-6",
+  choiceCardIcon:
+    "mb-3 flex h-[var(--control-height)] w-[var(--control-height)] shrink-0 items-center justify-center rounded-[var(--radius-md)]",
+  choiceCardFooter: "mt-auto flex min-h-[var(--control-height-xs)] items-center gap-2 pt-4",
+  equalGrid: "grid items-stretch gap-4",
 
   pageTitle: "font-display text-2xl font-semibold tracking-tight text-[var(--foreground)]",
   pageSub: "mt-1.5 text-sm leading-relaxed text-[var(--muted)]",

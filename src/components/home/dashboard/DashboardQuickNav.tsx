@@ -45,7 +45,7 @@ export function DashboardQuickNav({ setRoute }: DashboardQuickNavProps) {
   return (
     <div>
       <p className={cn(ui.overline, "mb-3")}>Quick navigation</p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((action, i) => (
           <motion.button
             key={action.label}
@@ -57,19 +57,19 @@ export function DashboardQuickNav({ setRoute }: DashboardQuickNavProps) {
             className={cn(
               ui.card,
               ui.cardHover,
-              "group flex items-center gap-3 p-3.5 text-left",
+              "group flex h-full items-center gap-3 p-3.5 text-left",
               action.accent === "labs" && "hover:border-[var(--labs)]/30",
               action.accent === "protocol" && "hover:border-[var(--protocol)]/30",
               action.accent === "intel" && "hover:border-[var(--intel)]/30"
             )}
           >
             <div className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)]",
+              "flex h-[var(--control-height-icon)] w-[var(--control-height-icon)] shrink-0 items-center justify-center rounded-[var(--radius-md)]",
               action.accent === "labs" && "bg-[var(--labs-dim)] text-[var(--labs)]",
               action.accent === "protocol" && "bg-[var(--protocol-dim)] text-[var(--protocol)]",
               action.accent === "intel" && "bg-[var(--intel-dim)] text-[var(--intel)]"
             )}>
-              <action.icon className="h-4 w-4" />
+              <action.icon className="app-icon app-icon--sm" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-[var(--foreground)]">{action.label}</p>

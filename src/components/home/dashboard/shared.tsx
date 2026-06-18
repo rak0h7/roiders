@@ -29,7 +29,7 @@ export function Stat({
       disabled={!onClick}
       className={cn(
         ui.cardInner,
-        "flex min-h-[5.5rem] flex-col justify-center p-2.5 text-left transition sm:min-h-0 sm:p-3",
+        "flex min-h-[4.75rem] flex-col justify-center p-3 text-left transition",
         onClick && "cursor-pointer hover:border-[var(--border-strong)]"
       )}
     >
@@ -55,8 +55,8 @@ export function ModuleHeader({
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-center gap-3">
-        <div className={cn("flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]", accentClass)}>
-          <Icon className="h-4 w-4" />
+        <div className={cn("flex h-[var(--control-height-icon)] w-[var(--control-height-icon)] items-center justify-center rounded-[var(--radius-md)]", accentClass)}>
+          <Icon className="app-icon app-icon--sm" />
         </div>
         <div>
           <h3 className={ui.sectionTitle}>{title}</h3>

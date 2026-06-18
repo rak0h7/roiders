@@ -261,13 +261,13 @@ export function LandingPage() {
               Roiders Club correlates labs, protocol compounds, training load, and nutrition — surfacing alerts
               you would miss when each tracker lives in a separate app.
             </p>
-            <div className="mx-auto mt-10 grid max-w-3xl gap-3 sm:grid-cols-3">
+            <div className="mx-auto mt-10 grid max-w-3xl items-stretch gap-3 sm:grid-cols-3">
               {[
                 { label: "Lab flags", sub: "Baseline & on-cycle ranges" },
                 { label: "Compound risk", sub: "Stack-aware analytics" },
                 { label: "Daily macros", sub: "Goal-based from your stats" },
               ].map((item) => (
-                <div key={item.label} className={cn(ui.cardInner, "px-4 py-3 text-left")}>
+                <div key={item.label} className={cn(ui.cardInner, "flex h-full flex-col justify-center px-4 py-4 text-left")}>
                   <p className="text-sm font-semibold">{item.label}</p>
                   <p className="mt-0.5 text-xs text-[var(--muted)]">{item.sub}</p>
                 </div>
@@ -288,7 +288,7 @@ export function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className={cn(ui.equalGrid, "sm:grid-cols-2")}>
             {MODULES.map((mod, i) => {
               const Icon = mod.icon;
               return (
@@ -296,16 +296,16 @@ export function LandingPage() {
                   key={mod.title}
                   {...fadeUp}
                   transition={{ duration: 0.4, delay: i * 0.06 }}
-                  className={cn(accentCard(mod.accent), ui.cardPad, ui.cardHover)}
+                  className={cn(accentCard(mod.accent), ui.cardPad, ui.cardHover, "flex h-full flex-col")}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-1 items-start gap-3">
                     <div
                       className={cn(
-                        "flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/80",
+                        "flex h-[var(--control-height)] w-[var(--control-height)] shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/80",
                         accentText(mod.accent)
                       )}
                     >
-                      <Icon className="h-5 w-5" />
+                      <Icon className="app-icon" />
                     </div>
                     <div className="min-w-0">
                       <h3 className={ui.sectionTitle}>{mod.title}</h3>

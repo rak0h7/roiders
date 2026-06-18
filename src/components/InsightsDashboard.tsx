@@ -113,12 +113,12 @@ export function InsightsDashboard() {
         <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">{overallScore.status}</p>
       </Panel>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 items-stretch gap-3 md:grid-cols-3 lg:grid-cols-4">
         {categoryScores.map((cat) => (
           <Panel
             key={cat.category}
             hover
-            className="p-4"
+            className="flex h-full flex-col p-4"
           >
             <div className="mb-2 flex items-center gap-1.5 text-[var(--muted)]">
               {CATEGORY_ICONS[cat.category]}
@@ -137,7 +137,7 @@ export function InsightsDashboard() {
               </div>
             )}
             {cat.tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
+              <div className="mt-auto flex flex-wrap gap-1 pt-2">
                 {cat.tags.map((tag, i) => (
                   <span
                     key={i}

@@ -70,7 +70,7 @@ export function IntensityHeatmapView() {
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
         <MonthHeatmap year={start.getFullYear()} month={start.getMonth()} startDate={start} />
         <MonthHeatmap year={next.getFullYear()} month={next.getMonth()} startDate={start} />
       </div>

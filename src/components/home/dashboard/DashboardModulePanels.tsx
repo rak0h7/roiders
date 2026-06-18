@@ -86,10 +86,10 @@ export function DashboardModulePanels({
     panels.length === 3 ? "lg:grid-cols-3" : "xl:grid-cols-4";
 
   return (
-    <div className={cn("grid gap-4 lg:grid-cols-2", gridCols)}>
+    <div className={cn("grid items-stretch gap-4 lg:grid-cols-2", gridCols)}>
       {/* Labs */}
       {moduleEnabled("labs") && (
-      <motion.div custom={0} variants={fade} initial="hidden" animate="show" className={cn(ui.cardLabs, ui.cardPad, "flex flex-col gap-4")}>
+      <motion.div custom={0} variants={fade} initial="hidden" animate="show" className={cn(ui.cardLabs, ui.cardPad, "flex h-full flex-col gap-4")}>
         <ModuleHeader
           title="Labs"
           status={reports.length > 0 ? `${reports.length} panel${reports.length > 1 ? "s" : ""} on file` : "No panels logged"}
@@ -120,8 +120,8 @@ export function DashboardModulePanels({
             ))}
           </div>
         ) : (
-          <div className={cn(ui.cardInner, "flex flex-col items-center py-8 text-center")}>
-            <FlaskConical className="mb-2 h-6 w-6 text-[var(--labs)]" />
+          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
+            <FlaskConical className="app-icon mb-2 text-[var(--labs)]" />
             <p className="text-sm text-[var(--muted)]">Upload or enter your first panel</p>
             <button onClick={() => setRoute("bloodwork-log")} className={cn(ui.btnPrimary, "mt-4 text-xs")}>
               Log labs
@@ -139,7 +139,7 @@ export function DashboardModulePanels({
 
       {/* Protocol */}
       {moduleEnabled("cycle") && (
-      <motion.div custom={1} variants={fade} initial="hidden" animate="show" className={cn(ui.cardProtocol, ui.cardPad, "flex flex-col gap-4")}>
+      <motion.div custom={1} variants={fade} initial="hidden" animate="show" className={cn(ui.cardProtocol, ui.cardPad, "flex h-full flex-col gap-4")}>
         <ModuleHeader
           title="Protocol"
           status={compounds.length > 0 ? `${weeks}-week cycle active` : "No stack configured"}
@@ -151,7 +151,7 @@ export function DashboardModulePanels({
         />
         {compounds.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 items-stretch gap-2">
               <Stat label="Duration" value={`${weeks}w`} />
               <Stat label="Injections" value={cycleStats?.injections ?? 0} />
               <Stat label="Start" value={format(new Date(startDate), "MMM d")} />
@@ -166,8 +166,8 @@ export function DashboardModulePanels({
             </div>
           </>
         ) : (
-          <div className={cn(ui.cardInner, "flex flex-col items-center py-8 text-center")}>
-            <Blocks className="mb-2 h-6 w-6 text-[var(--protocol)]" />
+          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
+            <Blocks className="app-icon mb-2 text-[var(--protocol)]" />
             <p className="text-sm text-[var(--muted)]">Build your compound stack</p>
             <button onClick={() => setRoute("cycle-planner")} className={cn(ui.btnProtocol, "mt-4 text-xs")}>
               Open builder
@@ -179,7 +179,7 @@ export function DashboardModulePanels({
 
       {/* Training */}
       {moduleEnabled("gym") && (
-      <motion.div custom={2} variants={fade} initial="hidden" animate="show" className={cn(ui.card, ui.cardPad, "flex flex-col gap-4 border-[var(--protocol)]/20")}>
+      <motion.div custom={2} variants={fade} initial="hidden" animate="show" className={cn(ui.card, ui.cardPad, "flex h-full flex-col gap-4 border-[var(--protocol)]/20")}>
         <ModuleHeader
           title="Training"
           status={
@@ -216,7 +216,7 @@ export function DashboardModulePanels({
                 </ResponsiveContainer>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 items-stretch gap-2">
               <Stat label="Last session" value={gymHistory[0] ? format(new Date(gymHistory[0].completedAt), "MMM d") : "—"} />
               <Stat label="Best PR" value={topPR ? `${topPR.weight}×${topPR.reps}` : "—"} sub={topPRExercise?.name} />
             </div>
@@ -228,8 +228,8 @@ export function DashboardModulePanels({
             )}
           </>
         ) : (
-          <div className={cn(ui.cardInner, "flex flex-col items-center py-8 text-center")}>
-            <Dumbbell className="mb-2 h-6 w-6 text-[var(--protocol)]" />
+          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
+            <Dumbbell className="app-icon mb-2 text-[var(--protocol)]" />
             <p className="text-sm text-[var(--muted)]">Log sets, reps, and track PRs</p>
             <button
               onClick={() => { startEmptyWorkout(); setRoute("gym-workout"); }}
@@ -244,7 +244,7 @@ export function DashboardModulePanels({
 
       {/* Nutrition */}
       {moduleEnabled("nutrition") && (
-      <motion.div custom={3} variants={fade} initial="hidden" animate="show" className={cn(ui.cardIntel, ui.cardPad, "flex flex-col gap-4")}>
+      <motion.div custom={3} variants={fade} initial="hidden" animate="show" className={cn(ui.cardIntel, ui.cardPad, "flex h-full flex-col gap-4")}>
         <ModuleHeader
           title="Nutrition"
           status={
@@ -262,7 +262,7 @@ export function DashboardModulePanels({
         />
         {todayLog.length > 0 || daysLogged > 0 ? (
           <>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 items-stretch gap-2">
               <Stat label="Protein" value={todayLog.length > 0 ? `${todayMacros.protein}g` : "—"} sub={goals.protein ? `${pctOfGoal(todayMacros.protein, goals.protein)}% goal` : undefined} />
               <Stat label="Carbs" value={todayLog.length > 0 ? `${todayMacros.carbs}g` : "—"} />
               <Stat label="Fat" value={todayLog.length > 0 ? `${todayMacros.fat}g` : "—"} />
@@ -284,8 +284,8 @@ export function DashboardModulePanels({
             )}
           </>
         ) : (
-          <div className={cn(ui.cardInner, "flex flex-col items-center py-8 text-center")}>
-            <UtensilsCrossed className="mb-2 h-6 w-6 text-[var(--intel)]" />
+          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
+            <UtensilsCrossed className="app-icon mb-2 text-[var(--intel)]" />
             <p className="text-sm text-[var(--muted)]">Track macros and micronutrients</p>
             <button onClick={() => setRoute("nutrition-search")} className={cn(ui.btnSecondary, "mt-4 text-xs")}>
               Log first meal

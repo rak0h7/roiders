@@ -11,7 +11,7 @@ export function QuickStartTemplates() {
     <div className={`${ui.cardProtocol} ${ui.cardPad}`}>
       <h3 className={ui.sectionTitle}>Quick-Start Templates</h3>
       <p className={`${ui.sectionSub} mb-4`}>Pre-configured cycles with typical doses and ancillaries</p>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {CYCLE_TEMPLATES.map((t) => (
           <button
             key={t.id}
