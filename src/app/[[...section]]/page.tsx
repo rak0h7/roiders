@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { AppShell } from "@/components/shell/AppShell";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { HomeScreenPromptProvider } from "@/context/HomeScreenPromptContext";
 import { LandingPage } from "@/components/landing/LandingPage";
 import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -38,7 +39,9 @@ export default function AppPage() {
 
   return (
     <AuthGuard>
-      <AppShell />
+      <HomeScreenPromptProvider>
+        <AppShell />
+      </HomeScreenPromptProvider>
     </AuthGuard>
   );
 }

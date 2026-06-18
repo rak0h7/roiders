@@ -8,3 +8,20 @@ export function isMobileDevice(): boolean {
 
   return mobileUa || touchTablet;
 }
+
+export type MobilePlatform = "ios" | "android" | "other";
+
+export function getMobilePlatform(): MobilePlatform {
+  if (typeof navigator === "undefined") return "other";
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "other";
+}
+
+/** Already launched from home screen / installed PWA. */
+export function isStandalonePwa(): boolean {
+  if (typeof window === "undefined") return false;
+  const nav = navigator as Navigator & { standalone?: boolean };
+  return window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true;
+}

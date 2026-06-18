@@ -13,8 +13,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { useNavigation, type AppRoute, type NavItem } from "@/context/NavigationContext";
 import { visibleNavItems } from "@/lib/navVisibility";
-import { AddToHomeScreenModal } from "@/components/ui/AddToHomeScreenModal";
 import { AppIcon } from "@/components/ui/AppIcon";
+import { useHomeScreenPrompt } from "@/context/HomeScreenPromptContext";
 import { isMobileDevice } from "@/lib/device";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
@@ -70,8 +70,8 @@ export function Sidebar() {
   const { settings } = useSiteConfig();
   const navItems = visibleNavItems(settings);
   const siteInitial = settings.site_name.trim().charAt(0).toUpperCase() || "R";
+  const { openHomeScreenPrompt, canShowHomeScreenPrompt } = useHomeScreenPrompt();
   const [showMobile, setShowMobile] = useState(false);
-  const [homeScreenOpen, setHomeScreenOpen] = useState(false);
 
   useEffect(() => {
     setShowMobile(isMobileDevice());
@@ -108,12 +108,12 @@ export function Sidebar() {
                 <p className={cn(ui.overline, "mb-2 px-3 text-[var(--muted-2)]")}>{label}</p>
               )}
               <ul className="space-y-0.5">
-                {id === "misc" && showMobile && (
+                {id === "misc" && showMobile && canShowHomeScreenPrompt && (
                   <li>
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       type="button"
-                      onClick={() => setHomeScreenOpen(true)}
+                      onClick={openHomeScreenPrompt}
                       title={sidebarCollapsed ? "Add to Home Screen" : undefined}
                       className={cn(
                         ui.navItem,
@@ -194,7 +194,6 @@ export function Sidebar() {
         </button>
       </div>
 
-      <AddToHomeScreenModal open={homeScreenOpen} onClose={() => setHomeScreenOpen(false)} />
     </motion.aside>
   );
 }

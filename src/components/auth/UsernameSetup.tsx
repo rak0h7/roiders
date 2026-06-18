@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AtSign, Check, Loader2, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { canShowHomeScreenPrompt, markHomeScreenPromptPending } from "@/lib/homeScreenPrompt";
 import { normalizeUsername, validateUsername } from "@/lib/username";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
@@ -51,6 +52,10 @@ export function UsernameSetup() {
     if (result.error) {
       setError(result.error);
       return;
+    }
+
+    if (canShowHomeScreenPrompt()) {
+      markHomeScreenPromptPending();
     }
 
     window.location.assign("/");
