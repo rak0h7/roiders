@@ -13,6 +13,7 @@ export type AdminProfile = {
   display_name: string | null;
   key_fingerprint: string | null;
   is_admin: boolean;
+  premium_sync_enabled: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -55,15 +56,51 @@ export async function isUserAdmin(request: NextRequest, userId: string) {
 export async function requireAdmin(request: NextRequest) {
   const user = await getSessionUser(request);
   if (!user) {
-    return { user: null, error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+    return { user: null, isAdmin: false, isVendor: false, error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
   const admin = await isUserAdmin(request, user.id);
   if (!admin) {
-    return { user: null, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+    return { user: null, isAdmin: false, isVendor: false, error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
   }
 
-  return { user, error: null };
+  return { user, isAdmin: true, isVendor: false, error: null };
+}
+
+export async function isUserVendor(request: NextRequest, userId: string) {
+  const supabase = createSessionClient(request);
+  const profile = await loadUserProfile(supabase, userId);
+  return profile.is_vendor;
+}
+
+export async function requireVendorOrAdmin(request: NextRequest) {
+  const user = await getSessionUser(request);
+  if (!user) {
+    return {
+      user: null,
+      isAdmin: false,
+      isVendor: false,
+      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  const supabase = createSessionClient(request);
+  const profile = await loadUserProfile(supabase, user.id);
+
+  if (profile.is_admin) {
+    return { user, isAdmin: true, isVendor: profile.is_vendor, error: null };
+  }
+
+  if (profile.is_vendor) {
+    return { user, isAdmin: false, isVendor: true, error: null };
+  }
+
+  return {
+    user: null,
+    isAdmin: false,
+    isVendor: false,
+    error: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+  };
 }
 
 export { fetchAdminStats, type AdminStats } from "@/lib/adminStats";
@@ -73,7 +110,7 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
 
   const fullProfilesRes = await admin
     .from("profiles")
-    .select("id, username, display_name, key_fingerprint, is_admin, created_at, updated_at")
+    .select("id, username, display_name, key_fingerprint, is_admin, premium_sync_enabled, created_at, updated_at")
     .order("created_at", { ascending: false });
 
   const profilesRes =
@@ -106,6 +143,7 @@ export async function fetchAdminUsers(): Promise<AdminUser[]> {
       display_name: profile.display_name,
       key_fingerprint: profile.key_fingerprint,
       is_admin: profile.is_admin,
+      premium_sync_enabled: profile.premium_sync_enabled,
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,
       modules: userModules,
@@ -151,6 +189,34 @@ export async function resetAdminUserModule(userId: string, module: CloudModule |
     return;
   }
   const { error } = await admin.from("user_modules").delete().eq("user_id", userId).eq("module", module);
+  if (error) throw error;
+}
+
+export async function setAdminUserPremiumSync(userId: string, enabled: boolean): Promise<void> {
+  const admin = createAdminClient();
+
+  const { data: target, error: targetError } = await admin
+    .from("profiles")
+    .select("id, is_admin, key_fingerprint")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (targetError) throw targetError;
+  if (!target) throw new Error("Account not found");
+
+  const resolved = resolveProfileGate(target as Record<string, unknown>);
+  if (resolved.is_admin && !enabled) {
+    throw new Error("Cannot disable premium sync for the site owner account");
+  }
+
+  const { error } = await admin
+    .from("profiles")
+    .update({
+      premium_sync_enabled: enabled,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+
   if (error) throw error;
 }
 

@@ -54,7 +54,11 @@ export function resolveFlagForMarker(
   markerId: string,
   flagMap: Map<string, ReviewFlag>
 ): ReviewFlag | undefined {
-  return flagMap.get(markerId) ?? flagMap.get(cycleWatchFlagId(markerId));
+  return (
+    flagMap.get(markerId) ??
+    flagMap.get(cycleWatchFlagId(markerId)) ??
+    (markerId === "estradiol" ? flagMap.get("cycle-watch-estradiol-control") : undefined)
+  );
 }
 
 export function buildCategoryMarkerRows(

@@ -5,12 +5,16 @@ import {
   Blocks,
   Cloud,
   FlaskConical,
+  Globe,
   LayoutGrid,
+  Link2,
   Megaphone,
   MessageSquare,
   Save,
   Settings2,
   Shield,
+  Sparkles,
+  Store,
   UtensilsCrossed,
 } from "lucide-react";
 import { AdminToggleRow } from "@/components/admin/AdminToggleRow";
@@ -22,12 +26,22 @@ import { ui } from "@/lib/ui";
 
 type Props = { onSaved?: () => void };
 
-type SettingsTab = "general" | "access" | "modules" | "messaging" | "announcements" | "platform";
+type SettingsTab =
+  | "general"
+  | "access"
+  | "modules"
+  | "labs"
+  | "premium"
+  | "messaging"
+  | "announcements"
+  | "platform";
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "general", label: "General", icon: <Settings2 className="h-4 w-4" /> },
   { id: "access", label: "Access", icon: <Shield className="h-4 w-4" /> },
   { id: "modules", label: "Modules", icon: <LayoutGrid className="h-4 w-4" /> },
+  { id: "labs", label: "Labs", icon: <FlaskConical className="h-4 w-4" /> },
+  { id: "premium", label: "Premium", icon: <Sparkles className="h-4 w-4" /> },
   { id: "messaging", label: "Messaging", icon: <MessageSquare className="h-4 w-4" /> },
   { id: "announcements", label: "Announcements", icon: <Megaphone className="h-4 w-4" /> },
   { id: "platform", label: "Platform", icon: <Cloud className="h-4 w-4" /> },
@@ -220,19 +234,56 @@ export function AdminSiteSettings({ onSaved }: Props) {
                 </div>
               </div>
               <div>
-                <label className={ui.label} htmlFor="support_url">
-                  Support / contact URL
+                <label className={ui.label} htmlFor="site_description">
+                  Public description
                 </label>
-                <input
-                  id="support_url"
-                  type="url"
-                  value={draft.support_url}
-                  onChange={(e) => patch({ support_url: e.target.value })}
-                  placeholder="https://..."
-                  className={cn(ui.input, "mt-1.5")}
+                <textarea
+                  id="site_description"
+                  value={draft.site_description}
+                  onChange={(e) => patch({ site_description: e.target.value })}
+                  rows={2}
+                  maxLength={200}
+                  placeholder="Shown on the public landing page when set."
+                  className={cn(ui.input, "mt-1.5 min-h-[4rem] resize-y py-2.5 leading-relaxed")}
                 />
-                <p className={`${ui.sectionSub} mt-1.5`}>Optional link shown on the maintenance page.</p>
               </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className={ui.label} htmlFor="support_url">
+                    Support / premium request URL
+                  </label>
+                  <input
+                    id="support_url"
+                    type="url"
+                    value={draft.support_url}
+                    onChange={(e) => patch({ support_url: e.target.value })}
+                    placeholder="https://... or mailto:..."
+                    className={cn(ui.input, "mt-1.5")}
+                  />
+                </div>
+                <div>
+                  <label className={ui.label} htmlFor="legal_contact_email">
+                    Legal contact email
+                  </label>
+                  <input
+                    id="legal_contact_email"
+                    type="email"
+                    value={draft.legal_contact_email}
+                    onChange={(e) => patch({ legal_contact_email: e.target.value })}
+                    placeholder="privacy@example.com"
+                    className={cn(ui.input, "mt-1.5")}
+                  />
+                </div>
+              </div>
+              <p className={ui.sectionSub}>
+                Support URL is used for premium requests, maintenance contact, and footer links. Legal email appears on Privacy and Terms pages.
+              </p>
+              <AdminToggleRow
+                label="Public marketing landing"
+                description="When off, visitors at / are sent straight to login instead of the marketing page"
+                checked={draft.public_landing_enabled}
+                onChange={(public_landing_enabled) => patch({ public_landing_enabled })}
+              />
             </>
           )}
 
@@ -286,6 +337,22 @@ export function AdminSiteSettings({ onSaved }: Props) {
                   />
                 </div>
               )}
+              {!draft.allow_public_signup && (
+                <div>
+                  <label className={ui.label} htmlFor="signup_closed_message">
+                    Signup closed message
+                  </label>
+                  <textarea
+                    id="signup_closed_message"
+                    value={draft.signup_closed_message}
+                    onChange={(e) => patch({ signup_closed_message: e.target.value })}
+                    rows={2}
+                    maxLength={300}
+                    placeholder="Public signup is disabled. Contact the site owner for an access key."
+                    className={cn(ui.input, "mt-1.5 min-h-[4rem] resize-y py-2.5 leading-relaxed")}
+                  />
+                </div>
+              )}
               <div>
                 <label className={ui.label} htmlFor="max_accounts">
                   Maximum accounts
@@ -323,7 +390,7 @@ export function AdminSiteSettings({ onSaved }: Props) {
                 },
                 {
                   key: "module_cycle_enabled" as const,
-                  label: "Protocol",
+                  label: "Gear",
                   description: "Cycle builder, guides, and simulation",
                   icon: <Blocks className="h-4 w-4" />,
                 },
@@ -348,6 +415,78 @@ export function AdminSiteSettings({ onSaved }: Props) {
                   onChange={(checked) => patch({ [mod.key]: checked })}
                 />
               ))}
+            </>
+          )}
+
+          {tab === "labs" && (
+            <>
+              <SectionHeader
+                icon={<FlaskConical className="h-5 w-5" />}
+                title="Bloodwork defaults"
+                description="Site-wide defaults for the labs module. Users can still switch per session."
+              />
+              <div>
+                <p className={cn(ui.overline, "mb-2")}>Default range mode</p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { id: "optimized" as const, label: "Optimized", hint: "Performance-oriented ranges" },
+                      { id: "lab" as const, label: "Lab reference", hint: "Official lab reference ranges" },
+                    ] as const
+                  ).map((mode) => (
+                    <button
+                      key={mode.id}
+                      type="button"
+                      onClick={() => patch({ default_labs_range_mode: mode.id })}
+                      className={cn(
+                        "rounded-[var(--radius-sm)] border px-3 py-2 text-left text-xs transition",
+                        draft.default_labs_range_mode === mode.id
+                          ? "border-[var(--labs)]/40 bg-[var(--labs-dim)] text-[var(--labs)]"
+                          : "border-[var(--border)] text-[var(--muted)]"
+                      )}
+                    >
+                      <span className="font-semibold">{mode.label}</span>
+                      <span className="mt-0.5 block text-[10px] opacity-80">{mode.hint}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {tab === "premium" && (
+            <>
+              <SectionHeader
+                icon={<Sparkles className="h-5 w-5" />}
+                title="Premium features"
+                description="Gated capabilities beyond the free local-only tier."
+                accent="protocol"
+              />
+              <AdminToggleRow
+                label="Cloud sync platform"
+                description="Master switch — also in Platform tab. Per-user access is granted in Accounts → Premium."
+                checked={draft.cloud_sync_enabled}
+                onChange={(cloud_sync_enabled) => patch({ cloud_sync_enabled })}
+              />
+              <AdminToggleRow
+                label="Cycle sources directory"
+                description="Verified supplier contacts in Gear → Sources. Requires per-user premium in Accounts."
+                checked={draft.premium_sources_enabled}
+                onChange={(premium_sources_enabled) => patch({ premium_sources_enabled })}
+              />
+              <AdminToggleRow
+                label="Vendor partner portal"
+                description="Approved vendors can issue customer keys from /admin when signed in as a vendor"
+                checked={draft.vendor_portal_enabled}
+                onChange={(vendor_portal_enabled) => patch({ vendor_portal_enabled })}
+              />
+              <div className={cn(ui.cardInner, "flex items-start gap-3 p-3 text-xs text-[var(--muted)]")}>
+                <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-[var(--protocol)]" />
+                <p>
+                  Premium is granted per account in <strong className="text-[var(--foreground)]">Accounts → Premium</strong>.
+                  Site admins created before the premium column may already have sync enabled automatically.
+                </p>
+              </div>
             </>
           )}
 
@@ -392,9 +531,15 @@ export function AdminSiteSettings({ onSaved }: Props) {
               />
               <AdminToggleRow
                 label="Show banner"
-                description="Display the announcement below the top bar"
+                description="Display the announcement below the top bar for signed-in users"
                 checked={draft.announcement_enabled}
                 onChange={(announcement_enabled) => patch({ announcement_enabled })}
+              />
+              <AdminToggleRow
+                label="Show to guests"
+                description="Also show the banner on the public landing page (unsigned visitors)"
+                checked={draft.announcement_guest_visible}
+                onChange={(announcement_guest_visible) => patch({ announcement_guest_visible })}
               />
               {draft.announcement_enabled && (
                 <>
@@ -457,8 +602,8 @@ export function AdminSiteSettings({ onSaved }: Props) {
                 description="Global toggles that affect every signed-in user."
               />
               <AdminToggleRow
-                label="Cloud sync"
-                description="Push and pull module data to Supabase on sign-in and every 45s"
+                label="Cloud sync platform"
+                description="Master switch for cloud sync. Per-user premium access is granted in Accounts → Premium column."
                 checked={draft.cloud_sync_enabled}
                 onChange={(cloud_sync_enabled) => patch({ cloud_sync_enabled })}
               />
@@ -468,6 +613,26 @@ export function AdminSiteSettings({ onSaved }: Props) {
                 checked={draft.debug_panel_enabled}
                 onChange={(debug_panel_enabled) => patch({ debug_panel_enabled })}
               />
+              <div className={cn(ui.cardInner, "grid gap-3 p-3 sm:grid-cols-2")}>
+                <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                  <Globe className="h-4 w-4 shrink-0 text-[var(--labs)]" />
+                  <span>
+                    Landing:{" "}
+                    <strong className="text-[var(--foreground)]">
+                      {draft.public_landing_enabled ? "Public" : "Login only"}
+                    </strong>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+                  <Store className="h-4 w-4 shrink-0 text-[var(--protocol)]" />
+                  <span>
+                    Vendors:{" "}
+                    <strong className="text-[var(--foreground)]">
+                      {draft.vendor_portal_enabled ? "Enabled" : "Disabled"}
+                    </strong>
+                  </span>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -488,5 +653,5 @@ export function AdminSiteSettings({ onSaved }: Props) {
 }
 
 const DEFAULT_LOGIN = "Enter your private access key. No email required.";
-const DEFAULT_SIGNUP = "Generate a one-time access key. Save it — it cannot be recovered.";
+const DEFAULT_SIGNUP = "Create your free account. Save your access key — it cannot be recovered.";
 const DEFAULT_WELCOME = "Pick a username to finish setting up your account.";

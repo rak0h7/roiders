@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   Archive, Apple, BarChart2, Blocks, BookOpen, ChevronLeft, ClipboardList, Compass,
-  Dumbbell, FlaskConical, History, Leaf, Library, Search, Settings2, Shield, Spline,
+  Dumbbell, FlaskConical, History, Leaf, Library, Link2, Search, Settings2, Shield, Smartphone, Spline,
   Target, TrendingUp, UtensilsCrossed,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -12,7 +13,9 @@ import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { useNavigation, type AppRoute, type NavItem } from "@/context/NavigationContext";
 import { visibleNavItems } from "@/lib/navVisibility";
+import { AddToHomeScreenModal } from "@/components/ui/AddToHomeScreenModal";
 import { AppIcon } from "@/components/ui/AppIcon";
+import { isMobileDevice } from "@/lib/device";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +27,7 @@ const ICONS: Record<string, LucideIcon> = {
   blocks: Blocks,
   book: BookOpen,
   waveform: Spline,
+  sources: Link2,
   dumbbell: Dumbbell,
   clipboard: ClipboardList,
   history: History,
@@ -40,10 +44,10 @@ const ICONS: Record<string, LucideIcon> = {
 const GROUPS: { id: NavItem["group"]; label: string }[] = [
   { id: "overview", label: "" },
   { id: "labs", label: "Labs" },
-  { id: "protocol", label: "Protocol" },
+  { id: "protocol", label: "Gear" },
   { id: "training", label: "Training" },
   { id: "nutrition", label: "Nutrition" },
-  { id: "system", label: "" },
+  { id: "misc", label: "Misc" },
 ];
 
 const ACCENT_BAR: Record<NavItem["accent"], string> = {
@@ -62,10 +66,16 @@ const ACCENT_TEXT: Record<NavItem["accent"], string> = {
 
 export function Sidebar() {
   const { route, setRoute, sidebarCollapsed, toggleSidebar } = useNavigation();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isVendor } = useAuth();
   const { settings } = useSiteConfig();
   const navItems = visibleNavItems(settings);
   const siteInitial = settings.site_name.trim().charAt(0).toUpperCase() || "R";
+  const [showMobile, setShowMobile] = useState(false);
+  const [homeScreenOpen, setHomeScreenOpen] = useState(false);
+
+  useEffect(() => {
+    setShowMobile(isMobileDevice());
+  }, []);
 
   return (
     <motion.aside
@@ -98,6 +108,25 @@ export function Sidebar() {
                 <p className={cn(ui.overline, "mb-2 px-3 text-[var(--muted-2)]")}>{label}</p>
               )}
               <ul className="space-y-0.5">
+                {id === "misc" && showMobile && (
+                  <li>
+                    <motion.button
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={() => setHomeScreenOpen(true)}
+                      title={sidebarCollapsed ? "Add to Home Screen" : undefined}
+                      className={cn(
+                        ui.navItem,
+                        "text-[var(--muted)] hover:bg-[var(--bg-hover)]/60 hover:text-[var(--foreground)]"
+                      )}
+                    >
+                      <span className="text-[var(--muted-2)] group-hover:text-[var(--intel)]">
+                        <AppIcon icon={Smartphone} size="sm" />
+                      </span>
+                      {!sidebarCollapsed && <span className="font-medium">Add to Home Screen</span>}
+                    </motion.button>
+                  </li>
+                )}
                 {items.map((item) => {
                   const active = route === item.id;
                   const Icon = ICONS[item.icon] ?? Compass;
@@ -134,15 +163,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      {isAdmin && (
+      {(isAdmin || isVendor) && (
         <div className="border-t border-[var(--border)] px-3 py-2">
           <Link
             href="/admin"
-            title={sidebarCollapsed ? "Site Admin" : undefined}
-            className={cn(ui.navItem, "text-[var(--labs)] hover:bg-[var(--labs-dim)]")}
+            title={sidebarCollapsed ? (isAdmin ? "Site Admin" : "Vendor Portal") : undefined}
+            className={cn(
+              ui.navItem,
+              isAdmin
+                ? "text-[var(--labs)] hover:bg-[var(--labs-dim)]"
+                : "text-[var(--protocol)] hover:bg-[var(--protocol-dim)]",
+            )}
           >
             <AppIcon icon={Shield} size="sm" />
-            {!sidebarCollapsed && "Site Admin"}
+            {!sidebarCollapsed && (isAdmin ? "Site Admin" : "Vendor Portal")}
           </Link>
         </div>
       )}
@@ -159,6 +193,8 @@ export function Sidebar() {
           {!sidebarCollapsed && "Collapse"}
         </button>
       </div>
+
+      <AddToHomeScreenModal open={homeScreenOpen} onClose={() => setHomeScreenOpen(false)} />
     </motion.aside>
   );
 }

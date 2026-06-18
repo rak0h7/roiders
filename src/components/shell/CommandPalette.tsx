@@ -5,7 +5,7 @@ import { Command } from "cmdk";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Apple, Archive, Blocks, BookOpen, ClipboardList, Compass, Download, Dumbbell, FlaskConical,
-  History, Leaf, Library, Search, Settings2, Target, TrendingUp, Upload, UtensilsCrossed,
+  History, Leaf, Library, Link2, Search, Settings2, Target, TrendingUp, Upload, UtensilsCrossed,
 } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { isModuleEnabled } from "@/lib/siteSettings";
@@ -25,6 +25,7 @@ const ICONS: Record<string, React.ReactNode> = {
   blocks: <Blocks className="h-4 w-4 text-[var(--protocol)]" />,
   book: <BookOpen className="h-4 w-4 text-[var(--protocol)]" />,
   waveform: <Blocks className="h-4 w-4 text-[var(--protocol)]" />,
+  sources: <Link2 className="h-4 w-4 text-[var(--protocol)]" />,
   dumbbell: <Dumbbell className="h-4 w-4 text-[var(--protocol)]" />,
   clipboard: <ClipboardList className="h-4 w-4 text-[var(--protocol)]" />,
   history: <History className="h-4 w-4 text-[var(--protocol)]" />,
@@ -64,7 +65,15 @@ export function CommandPalette() {
     setCommandOpen(false);
   };
 
-  const groups = ["overview", "labs", "protocol", "training", "nutrition", "system"] as const;
+  const groups = ["overview", "labs", "protocol", "training", "nutrition", "misc"] as const;
+  const groupLabels: Record<(typeof groups)[number], string> = {
+    overview: "Overview",
+    labs: "Labs",
+    protocol: "Gear",
+    training: "Training",
+    nutrition: "Nutrition",
+    misc: "Misc",
+  };
 
   return (
     <AnimatePresence>
@@ -99,7 +108,7 @@ export function CommandPalette() {
                   return (
                     <Command.Group
                       key={group}
-                      heading={group}
+                      heading={groupLabels[group]}
                       className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-[var(--muted-2)]"
                     >
                       {items.map((item) => (

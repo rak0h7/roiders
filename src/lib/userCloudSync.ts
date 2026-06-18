@@ -23,7 +23,7 @@ export async function pullAndApplyUserData(
   userId: string
 ): Promise<AppliedSyncResult> {
   const pull = await bootstrapUserCloudSync(supabase, userId);
-  if (pull.merged) await rehydratePersistedStores();
+  if (pull.merged) await rehydratePersistedStores(pull.pulled);
   return { pulled: pull.pulled, pushed: [], merged: pull.merged, conflicts: pull.conflicts };
 }
 
@@ -33,6 +33,9 @@ export async function syncAndApplyUserData(
   userId: string
 ): Promise<AppliedSyncResult> {
   const result: SyncResult = await syncUserData(supabase, userId);
-  if (result.merged || result.pushed.length > 0) await rehydratePersistedStores();
+  if (result.merged || result.pushed.length > 0) {
+    const modules = [...new Set([...result.pulled, ...result.pushed])];
+    await rehydratePersistedStores(modules);
+  }
   return result;
 }

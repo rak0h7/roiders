@@ -8,10 +8,11 @@ import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/context/ToastContext";
 import { useCycleStore } from "@/store/cycleStore";
 import { applyImportBundle, buildExportBundle, exportJSON, exportBloodworkCSV, exportBloodworkPDF, parseImportBundle } from "@/lib/export";
-import { dispatchCloudSyncEvent, rehydratePersistedStores } from "@/lib/storeRehydrate";
+import { rehydratePersistedStores } from "@/lib/storeRehydrate";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { InterfaceSettings } from "./InterfaceSettings";
+import { MiscSettings } from "./MiscSettings";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -46,8 +47,7 @@ export function SettingsView() {
     }
     if (!confirm("Import will overwrite local data for included modules. Continue?")) return;
     const result = applyImportBundle(bundle);
-    await rehydratePersistedStores();
-    dispatchCloudSyncEvent({ modules: result.imported });
+    await rehydratePersistedStores(result.imported);
     if (result.errors.length) {
       toast({ type: "warning", title: "Partial import", description: result.errors.join("; ") });
     } else {
@@ -90,6 +90,8 @@ export function SettingsView() {
       <AppearanceSettings />
 
       <InterfaceSettings />
+
+      <MiscSettings />
 
       <div className={`${ui.card} ${ui.cardPad}`}>
         <h3 className={ui.sectionTitle}>Export Data</h3>

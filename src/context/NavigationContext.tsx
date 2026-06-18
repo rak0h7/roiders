@@ -11,6 +11,7 @@ export type AppRoute =
   | "cycle-planner"
   | "cycle-guides"
   | "cycle-dashboard"
+  | "cycle-sources"
   | "gym-workout"
   | "gym-routines"
   | "gym-history"
@@ -23,7 +24,7 @@ export type AppRoute =
   | "nutrition-foods"
   | "settings";
 
-export type NavGroup = "overview" | "labs" | "protocol" | "training" | "nutrition" | "system";
+export type NavGroup = "overview" | "labs" | "protocol" | "training" | "nutrition" | "misc";
 
 export interface NavItem {
   id: AppRoute;
@@ -40,7 +41,8 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "bloodwork-insights", label: "Analysis", group: "labs", icon: "chart", description: "Scores, flags & past logs", accent: "labs" },
   { id: "cycle-planner", label: "Builder", group: "protocol", icon: "blocks", description: "Compose your stack", accent: "protocol" },
   { id: "cycle-guides", label: "Guides", group: "protocol", icon: "book", description: "Compound profiles & reference", accent: "protocol" },
-  { id: "cycle-dashboard", label: "Simulation", group: "protocol", icon: "waveform", description: "PK curves & risk", accent: "protocol" },
+  { id: "cycle-dashboard", label: "Simulation", group: "protocol", icon: "waveform", description: "Saturation curves & risk", accent: "protocol" },
+  { id: "cycle-sources", label: "Sources", group: "protocol", icon: "sources", description: "Verified vendors & suppliers", accent: "protocol" },
   { id: "gym-workout", label: "Train", group: "training", icon: "dumbbell", description: "Log sets & track sessions", accent: "protocol" },
   { id: "gym-routines", label: "Programs", group: "training", icon: "clipboard", description: "Routines & templates", accent: "protocol" },
   { id: "gym-history", label: "Workout Log", group: "training", icon: "history", description: "Past training sessions", accent: "protocol" },
@@ -51,7 +53,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "nutrition-micro", label: "Micronutrients", group: "nutrition", icon: "leaf", description: "Vitamins, minerals & aminos", accent: "intel" },
   { id: "nutrition-goals", label: "Nutrition Goals", group: "nutrition", icon: "target", description: "Macro & micro targets", accent: "intel" },
   { id: "nutrition-foods", label: "Food Library", group: "nutrition", icon: "apple", description: "Custom foods & favorites", accent: "neutral" },
-  { id: "settings", label: "Settings", group: "system", icon: "sliders", description: "Export & preferences", accent: "neutral" },
+  { id: "settings", label: "Settings", group: "misc", icon: "sliders", description: "Export & preferences", accent: "neutral" },
 ];
 
 interface NavigationContextValue {

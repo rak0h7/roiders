@@ -10,6 +10,11 @@
   --foreground: #f2f4f8;
   --muted: #8b939f;
   --muted-2: #565e6c;
+  --text-on-labs: #ffffff;
+  --text-on-protocol: #07080c;
+  --text-on-intel: #07080c;
+  --text-on-warning: #0a0c10;
+  --text-on-success: #0a0c10;
 
   --accent: #ff2e4a;
   --accent-soft: #ff6b8a;

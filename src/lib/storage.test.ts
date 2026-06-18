@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BloodworkReport } from "./types";
-import { hydrateLabsState, pickLatestReport } from "./storage";
+import { hasUnsavedLabEdits, hydrateLabsState, pickLatestReport, reportToValuesRecord } from "./storage";
 
 function report(id: string, createdAt: string, markerCount = 1): BloodworkReport {
   return {
@@ -45,6 +45,22 @@ describe("hydrateLabsState", () => {
     const hydrated = hydrateLabsState([], null);
     expect(hydrated.activeReportId).toBeNull();
     expect(hydrated.currentValues).toEqual({});
+  });
+});
+
+describe("hasUnsavedLabEdits", () => {
+  it("detects edits that differ from the saved active report", () => {
+    const reports = [report("active", "2026-06-01T00:00:00.000Z", 1)];
+    const saved = reportToValuesRecord(reports[0]);
+    const edited = { ...saved, "marker-0": { ...saved["marker-0"], value: 99 } };
+
+    expect(hasUnsavedLabEdits(saved, reports, "active")).toBe(false);
+    expect(hasUnsavedLabEdits(edited, reports, "active")).toBe(true);
+  });
+
+  it("treats values without an active report as unsaved", () => {
+    const values = { alt: { markerId: "alt", value: 42, unit: "U/L" } };
+    expect(hasUnsavedLabEdits(values, [], null)).toBe(true);
   });
 });
 

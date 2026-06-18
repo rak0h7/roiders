@@ -95,7 +95,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       return (
         <div className={cn(ui.card, ui.cardPad, "space-y-4 text-center")}>
           <p className="text-sm text-[var(--muted)]">
-            Public signup is disabled. Ask the site owner for an access key.
+            {settings.signup_closed_message.trim() ||
+              "Public signup is disabled. Ask the site owner for an access key."}
           </p>
           <Link href="/auth/login" className={cn(ui.btnSecondary, "w-full")}>
             Sign in with your key
@@ -135,6 +136,18 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         >
           {busy ? "Generating…" : "Generate access key"}
         </button>
+
+        <p className="text-center text-[11px] leading-relaxed text-[var(--muted)]">
+          By creating an account you agree to our{" "}
+          <Link href="/terms" className="text-[var(--labs)] hover:underline">
+            Terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="text-[var(--labs)] hover:underline">
+            Privacy Policy
+          </Link>
+          .
+        </p>
 
         <p className="text-center text-sm text-[var(--muted)]">
           Have a key?{" "}

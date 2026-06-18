@@ -5,6 +5,7 @@ import { AppShell } from "@/components/shell/AppShell";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { LandingPage } from "@/components/landing/LandingPage";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 function SessionLoader() {
   return (
@@ -20,12 +21,19 @@ function SessionLoader() {
 export default function AppPage() {
   const pathname = usePathname();
   const { configured, user, loading } = useAuth();
+  const { settings, loading: siteLoading } = useSiteConfig();
   const isHome = pathname === "/";
 
   if (isHome) {
     if (!configured) return <LandingPage />;
-    if (loading) return <SessionLoader />;
-    if (!user) return <LandingPage />;
+    if (loading || siteLoading) return <SessionLoader />;
+    if (!user) {
+      if (!settings.public_landing_enabled) {
+        if (typeof window !== "undefined") window.location.replace("/auth/login");
+        return <SessionLoader />;
+      }
+      return <LandingPage />;
+    }
   }
 
   return (

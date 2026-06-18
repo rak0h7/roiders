@@ -3,19 +3,13 @@
 import { Palette, Sparkles } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/context/ToastContext";
-import {
-  ADVANCED_PRESET_IDS,
-  BASE_PRESET_IDS,
-  DEFAULT_THEME,
-  LAYOUT_PRESET_PATCHES,
-  THEME_PRESETS,
-} from "@/lib/themes";
+import { DEFAULT_THEME, LAYOUT_PRESET_PATCHES, THEME_PRESETS } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 import { PreviewPanel } from "./appearance/PreviewPanel";
 import { PresetSection } from "./appearance/PresetSection";
-import { PaletteBuilderSection, AccentColorsSection } from "./appearance/PaletteBuilderSection";
 import {
+  AccentColorsSection,
   TypographySection,
   IconLayoutSection,
   BackgroundEffectsSection,
@@ -45,8 +39,7 @@ export function AppearanceSettings() {
       <PreviewPanel theme={theme} />
 
       <PresetSection
-        title="Theme presets"
-        presetIds={BASE_PRESET_IDS}
+        title="Presets"
         activePreset={theme.preset}
         onSelect={(id) => {
           applyPreset(id);
@@ -54,17 +47,6 @@ export function AppearanceSettings() {
         }}
       />
 
-      <PresetSection
-        title="Advanced theme presets"
-        presetIds={ADVANCED_PRESET_IDS}
-        activePreset={theme.preset}
-        onSelect={(id) => {
-          applyPreset(id);
-          notify(`${THEME_PRESETS.find((p) => p.id === id)?.name} applied`);
-        }}
-      />
-
-      <PaletteBuilderSection theme={theme} updateTheme={updateTheme} onToast={notify} />
       <AccentColorsSection theme={theme} updateTheme={updateTheme} />
       <TypographySection theme={theme} updateTheme={updateTheme} />
       <IconLayoutSection
@@ -87,7 +69,7 @@ export function AppearanceSettings() {
       <button
         type="button"
         onClick={() => {
-          updateTheme({ ...DEFAULT_THEME, savedPalettes: theme.savedPalettes });
+          updateTheme(DEFAULT_THEME);
           notify("Appearance reset to Crimson default", "info");
         }}
         className={cn(ui.btnGhost, "w-full justify-center border border-[var(--border)] py-3")}

@@ -37,6 +37,7 @@ async function createAdminViaApi({ url, serviceKey, keyFingerprint, accessKeyHas
     key_fingerprint: keyFingerprint,
     access_key_hash: accessKeyHash,
     display_name: "Admin",
+    premium_sync_enabled: true,
     updated_at: new Date().toISOString(),
   });
 

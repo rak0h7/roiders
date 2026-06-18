@@ -25,7 +25,7 @@ export function DashboardActivityRow({ activity, crossAlerts, setRoute }: Dashbo
           </div>
           {activity.length === 0 ? (
             <p className="py-10 text-center text-sm text-[var(--muted)]">
-              Activity from labs, protocol, training, and nutrition will appear here
+              Activity from labs, gear, training, and nutrition will appear here
             </p>
           ) : (
             <ul className="mt-4 space-y-1">
@@ -38,7 +38,7 @@ export function DashboardActivityRow({ activity, crossAlerts, setRoute }: Dashbo
                     <span className={cn(
                       "flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-[10px] font-bold uppercase",
                       item.module === "labs" && "bg-[var(--labs-dim)] text-[var(--labs)]",
-                      item.module === "protocol" && "bg-[var(--protocol-dim)] text-[var(--protocol)]",
+                      item.module === "gear" && "bg-[var(--protocol-dim)] text-[var(--protocol)]",
                       item.module === "training" && "bg-[var(--protocol-dim)] text-[var(--protocol)]",
                       item.module === "nutrition" && "bg-[var(--intel-dim)] text-[var(--intel)]"
                     )}>
@@ -71,7 +71,7 @@ export function DashboardActivityRow({ activity, crossAlerts, setRoute }: Dashbo
               <div>
                 <h3 className={ui.sectionTitle}>Cross-domain intelligence</h3>
                 <p className={`${ui.sectionSub} mt-1 max-w-md`}>
-                  Roiders Club correlates labs, nutrition, training, and your protocol stack. Log data across modules to unlock automated insights.
+                  Roiders Club correlates labs, nutrition, training, and your gear stack. Log data across modules to unlock automated insights.
                 </p>
                 <button
                   onClick={() => setRoute("bloodwork-log")}

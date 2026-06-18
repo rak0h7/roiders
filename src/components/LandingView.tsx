@@ -2,36 +2,24 @@
 
 import { motion } from "framer-motion";
 import { useApp } from "@/context/AppContext";
-import { useToast } from "@/context/ToastContext";
+import { useLabFilePicker } from "@/components/labs/useLabFilePicker";
+import { isMobileDevice } from "@/lib/device";
+import { LAB_UPLOAD_ACCEPT } from "@/lib/labUpload";
 import { ChoiceCard } from "@/components/ui/ChoiceCard";
 import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
-import { Droplet, FileEdit } from "lucide-react";
-import { useRef } from "react";
+import { Droplet, FileEdit, ImageIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function LandingView() {
-  const { setLogView, handleFileUpload, rangeMode, setRangeMode, reports } = useApp();
-  const { toast } = useToast();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const { setLogView, rangeMode, setRangeMode, reports } = useApp();
+  const { fileRef, parsing, onInputChange, onDrop, pickAny } = useLabFilePicker();
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await handleFileUpload(file);
-      toast({ type: "success", title: "File uploaded", description: `Parsing ${file.name}…` });
-    }
-    e.target.value = "";
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      await handleFileUpload(file);
-      toast({ type: "success", title: "File uploaded", description: `Parsing ${file.name}…` });
-    }
-  };
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -40,11 +28,17 @@ export function LandingView() {
         <p className={ui.pageSub}>
           {reports.length > 0
             ? `${reports.length} panel${reports.length > 1 ? "s" : ""} on file — add another or review in Analysis`
-            : "Upload a lab report or enter values manually"}
+            : "Upload a lab report, add screenshots, or enter values manually"}
         </p>
       </motion.div>
 
-      <input ref={fileRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFile} />
+      <input
+        ref={fileRef}
+        type="file"
+        accept={LAB_UPLOAD_ACCEPT}
+        className="hidden"
+        onChange={onInputChange}
+      />
 
       <div className={cn(ui.equalGrid, "md:grid-cols-2")}>
         <motion.div
@@ -53,17 +47,39 @@ export function LandingView() {
           transition={{ delay: 0.1 }}
           className="h-full"
           onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
+          onDrop={onDrop}
         >
           <ChoiceCard
             variant="labs"
             icon={Droplet}
             iconAccent="labs"
             title="Upload Blood Test"
-            description="Drop a PDF, TXT, or CSV file and we'll extract markers automatically."
-            onClick={() => fileRef.current?.click()}
+            description={
+              isMobile
+                ? "Pick screenshots from your camera roll or drop a PDF — we'll read the values automatically."
+                : "Drop a PDF, add lab screenshots, or upload TXT/CSV and we'll extract markers automatically."
+            }
+            onClick={pickAny}
             footer={
               <>
+                <span
+                  className={cn(
+                    ui.chip,
+                    "border border-[var(--labs)]/30 bg-[var(--labs-dim)] text-[var(--labs)]"
+                  )}
+                >
+                  {parsing ? (
+                    <>
+                      <Loader2 className="mr-1 inline h-3 w-3 animate-spin" />
+                      Reading…
+                    </>
+                  ) : (
+                    <>
+                      <ImageIcon className="mr-1 inline h-3 w-3" />
+                      Photos
+                    </>
+                  )}
+                </span>
                 {["PDF", "TXT", "CSV"].map((t) => (
                   <span
                     key={t}

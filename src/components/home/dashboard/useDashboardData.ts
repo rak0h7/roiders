@@ -13,7 +13,7 @@ import { calculateStats, calculateRiskProfile } from "@/lib/cycleCalculations";
 import { formatDuration, volumeByWeek } from "@/lib/gymCalculations";
 import type { AppRoute } from "@/context/NavigationContext";
 
-export type ModuleId = "labs" | "protocol" | "training" | "nutrition";
+export type ModuleId = "labs" | "gear" | "training" | "nutrition";
 
 export interface ActivityItem {
   id: string;
@@ -91,7 +91,7 @@ export function useDashboardData() {
     if (compounds.length > 0) {
       items.push({
         id: "cycle-active",
-        module: "protocol",
+        module: "gear",
         title: `${compounds.length}-compound stack`,
         subtitle: `${weeks} weeks from ${startDate}`,
         at: startDate,

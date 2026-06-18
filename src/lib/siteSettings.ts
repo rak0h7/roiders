@@ -1,8 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AppRoute } from "@/context/NavigationContext";
+import type { RangeMode } from "@/lib/types";
 
 export type AnnouncementLevel = "info" | "warning" | "danger";
 export type SiteModule = "labs" | "cycle" | "gym" | "nutrition";
+export type SiteLabsRangeMode = RangeMode;
 
 export type SiteSettings = {
   site_name: string;
@@ -25,6 +27,14 @@ export type SiteSettings = {
   module_cycle_enabled: boolean;
   module_gym_enabled: boolean;
   module_nutrition_enabled: boolean;
+  public_landing_enabled: boolean;
+  premium_sources_enabled: boolean;
+  vendor_portal_enabled: boolean;
+  default_labs_range_mode: SiteLabsRangeMode;
+  legal_contact_email: string;
+  signup_closed_message: string;
+  site_description: string;
+  announcement_guest_visible: boolean;
   updated_at: string;
 };
 
@@ -33,7 +43,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   site_tagline: "Private performance tracking",
   maintenance_mode: false,
   maintenance_message: "Roiders Club is undergoing maintenance. Please check back soon.",
-  allow_public_signup: false,
+  allow_public_signup: true,
   announcement_enabled: false,
   announcement_message: "",
   announcement_level: "info",
@@ -49,6 +59,14 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   module_cycle_enabled: true,
   module_gym_enabled: true,
   module_nutrition_enabled: true,
+  public_landing_enabled: true,
+  premium_sources_enabled: true,
+  vendor_portal_enabled: true,
+  default_labs_range_mode: "optimized",
+  legal_contact_email: "",
+  signup_closed_message: "",
+  site_description: "",
+  announcement_guest_visible: false,
   updated_at: new Date().toISOString(),
 };
 
@@ -77,11 +95,27 @@ export type SiteSettingsPatch = Partial<
     | "module_cycle_enabled"
     | "module_gym_enabled"
     | "module_nutrition_enabled"
+    | "public_landing_enabled"
+    | "premium_sources_enabled"
+    | "vendor_portal_enabled"
+    | "default_labs_range_mode"
+    | "legal_contact_email"
+    | "signup_closed_message"
+    | "site_description"
+    | "announcement_guest_visible"
   >
 >;
 
 export function toPublicSettings(settings: SiteSettings): PublicSiteSettings {
   return { ...settings };
+}
+
+export function resolveLegalContactHref(
+  settings: Pick<SiteSettings, "legal_contact_email" | "support_url">
+): string {
+  const email = settings.legal_contact_email.trim();
+  if (email) return `mailto:${email}`;
+  return settings.support_url.trim() || "mailto:support@roiders.club";
 }
 
 export function routeModule(route: AppRoute): SiteModule | null {
@@ -153,6 +187,20 @@ function normalizeRow(row: Record<string, unknown>): SiteSettings {
     module_gym_enabled: row.module_gym_enabled === undefined ? true : Boolean(row.module_gym_enabled),
     module_nutrition_enabled:
       row.module_nutrition_enabled === undefined ? true : Boolean(row.module_nutrition_enabled),
+    public_landing_enabled:
+      row.public_landing_enabled === undefined ? true : Boolean(row.public_landing_enabled),
+    premium_sources_enabled:
+      row.premium_sources_enabled === undefined ? true : Boolean(row.premium_sources_enabled),
+    vendor_portal_enabled:
+      row.vendor_portal_enabled === undefined ? true : Boolean(row.vendor_portal_enabled),
+    default_labs_range_mode:
+      row.default_labs_range_mode === "lab" ? "lab" : "optimized",
+    legal_contact_email:
+      typeof row.legal_contact_email === "string" ? row.legal_contact_email : "",
+    signup_closed_message:
+      typeof row.signup_closed_message === "string" ? row.signup_closed_message : "",
+    site_description: typeof row.site_description === "string" ? row.site_description : "",
+    announcement_guest_visible: Boolean(row.announcement_guest_visible),
     updated_at:
       typeof row.updated_at === "string" ? row.updated_at : DEFAULT_SITE_SETTINGS.updated_at,
   };
@@ -264,6 +312,22 @@ export function validateSiteSettingsPatch(patch: SiteSettingsPatch): string | nu
     !["info", "warning", "danger"].includes(patch.announcement_level)
   ) {
     return "Invalid announcement level";
+  }
+
+  if (patch.default_labs_range_mode !== undefined && !["lab", "optimized"].includes(patch.default_labs_range_mode)) {
+    return "Default labs range mode must be lab or optimized";
+  }
+
+  if (patch.legal_contact_email !== undefined && patch.legal_contact_email.length > 120) {
+    return "Legal contact email must be 120 characters or fewer";
+  }
+
+  if (patch.signup_closed_message !== undefined && patch.signup_closed_message.length > 300) {
+    return "Signup closed message must be 300 characters or fewer";
+  }
+
+  if (patch.site_description !== undefined && patch.site_description.length > 200) {
+    return "Site description must be 200 characters or fewer";
   }
 
   return null;

@@ -8,21 +8,21 @@ import { ui } from "@/lib/ui";
 
 export function PresetSection({
   title,
-  presetIds,
   activePreset,
   onSelect,
 }: {
   title: string;
-  presetIds: ThemePresetId[];
   activePreset: ThemeConfig["preset"];
   onSelect: (id: ThemePresetId) => void;
 }) {
-  const presets = THEME_PRESETS.filter((p) => presetIds.includes(p.id));
   return (
     <section className="border-t border-[var(--border)] pt-8">
-      <p className={cn(ui.overline, "mb-4")}>{title}</p>
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+        <p className={ui.overline}>{title}</p>
+        <p className="text-[10px] text-[var(--muted)]">{THEME_PRESETS.length} themes · plain → wild</p>
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        {presets.map((preset) => {
+        {THEME_PRESETS.map((preset) => {
           const active = activePreset === preset.id;
           return (
             <motion.button

@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { getProfileById } from "@/data/compoundProfiles";
+import { getDisplayProfileById } from "@/lib/guideCatalog";
 import { useNavigation } from "@/context/NavigationContext";
 import { useCycleStore } from "@/store/cycleStore";
 import { CompoundGuideArticle } from "./CompoundGuideArticle";
@@ -11,7 +11,7 @@ import { ui } from "@/lib/ui";
 export function CompoundProfileModal() {
   const { setRoute } = useNavigation();
   const { profileModalId, setProfileModalId, openGuidesAt } = useCycleStore();
-  const profile = profileModalId ? getProfileById(profileModalId) : null;
+  const profile = profileModalId ? getDisplayProfileById(profileModalId) : null;
 
   if (!profileModalId || !profile) return null;
 

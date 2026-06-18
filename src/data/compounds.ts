@@ -8,8 +8,7 @@ export type CompoundCategory =
   | "peptides"
   | "cognitive"
   | "hair"
-  | "support"
-  | "recreational";
+  | "support";
 
 export type RouteType = "injectable" | "oral" | "topical";
 
@@ -40,27 +39,26 @@ export const COMPOUND_CATEGORIES: {
   { id: "cognitive", label: "Cognitive & Nootropics", icon: "🧠" },
   { id: "hair", label: "Hair & Topicals", icon: "💇" },
   { id: "support", label: "Support & Ancillaries", icon: "🛡️" },
-  { id: "recreational", label: "Recreational", icon: "💊" },
 ];
 
 export const COMPOUNDS: Compound[] = [
   { id: "test-e", name: "Testosterone Enanthate", shortName: "Test E", category: "anabolics", route: "injectable", tags: ["TR", "IM", "Test"], dosageInfo: "100–500 mg/wk typical", color: "#ec4899", halfLife: 4.5, pkMultiplier: 1.0, unit: "mg" },
-  { id: "test-c", name: "Testosterone Cypionate", shortName: "Test C", category: "anabolics", route: "injectable", tags: ["TR", "IM", "Test"], dosageInfo: "100–500 mg/wk typical", color: "#ec4899", halfLife: 8, pkMultiplier: 1.0, unit: "mg" },
+  { id: "test-c", name: "Testosterone Cypionate", shortName: "Test C", category: "anabolics", route: "injectable", tags: ["TR", "IM", "Test"], dosageInfo: "100–500 mg/wk typical", color: "#ec4899", halfLife: 6, pkMultiplier: 1.0, unit: "mg" },
   { id: "test-p", name: "Testosterone Propionate", shortName: "Test P", category: "anabolics", route: "injectable", tags: ["TR", "IM", "Test"], dosageInfo: "50–100 mg EOD typical", color: "#ec4899", halfLife: 0.8, pkMultiplier: 1.0, unit: "mg" },
   { id: "test-sus", name: "Testosterone Sustanon", shortName: "Test Sus", category: "anabolics", route: "injectable", tags: ["TR", "IM", "Test"], dosageInfo: "250–750 mg/wk typical", color: "#ec4899", halfLife: 5, pkMultiplier: 1.0, unit: "mg" },
   { id: "test-trt", name: "Testosterone TRT (No Ester)", shortName: "Test TRT", category: "anabolics", route: "injectable", tags: ["TR", "IM"], dosageInfo: "100–200 mg/wk TRT", color: "#ec4899", halfLife: 0.03, pkMultiplier: 1.0, unit: "mg" },
   { id: "test-tne", name: "Testosterone TNE (No Ester)", shortName: "Test TNE", category: "anabolics", route: "injectable", tags: ["IM", "Pre-workout"], dosageInfo: "50–100 mg pre-workout", color: "#ec4899", halfLife: 0.03, pkMultiplier: 1.2, unit: "mg" },
   { id: "mast-e", name: "Masteron Enanthate", shortName: "Mast E", category: "anabolics", route: "injectable", tags: ["IM", "DHT"], dosageInfo: "200–400 mg/wk typical", color: "#14b8a6", halfLife: 4.5, pkMultiplier: 0.6, unit: "mg" },
   { id: "mast-p", name: "Masteron Propionate", shortName: "Mast P", category: "anabolics", route: "injectable", tags: ["IM", "DHT"], dosageInfo: "100 mg EOD typical", color: "#14b8a6", halfLife: 0.8, pkMultiplier: 0.6, unit: "mg" },
-  { id: "tren-a", name: "Trenbolone Acetate", shortName: "Tren A", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "50–100 mg EOD typical", color: "#eab308", halfLife: 1, pkMultiplier: 1.5, unit: "mg" },
+  { id: "tren-a", name: "Trenbolone Acetate", shortName: "Tren A", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "50–100 mg EOD typical", color: "#eab308", halfLife: 2.5, pkMultiplier: 1.5, unit: "mg" },
   { id: "tren-e", name: "Trenbolone Enanthate", shortName: "Tren E", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "200–400 mg/wk typical", color: "#eab308", halfLife: 4.5, pkMultiplier: 1.5, unit: "mg" },
   { id: "primo-e", name: "Primobolan Enanthate", shortName: "Primo E", category: "anabolics", route: "injectable", tags: ["IM"], dosageInfo: "400–600 mg/wk typical", color: "#22c55e", halfLife: 7, pkMultiplier: 0.4, unit: "mg" },
-  { id: "eq", name: "Boldenone Undecylenate (EQ)", shortName: "EQ", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "400–600 mg/wk typical", color: "#22c55e", halfLife: 14, pkMultiplier: 0.5, unit: "mg" },
+  { id: "eq", name: "Boldenone Undecylenate (EQ)", shortName: "EQ", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "400–600 mg/wk typical", color: "#22c55e", halfLife: 8.5, pkMultiplier: 0.5, unit: "mg" },
   { id: "eq-c", name: "Boldenone Cypionate", shortName: "EQ C", category: "anabolics", route: "injectable", tags: ["IM"], dosageInfo: "400–600 mg/wk typical", color: "#f97316", halfLife: 8, pkMultiplier: 0.5, unit: "mg" },
   { id: "eq-a", name: "Boldenone Acetate", shortName: "EQ A", category: "anabolics", route: "injectable", tags: ["IM"], dosageInfo: "100 mg EOD typical", color: "#f97316", halfLife: 0.8, pkMultiplier: 0.5, unit: "mg" },
   { id: "deca", name: "Nandrolone Decanoate (Deca)", shortName: "Deca", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "200–400 mg/wk typical", color: "#a855f7", halfLife: 7, pkMultiplier: 0.7, unit: "mg" },
   { id: "deca-d", name: "Deca-Durabolin", shortName: "Deca-D", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "200–400 mg/wk typical", color: "#a855f7", halfLife: 7, pkMultiplier: 0.7, unit: "mg" },
-  { id: "npp", name: "Nandrolone Phenylpropionate (NPP)", shortName: "NPP", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "100 mg EOD typical", color: "#3b82f6", halfLife: 1.5, pkMultiplier: 0.7, unit: "mg" },
+  { id: "npp", name: "Nandrolone Phenylpropionate (NPP)", shortName: "NPP", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "100 mg EOD typical", color: "#3b82f6", halfLife: 4, pkMultiplier: 0.7, unit: "mg" },
   { id: "dhb", name: "DHB (1-Testosterone)", shortName: "DHB", category: "anabolics", route: "injectable", tags: ["IM"], dosageInfo: "200–400 mg/wk typical", color: "#14b8a6", halfLife: 4, pkMultiplier: 0.8, unit: "mg" },
   { id: "ment", name: "MENT (Trestolone Acetate)", shortName: "MENT", category: "anabolics", route: "injectable", tags: ["IM", "19-nor"], dosageInfo: "50–100 mg/wk typical", color: "#ec4899", halfLife: 0.5, pkMultiplier: 2.0, unit: "mg" },
   { id: "dht", name: "Injectable DHT (Stanolone)", shortName: "DHT", category: "anabolics", route: "injectable", tags: ["IM", "DHT"], dosageInfo: "50–100 mg/wk typical", color: "#ec4899", halfLife: 0.5, pkMultiplier: 0.9, unit: "mg" },
@@ -71,7 +69,7 @@ export const COMPOUNDS: Compound[] = [
   { id: "anavar", name: "Anavar (Oxandrolone)", shortName: "Anavar", category: "anabolics", route: "oral", tags: ["17aa", "Oral", "DHT"], dosageInfo: "25–80 mg/day (6-8 weeks)", color: "#f97316", halfLife: 0.4, pkMultiplier: 0.8, unit: "mg", hepatotoxic: true },
   { id: "winstrol", name: "Winstrol (Stanozolol)", shortName: "Winstrol", category: "anabolics", route: "oral", tags: ["17aa", "Oral", "DHT"], dosageInfo: "25–100 mg/day oral", color: "#eab308", halfLife: 0.4, pkMultiplier: 0.9, unit: "mg", hepatotoxic: true },
   { id: "winstrol-inj", name: "Winstrol Injectable", shortName: "Winstrol Inj", category: "anabolics", route: "injectable", tags: ["IM", "DHT"], dosageInfo: "50 mg EOD injectable", color: "#eab308", halfLife: 1, pkMultiplier: 0.9, unit: "mg" },
-  { id: "turinabol", name: "Turinabol (Tbol)", shortName: "Tbol", category: "anabolics", route: "oral", tags: ["17aa", "Oral"], dosageInfo: "30–60 mg/day (6-8 weeks)", color: "#22c55e", halfLife: 0.5, pkMultiplier: 0.9, unit: "mg", hepatotoxic: true },
+  { id: "turinabol", name: "Turinabol (Tbol)", shortName: "Tbol", category: "anabolics", route: "oral", tags: ["17aa", "Oral"], dosageInfo: "30–60 mg/day (6-8 weeks)", color: "#22c55e", halfLife: 0.67, pkMultiplier: 0.9, unit: "mg", hepatotoxic: true },
   { id: "proviron", name: "Proviron (Mesterolone)", shortName: "Proviron", category: "support", route: "oral", tags: ["Oral", "DHT", "AI"], dosageInfo: "25–100 mg/day", color: "#14b8a6", halfLife: 0.5, pkMultiplier: 0.1, unit: "mg" },
   { id: "clen", name: "Clenbuterol", shortName: "Clen", category: "fat-loss", route: "oral", tags: ["Beta-2"], dosageInfo: "20–120 mcg/day", color: "#f97316", halfLife: 1.5, pkMultiplier: 0.3, unit: "mcg" },
   { id: "t3", name: "Liothyronine (T3)", shortName: "T3", category: "fat-loss", route: "oral", tags: ["Thyroid"], dosageInfo: "25–75 mcg/day", color: "#f97316", halfLife: 0.75, pkMultiplier: 0.2, unit: "mcg" },

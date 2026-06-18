@@ -5,7 +5,11 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { resolveSyncConflict, type CloudModule, type SyncConflict } from "@/lib/cloudSync";
-import { pullAndApplyUserData, syncAndApplyUserData } from "@/lib/userCloudSync";
+import {
+  pullAndApplyUserData,
+  syncAndApplyUserData,
+  type AppliedSyncResult,
+} from "@/lib/userCloudSync";
 import { rehydratePersistedStores } from "@/lib/storeRehydrate";
 import { accountLabel } from "@/lib/accessKey.shared";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -16,6 +20,7 @@ import {
   setUsernamesSchemaKnown,
 } from "@/lib/profile";
 import { formatUsername, normalizeUsername } from "@/lib/username";
+import { canUserCloudSync, PREMIUM_SYNC_REQUIRED_MESSAGE } from "@/lib/cloudSyncAccess";
 
 interface AuthResult {
   error: string | null;
@@ -29,6 +34,9 @@ interface AuthContextValue {
   accountName: string | null;
   needsUsername: boolean;
   isAdmin: boolean;
+  isVendor: boolean;
+  premiumSyncEnabled: boolean;
+  canCloudSync: boolean;
   usernamesEnabled: boolean;
   profileLoading: boolean;
   loading: boolean;
@@ -58,11 +66,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [username, setUsernameState] = useState<string | null>(null);
   const [displayName, setDisplayNameState] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isVendor, setIsVendor] = useState(false);
+  const [premiumSyncEnabled, setPremiumSyncEnabled] = useState(false);
   const [usernamesEnabled, setUsernamesEnabled] = useState(true);
+  const canCloudSync = useMemo(
+    () => canUserCloudSync(siteSettings.cloud_sync_enabled, { premium_sync_enabled: premiumSyncEnabled }),
+    [siteSettings.cloud_sync_enabled, premiumSyncEnabled],
+  );
   const [loading, setLoading] = useState(configured);
   const [profileLoading, setProfileLoading] = useState(false);
   const syncTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pulledForUser = useRef<string | null>(null);
+  const pullState = useRef<{
+    userId: string | null;
+    promise: Promise<AppliedSyncResult | null> | null;
+  }>({ userId: null, promise: null });
   const [syncStatus, setSyncStatus] = useState<AuthContextValue["syncStatus"]>({
     syncing: false,
     lastSyncAt: null,
@@ -78,9 +95,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUsernameState(null);
         setDisplayNameState(null);
         setIsAdmin(false);
+        setIsVendor(false);
+        setPremiumSyncEnabled(false);
         setUsernamesEnabled(true);
         setProfileLoading(false);
-        return;
+        return null;
       }
 
       setProfileLoading(true);
@@ -93,8 +112,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUsernameState(resolved.username);
       setDisplayNameState(resolved.display_name);
       setIsAdmin(resolved.is_admin);
+      setIsVendor(resolved.is_vendor);
+      setPremiumSyncEnabled(resolved.premium_sync_enabled);
       setUsernamesEnabled(resolved.usernames_enabled);
       setProfileLoading(false);
+      return resolved;
     },
     [supabase]
   );
@@ -115,6 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!siteSettings.cloud_sync_enabled) {
       return { error: "Cloud sync is disabled by the site administrator" };
     }
+    if (!premiumSyncEnabled) {
+      return { error: PREMIUM_SYNC_REQUIRED_MESSAGE };
+    }
     setSyncStatus((s) => ({ ...s, syncing: true, lastError: null }));
     try {
       const result = await syncAndApplyUserData(supabase, user.id);
@@ -133,14 +158,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSyncStatus((s) => ({ ...s, syncing: false, lastError: msg }));
       return { error: msg };
     }
-  }, [supabase, user, siteSettings.cloud_sync_enabled]);
+  }, [supabase, user, siteSettings.cloud_sync_enabled, premiumSyncEnabled]);
 
   const resolveConflict = useCallback(
     async (module: CloudModule, choice: "local" | "remote") => {
       if (!supabase || !user) return { error: null };
       try {
         await resolveSyncConflict(supabase, user.id, module, choice);
-        if (choice === "remote") await rehydratePersistedStores();
+        if (choice === "remote") await rehydratePersistedStores([module]);
         setSyncConflicts((list) => list.filter((c) => c.module !== module));
         return { error: null };
       } catch (e) {
@@ -152,6 +177,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!supabase) return;
+
+    const applyPullResult = (result: AppliedSyncResult) => {
+      setSyncConflicts(result.conflicts);
+      setSyncStatus((s) => ({
+        ...s,
+        lastSyncAt: result.merged ? new Date().toISOString() : s.lastSyncAt,
+        lastPulled: result.pulled,
+      }));
+    };
+
+    const pullOnce = async (userId: string): Promise<AppliedSyncResult | null> => {
+      if (!canCloudSync) return null;
+
+      if (pullState.current.userId === userId && pullState.current.promise) {
+        return pullState.current.promise;
+      }
+      if (pullState.current.userId === userId && !pullState.current.promise) {
+        return null;
+      }
+
+      pullState.current.userId = userId;
+      pullState.current.promise = pullAndApplyUserData(supabase, userId)
+        .then((result) => {
+          pullState.current.promise = null;
+          return result;
+        })
+        .catch((error) => {
+          pullState.current.promise = null;
+          pullState.current.userId = null;
+          throw error;
+        });
+
+      return pullState.current.promise;
+    };
 
     const schemaPromise = fetch("/api/profile/schema", { credentials: "same-origin" })
       .then((res) => res.json())
@@ -172,16 +231,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(nextUser);
       await refreshProfile(nextUser);
 
-      if (nextUser && siteSettings.cloud_sync_enabled) {
+      if (nextUser) {
         try {
-          pulledForUser.current = nextUser.id;
-          const result = await pullAndApplyUserData(supabase, nextUser.id);
-          setSyncConflicts(result.conflicts);
-          setSyncStatus((s) => ({
-            ...s,
-            lastSyncAt: result.merged ? new Date().toISOString() : s.lastSyncAt,
-            lastPulled: result.pulled,
-          }));
+          const result = await pullOnce(nextUser.id);
+          if (result) applyPullResult(result);
         } catch {
           /* local-only fallback */
         }
@@ -198,52 +251,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await refreshProfile(nextUser);
 
       if (!nextUser) {
-        pulledForUser.current = null;
+        pullState.current = { userId: null, promise: null };
         setSyncConflicts([]);
         return;
       }
 
-      if (pulledForUser.current === nextUser.id) return;
-      pulledForUser.current = nextUser.id;
-
-      if (siteSettings.cloud_sync_enabled) {
-        try {
-          const result = await pullAndApplyUserData(supabase, nextUser.id);
-          setSyncConflicts(result.conflicts);
-          setSyncStatus((s) => ({
-            ...s,
-            lastSyncAt: result.merged ? new Date().toISOString() : s.lastSyncAt,
-            lastPulled: result.pulled,
-          }));
-        } catch {
-          /* local-only fallback */
-        }
+      try {
+        const result = await pullOnce(nextUser.id);
+        if (result) applyPullResult(result);
+      } catch {
+        /* local-only fallback */
       }
     });
 
     return () => sub.subscription.unsubscribe();
-  }, [supabase, refreshProfile, siteSettings.cloud_sync_enabled]);
+  }, [supabase, refreshProfile, canCloudSync]);
 
   useEffect(() => {
     if (syncTimer.current) clearInterval(syncTimer.current);
-    if (!user || !supabase || !siteSettings.cloud_sync_enabled) return;
+    if (!user || !supabase || !canCloudSync) return;
 
     syncTimer.current = setInterval(() => {
-      void syncAndApplyUserData(supabase, user.id).then((result) => {
-        setSyncConflicts(result.conflicts);
-        setSyncStatus((s) => ({
-          ...s,
-          lastSyncAt: new Date().toISOString(),
-          lastPulled: result.pulled,
-          lastPushed: result.pushed,
-        }));
-      });
+      void syncAndApplyUserData(supabase, user.id)
+        .then((result) => {
+          setSyncConflicts(result.conflicts);
+          setSyncStatus((s) => ({
+            ...s,
+            lastSyncAt: new Date().toISOString(),
+            lastPulled: result.pulled,
+            lastPushed: result.pushed,
+            lastError: null,
+          }));
+        })
+        .catch((error) => {
+          const msg = error instanceof Error ? error.message : "Background sync failed";
+          setSyncStatus((s) => ({ ...s, lastError: msg }));
+        });
     }, 45_000);
 
     return () => {
       if (syncTimer.current) clearInterval(syncTimer.current);
     };
-  }, [user, supabase, siteSettings.cloud_sync_enabled]);
+  }, [user, supabase, canCloudSync]);
 
   const signIn = useCallback(
     async (accessKey: string) => {
@@ -264,11 +313,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(nextUser);
 
       if (nextUser) {
-        pulledForUser.current = nextUser.id;
-        await refreshProfile(nextUser);
-        if (siteSettings.cloud_sync_enabled) {
+        pullState.current = { userId: null, promise: null };
+        const profile = await refreshProfile(nextUser);
+        if (profile && canUserCloudSync(siteSettings.cloud_sync_enabled, profile)) {
           try {
             const result = await pullAndApplyUserData(supabase, nextUser.id);
+            pullState.current.userId = nextUser.id;
             setSyncConflicts(result.conflicts);
             setSyncStatus({
               syncing: false,
@@ -286,7 +336,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return { error: null };
     },
-    [supabase, refreshProfile, siteSettings.cloud_sync_enabled]
+    [supabase, refreshProfile, siteSettings.cloud_sync_enabled],
   );
 
   const createAccount = useCallback(async () => {
@@ -321,14 +371,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     if (!supabase) return;
-    if (user && siteSettings.cloud_sync_enabled) await syncAndApplyUserData(supabase, user.id);
+    if (user && canCloudSync) await syncAndApplyUserData(supabase, user.id);
     await supabase.auth.signOut();
     setUser(null);
     setUsernameState(null);
     setDisplayNameState(null);
     setIsAdmin(false);
+    setIsVendor(false);
+    setPremiumSyncEnabled(false);
     window.location.href = "/auth/login";
-  }, [supabase, user, siteSettings.cloud_sync_enabled]);
+  }, [supabase, user, canCloudSync]);
 
   return (
     <AuthContext.Provider
@@ -339,6 +391,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         accountName,
         needsUsername,
         isAdmin,
+        isVendor,
+        premiumSyncEnabled,
+        canCloudSync,
         usernamesEnabled,
         profileLoading,
         loading,

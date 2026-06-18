@@ -5,14 +5,22 @@ import { loadUserProfile } from "@/lib/profile";
 import { fetchSiteSettings } from "@/lib/siteSettings";
 
 const AUTH_ROUTES = ["/auth/login", "/auth/signup", "/api/auth"];
-const PUBLIC_ROUTES = ["/maintenance"];
+const PUBLIC_ROUTES = ["/maintenance", "/terms", "/privacy", "/robots.txt", "/sitemap.xml"];
 
 function isAuthRoute(pathname: string) {
   return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
 
-function isAdminRoute(pathname: string) {
-  return pathname === "/admin" || pathname.startsWith("/admin/") || pathname.startsWith("/api/admin");
+function isAdminPanelRoute(pathname: string) {
+  return pathname === "/admin" || pathname.startsWith("/admin/");
+}
+
+function isAdminApiRoute(pathname: string) {
+  return pathname.startsWith("/api/admin");
+}
+
+function isVendorApiRoute(pathname: string) {
+  return pathname.startsWith("/api/vendor");
 }
 
 function isApiRoute(pathname: string) {
@@ -60,7 +68,7 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (isAdminRoute(pathname)) {
+  if (isAdminPanelRoute(pathname) || isAdminApiRoute(pathname) || isVendorApiRoute(pathname)) {
     if (!user) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = "/auth/login";
@@ -68,9 +76,11 @@ export async function updateSession(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    const profile = await loadUserProfile(supabase, user.id);
-    if (!profile.is_admin) {
-      return NextResponse.redirect(new URL("/", request.url));
+    if (isAdminPanelRoute(pathname)) {
+      const profile = await loadUserProfile(supabase, user.id);
+      if (!profile.is_admin && !profile.is_vendor) {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
     }
 
     return supabaseResponse;
@@ -78,9 +88,9 @@ export async function updateSession(request: NextRequest) {
 
   if (siteSettings.maintenance_mode) {
     const profile = user ? await loadUserProfile(supabase, user.id) : null;
-    const isAdmin = Boolean(profile?.is_admin);
+    const canBypassMaintenance = Boolean(profile?.is_admin || profile?.is_vendor);
 
-    if (!isAdmin && !isAuthRoute(pathname)) {
+    if (!canBypassMaintenance && !isAuthRoute(pathname)) {
       const maintenanceUrl = request.nextUrl.clone();
       maintenanceUrl.pathname = "/maintenance";
       maintenanceUrl.search = "";

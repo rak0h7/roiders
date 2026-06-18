@@ -5,6 +5,7 @@ import { Circle, Grid3X3, Hexagon, LayoutGrid, Upload, Zap } from "lucide-react"
 import { AppIcon } from "@/components/ui/AppIcon";
 import {
   FONT_FAMILY_OPTIONS,
+  hexToHsl,
   type ContentWidth,
   type FontFamilyId,
   type LayoutPresetId,
@@ -12,7 +13,7 @@ import {
 } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
-import { SettingsSection, Slider, ToggleRow } from "./shared";
+import { ColorField, SettingsSection, Slider, ToggleRow } from "./shared";
 
 type UpdateTheme = (patch: Partial<ThemeConfig>) => void;
 
@@ -236,6 +237,71 @@ export function BackgroundEffectsSection({
         <Slider label="Page transition speed" value={theme.pageTransitionSpeed} onChange={(v) => updateTheme({ pageTransitionSpeed: v })} min={0} max={100} display={(v) => (v < 35 ? "Slow" : v > 65 ? "Fast" : "Normal")} />
         <Slider label="Parallax strength" value={theme.parallaxStrength} onChange={(v) => updateTheme({ parallaxStrength: v })} min={0} max={100} />
         <ToggleRow label="Particle effects" desc="Accent motes drifting in the ambient background" checked={theme.particleEffects} onChange={(v) => updateTheme({ particleEffects: v })} />
+      </SettingsSection>
+    </>
+  );
+}
+
+export function AccentColorsSection({
+  theme,
+  updateTheme,
+}: {
+  theme: ThemeConfig;
+  updateTheme: UpdateTheme;
+}) {
+  const setColor = (key: "accentPrimary" | "accentSecondary" | "accentTertiary", value: string) => {
+    const idx = { accentPrimary: 0, accentSecondary: 1, accentTertiary: 2 }[key];
+    const next = [...theme.customSwatches];
+    next[idx] = value;
+    const hsl = hexToHsl(value);
+    updateTheme({
+      [key]: value,
+      customSwatches: next,
+      paletteHue: hsl.h,
+      paletteSaturation: hsl.s,
+      paletteLightness: hsl.l,
+      preset: "custom",
+    });
+  };
+
+  return (
+    <>
+      <SettingsSection title="Custom accent colors">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {(
+            [
+              { key: "accentPrimary" as const, label: "Primary", desc: "Main accent & labs" },
+              { key: "accentSecondary" as const, label: "Secondary", desc: "Gradient end & protocol" },
+              { key: "accentTertiary" as const, label: "Tertiary", desc: "Intel & highlights" },
+            ] as const
+          ).map(({ key, label, desc }) => (
+            <ColorField key={key} label={label} desc={desc} value={theme[key]} onChange={(v) => setColor(key, v)} />
+          ))}
+        </div>
+      </SettingsSection>
+      <SettingsSection title="Background & surfaces">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {(
+            [
+              { key: "baseColor" as const, label: "Base", desc: "Page background" },
+              { key: "elevatedColor" as const, label: "Elevated", desc: "Inputs & dropdowns" },
+              { key: "surfaceColor" as const, label: "Surface", desc: "Cards & panels" },
+            ] as const
+          ).map(({ key, label, desc }) => (
+            <ColorField
+              key={key}
+              label={label}
+              desc={desc}
+              value={theme[key]}
+              onChange={(v) => {
+                const idx = { baseColor: 3, surfaceColor: 4, elevatedColor: 5 }[key];
+                const next = [...theme.customSwatches];
+                next[idx] = v;
+                updateTheme({ [key]: v, customSwatches: next, preset: "custom" });
+              }}
+            />
+          ))}
+        </div>
       </SettingsSection>
     </>
   );

@@ -9,6 +9,7 @@ import {
   RefreshCw,
   Settings2,
   Shield,
+  Store,
   Users,
 } from "lucide-react";
 import { AdminAccounts } from "@/components/admin/AdminAccounts";
@@ -18,21 +19,29 @@ import type { AdminUser } from "@/lib/admin";
 import type { AdminStats } from "@/lib/adminStats";
 import { AccessKeyReveal } from "@/components/auth/AccessKeyReveal";
 import { AdminSiteSettings } from "@/components/admin/AdminSiteSettings";
+import { AdminVendorPortal } from "@/components/admin/AdminVendorPortal";
+import { AdminVendors } from "@/components/admin/AdminVendors";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
-type AdminTab = "overview" | "accounts" | "settings";
+type AdminTab = "overview" | "accounts" | "vendors" | "settings";
 
-const TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+const ADMIN_TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard className="h-4 w-4" /> },
   { id: "accounts", label: "Accounts", icon: <Users className="h-4 w-4" /> },
+  { id: "vendors", label: "Vendors", icon: <Store className="h-4 w-4" /> },
   { id: "settings", label: "Settings", icon: <Settings2 className="h-4 w-4" /> },
 ];
 
 export function AdminPanel() {
-  const { user, accountName } = useAuth();
+  const { user, accountName, isAdmin, isVendor } = useAuth();
+  const { settings } = useSiteConfig();
   const [tab, setTab] = useState<AdminTab>("overview");
+  const adminTabs = ADMIN_TABS.filter(
+    (item) => item.id !== "vendors" || (settings.vendor_portal_enabled && isAdmin)
+  );
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,6 +124,27 @@ export function AdminPanel() {
     }
   };
 
+  const togglePremiumSync = async (target: AdminUser, enabled: boolean) => {
+    setBusyId(target.id);
+    try {
+      const res = await fetch(`/api/admin/users/${target.id}`, {
+        method: "PATCH",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ premium_sync_enabled: enabled }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Update failed");
+      setUsers((list) =>
+        list.map((u) => (u.id === target.id ? { ...u, premium_sync_enabled: enabled } : u)),
+      );
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const deleteUser = async (target: AdminUser) => {
     if (target.is_admin) return;
     const label = target.username ? `@${target.username}` : target.display_name ?? target.id;
@@ -144,6 +174,12 @@ export function AdminPanel() {
       setTab("accounts");
     }
   };
+
+  if (!isAdmin && isVendor && settings.vendor_portal_enabled) {
+    return <AdminVendorPortal />;
+  }
+
+  const tabs = adminTabs;
 
   return (
     <div className="relative min-h-screen">
@@ -206,7 +242,7 @@ export function AdminPanel() {
         )}
 
         <div className="mb-6 flex flex-wrap gap-1 border-b border-[var(--border)]">
-          {TABS.map((item) => (
+          {tabs.map((item) => (
             <button
               key={item.id}
               type="button"
@@ -265,10 +301,13 @@ export function AdminPanel() {
                   storageByUser={storageByUser}
                   onGenerate={() => void generateAccount()}
                   onDelete={(target) => void deleteUser(target)}
+                  onTogglePremiumSync={(target, enabled) => void togglePremiumSync(target, enabled)}
                   onInspect={setModulesUser}
                 />
               </>
             )}
+
+            {tab === "vendors" && <AdminVendors onChanged={() => void load()} />}
 
             {tab === "settings" && (
               <AdminSiteSettings onSaved={() => void load()} />

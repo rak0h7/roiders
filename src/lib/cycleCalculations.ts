@@ -2,6 +2,12 @@ import { differenceInDays, addWeeks, addDays } from "date-fns";
 import type { CycleCompound } from "@/lib/cycleTypes";
 import { getCompoundById } from "@/data/compounds";
 import type { FrequencyPattern } from "@/data/frequencies";
+import {
+  findSaturationWeek,
+  getSaturationProfile,
+  percentOfSaturation,
+  usesClassicSaturation,
+} from "@/lib/saturation";
 
 export interface CycleStats {
   weeks: number;
@@ -301,32 +307,82 @@ export interface PKCardData {
   id: string;
   short: string;
   peak: number;
-  steady: number;
+  level: number;
   peakW: string;
-  steadyW: string;
+  levelW: string;
+  saturationWeek: number;
+  saturationPct: number | null;
+  saturated: boolean;
+  halfLifeLabel: string;
+  saturationEta: string;
+  saturationNote?: string;
   color: string;
 }
 
 export function generatePKCards(weeks: number, compounds: CycleCompound[]): PKCardData[] {
   const data = generatePKData(weeks, compounds);
-  return compounds.map((cc) => {
+  const cards: PKCardData[] = [];
+  compounds.forEach((cc) => {
     const compound = getCompoundById(cc.compoundId);
-    if (!compound) return null;
+    if (!compound) return;
     const values = data.map((d) => (d[cc.id] as number) ?? 0);
     const peak = Math.max(...values);
     const peakIdx = values.indexOf(peak);
-    const activeEnd = cc.activeWeeks[1];
-    const steady = values[Math.min(activeEnd, weeks)] ?? values[values.length - 1] ?? 0;
-    return {
+    const evalWeek = Math.min(cc.activeWeeks[1], weeks);
+    const level = values[evalWeek] ?? values[values.length - 1] ?? 0;
+    const profile = getSaturationProfile(cc.compoundId);
+    const weeklyInput = weeklyDoseAmount(cc) * (compound.pkMultiplier ?? 1);
+    const halfLife = compound.halfLife ?? 1;
+
+    let saturationWeek = evalWeek;
+    let saturationPct: number | null = null;
+    let saturated = false;
+
+    if (usesClassicSaturation(cc.compoundId) && weeklyInput > 0) {
+      const result = findSaturationWeek(
+        cc.activeWeeks[0],
+        cc.activeWeeks[1],
+        weeklyInput,
+        halfLife,
+        weeks
+      );
+      saturationWeek = result.saturationWeek;
+      saturationPct = percentOfSaturation(level, result.steadyState);
+      saturated = evalWeek >= result.saturationWeek && result.saturated;
+    }
+
+    cards.push({
       id: cc.id,
       short: entryLabel(cc),
       peak: Math.round(peak * 10) / 10,
-      steady: Math.round(steady * 10) / 10,
+      level: Math.round(level * 10) / 10,
       peakW: `W${peakIdx}`,
-      steadyW: `W${activeEnd}`,
+      levelW: `W${evalWeek}`,
+      saturationWeek,
+      saturationPct,
+      saturated,
+      halfLifeLabel: profile.halfLifeDisplay,
+      saturationEta: profile.timeToSaturation,
+      saturationNote: profile.note,
       color: compound.color,
-    };
-  }).filter((c): c is PKCardData => c !== null);
+    });
+  });
+  return cards;
+}
+
+export function getSaturationMarkers(
+  weeks: number,
+  compounds: CycleCompound[]
+): { id: string; week: number; label: string; color: string }[] {
+  const cards = generatePKCards(weeks, compounds);
+  return cards
+    .filter((c) => c.saturationWeek <= weeks && c.saturationPct !== null)
+    .map((c) => ({
+      id: c.id,
+      week: c.saturationWeek,
+      label: `Sat W${c.saturationWeek}`,
+      color: c.color,
+    }));
 }
 
 export function generateStackedLoadData(weeks: number, compounds: CycleCompound[]) {

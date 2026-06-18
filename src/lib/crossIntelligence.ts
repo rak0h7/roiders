@@ -185,7 +185,7 @@ export function generateCrossAlerts(
       severity: "info",
       title: "Bloodwork logged — no cycle planned",
       message: "Lab values are on file. Plan your cycle to get cross-module risk analysis.",
-      recommendation: "Open the cycle planner to build your stack and see PK projections.",
+      recommendation: "Open the cycle planner to build your stack and see saturation projections.",
       route: "cycle-planner",
     });
   }

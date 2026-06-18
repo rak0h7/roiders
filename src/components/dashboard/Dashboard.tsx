@@ -31,7 +31,7 @@ export function Dashboard() {
     <div className="space-y-4">
       <div className={`${ui.cardProtocol} ${ui.cardPad} pb-0 sm:pb-0`}>
         <p className={ui.overline}>Cycle Analytics</p>
-        <p className={`${ui.sectionSub} mb-4`}>Visualize pharmacokinetics, load, and risk across your stack</p>
+        <p className={`${ui.sectionSub} mb-4`}>Saturation curves, weekly load, and risk across your stack</p>
         <DashboardNav />
       </div>
       <View />

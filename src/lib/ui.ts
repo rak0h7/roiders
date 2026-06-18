@@ -31,11 +31,11 @@ export const ui = {
     "h-[var(--control-height-xs)] w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-surface)] px-2 text-xs text-[var(--muted)] focus:border-[var(--labs)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--labs)]/15",
 
   btnPrimary:
-    "btn-hover inline-flex h-[var(--control-height)] items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 text-sm font-semibold text-white shadow-[0_4px_20px_var(--labs-glow)] active:scale-[0.98] [background:var(--gradient-primary)]",
+    "btn-hover inline-flex h-[var(--control-height)] items-center justify-center gap-2 rounded-[var(--radius-md)] px-5 text-sm font-semibold text-[var(--text-on-labs)] shadow-[0_4px_20px_var(--labs-glow)] active:scale-[0.98] [background:var(--gradient-primary)]",
   btnProtocol:
-    "btn-hover inline-flex h-[var(--control-height)] items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--protocol)] px-5 text-sm font-semibold text-[var(--bg-base)] shadow-[0_4px_16px_var(--protocol-glow)] active:scale-[0.98]",
+    "btn-hover inline-flex h-[var(--control-height)] items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--protocol)] px-5 text-sm font-semibold text-[var(--text-on-protocol)] shadow-[0_4px_16px_var(--protocol-glow)] active:scale-[0.98]",
   btnProtocolSm:
-    "btn-hover inline-flex h-[var(--control-height-xs)] items-center justify-center gap-1.5 rounded-[var(--radius-sm)] bg-[var(--protocol)] px-4 text-xs font-bold uppercase text-[var(--bg-base)] shadow-[0_2px_12px_var(--protocol-glow)] active:scale-[0.98]",
+    "btn-hover inline-flex h-[var(--control-height-xs)] items-center justify-center gap-1.5 rounded-[var(--radius-sm)] bg-[var(--protocol)] px-4 text-xs font-bold uppercase text-[var(--text-on-protocol)] shadow-[0_2px_12px_var(--protocol-glow)] active:scale-[0.98]",
   btnSecondary:
     "btn-hover inline-flex h-[var(--control-height)] items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--border-strong)] glass px-4 text-sm font-medium text-[var(--foreground)] hover:bg-[var(--bg-hover)]",
   btnGhost:
@@ -50,11 +50,11 @@ export const ui = {
     "inline-flex h-[var(--control-height-micro)] w-[var(--control-height-micro)] shrink-0 items-center justify-center rounded-[var(--radius-sm)] p-0 text-[var(--muted)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--foreground)]",
 
   pillActive:
-    "btn-hover inline-flex h-[var(--control-height-sm)] items-center justify-center rounded-full px-4 text-xs font-semibold text-white shadow-[0_2px_12px_var(--labs-glow)] [background:var(--gradient-primary)]",
+    "btn-hover inline-flex h-[var(--control-height-sm)] items-center justify-center rounded-full px-4 text-xs font-semibold text-[var(--text-on-labs)] shadow-[0_2px_12px_var(--labs-glow)] [background:var(--gradient-primary)]",
   pillInactive:
     "btn-hover inline-flex h-[var(--control-height-sm)] items-center justify-center rounded-full border border-[var(--border)] glass px-4 text-xs font-medium text-[var(--muted)] hover:border-[var(--accent)]/30 hover:text-[var(--foreground)]",
   pillProtocolActive:
-    "inline-flex h-[var(--control-height-sm)] items-center justify-center rounded-full bg-[var(--protocol)] px-4 text-xs font-semibold text-[var(--bg-base)] shadow-[0_2px_12px_var(--protocol-glow)]",
+    "inline-flex h-[var(--control-height-sm)] items-center justify-center rounded-full bg-[var(--protocol)] px-4 text-xs font-semibold text-[var(--text-on-protocol)] shadow-[0_2px_12px_var(--protocol-glow)]",
   tabInactive:
     "inline-flex h-[var(--control-height-sm)] shrink-0 items-center justify-center whitespace-nowrap rounded-full px-4 text-xs font-semibold text-[var(--muted)] transition hover:text-[var(--foreground)]",
 

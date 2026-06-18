@@ -21,10 +21,18 @@ function useClientMounted(): boolean {
   );
 }
 
-export function SiteAnnouncement() {
+type SiteAnnouncementProps = {
+  audience?: "signed-in" | "guest";
+};
+
+export function SiteAnnouncement({ audience = "signed-in" }: SiteAnnouncementProps) {
   const { settings } = useSiteConfig();
   const mounted = useClientMounted();
-  const enabled = settings.announcement_enabled && settings.announcement_message.trim().length > 0;
+  const guestOk = audience === "guest" && settings.announcement_guest_visible;
+  const enabled =
+    settings.announcement_enabled &&
+    settings.announcement_message.trim().length > 0 &&
+    (audience === "signed-in" || guestOk);
   const token = enabled ? `${settings.updated_at}:${settings.announcement_message}` : "";
   const [manualDismiss, setManualDismiss] = useState(false);
 

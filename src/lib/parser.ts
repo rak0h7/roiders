@@ -1,33 +1,126 @@
 import { MARKERS } from "./markers";
 import type { ExtractedMarker } from "./types";
 import { getLabStatus } from "./ranges";
-import { normalizeToDefaultUnit } from "./units";
+import { normalizeToDefaultUnit, normalizeUnitString } from "./units";
 
 function normalizeAlias(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[®™]/g, "")
+    .replace(/[^a-z0-9]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function findMarker(name: string) {
   const normalized = normalizeAlias(name);
+  if (!normalized || normalized.length < 2) return null;
+
+  let best: (typeof MARKERS)[number] | null = null;
+  let bestScore = 0;
+
   for (const marker of MARKERS) {
-    if (normalizeAlias(marker.name) === normalized) return marker;
-    for (const alias of marker.aliases) {
-      if (normalizeAlias(alias) === normalized) return marker;
-      if (normalized.includes(normalizeAlias(alias)) || normalizeAlias(alias).includes(normalized)) {
-        return marker;
+    const candidates = [marker.name, ...marker.aliases];
+    for (const alias of candidates) {
+      const aliasNorm = normalizeAlias(alias);
+      if (!aliasNorm) continue;
+
+      if (aliasNorm === normalized) return marker;
+
+      if (normalized.startsWith(aliasNorm) || aliasNorm.startsWith(normalized)) {
+        const score = aliasNorm.length;
+        if (score > bestScore) {
+          best = marker;
+          bestScore = score;
+        }
       }
     }
   }
-  return null;
-}
 
-const VALUE_PATTERN =
-  /([A-Za-z][A-Za-z0-9\s\-\/\(\)\.]+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s*([a-zA-Z%µ\/\^0-9²³]+)?/g;
+  return bestScore >= 4 ? best : null;
+}
 
 const DATE_PATTERN = /(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/;
 
+const UNIT_PATTERN =
+  /(?:%|ratio|mmol\/L|µmol\/L|umol\/L|nmol\/L|pmol\/L|mg\/dL|ng\/dL|ng\/mL|pg\/mL|g\/dL|g\/L|U\/L|IU\/L|mIU\/L|µIU\/mL|mEq\/L|mmol\/mol|mL\/min\/1\.73m²|K\/µL|M\/µL|x10\^\d+\/L|x10\^\d+\/µL|fL|pg|mg\/L|IU\/mL|kU\/L)/i;
+
+function parseNumericValue(raw: string): number | null {
+  const cleaned = raw.replace(/[<>≤≥\s]/g, "").replace(",", ".");
+  const value = parseFloat(cleaned);
+  return Number.isFinite(value) ? value : null;
+}
+
+function extractUnitFromTail(tail: string): string | undefined {
+  const unitMatch = tail.match(UNIT_PATTERN);
+  return unitMatch ? normalizeUnitString(unitMatch[0]) : undefined;
+}
+
+function tryParseLine(line: string, reportDate: string, seen: Set<string>): ExtractedMarker | null {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.length < 4) return null;
+
+  const patterns: RegExp[] = [
+    /^(.+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s+([^\d\s].+)$/i,
+    /^(.+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s*(%)\s*$/i,
+    /^(.+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s*$/i,
+    /^(.+?)\t+([<>≤≥]?\s*[\d.,]+)\s*(.*)$/i,
+    /^(.+?)\s{2,}([<>≤≥]?\s*[\d.,]+)\s*(.*)$/i,
+  ];
+
+  for (const pattern of patterns) {
+    const match = trimmed.match(pattern);
+    if (!match) continue;
+
+    let name = match[1].trim().replace(/^[\-›•*\s]+/, "").replace(/:+$/, "").trim();
+    name = name.replace(/\s*\(.*?\)\s*$/, "").trim();
+    if (!name || /^(test|result|value|reference|range|unit|flag)$/i.test(name)) continue;
+
+    const value = parseNumericValue(match[2]);
+    if (value === null) continue;
+
+    const marker = findMarker(name);
+    if (!marker || seen.has(marker.id)) continue;
+
+    const unitFromMatch = match[3] ? extractUnitFromTail(match[3]) : undefined;
+    const unit = unitFromMatch || marker.defaultUnit;
+    const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
+    const labStatus = getLabStatus(marker, normalized.value, normalized.unit);
+
+    seen.add(marker.id);
+    return {
+      id: `${marker.id}-${Date.now()}-${seen.size}`,
+      markerId: marker.id,
+      name: marker.name,
+      value: normalized.value,
+      unit: normalized.unit,
+      sourceValue: normalized.sourceValue,
+      sourceUnit: normalized.sourceUnit,
+      converted: normalized.converted,
+      date: reportDate,
+      labStatus,
+      selected: labStatus !== "lab-normal",
+      needsReview: labStatus !== "lab-normal",
+    };
+  }
+
+  return null;
+}
+
+export function preprocessLabText(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/\u00a0/g, " ")
+    .replace(/[–—]/g, "-")
+    .replace(/(\d)\s+(\d)/g, "$1$2")
+    .split("\n")
+    .map((line) => line.replace(/\s{2,}/g, "\t").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function parseLabText(text: string, defaultDate?: string): ExtractedMarker[] {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  const lines = preprocessLabText(text).split("\n");
   const results: ExtractedMarker[] = [];
   const seen = new Set<string>();
   let reportDate = defaultDate ?? new Date().toLocaleDateString("en-GB");
@@ -36,78 +129,23 @@ export function parseLabText(text: string, defaultDate?: string): ExtractedMarke
     const dateMatch = line.match(DATE_PATTERN);
     if (dateMatch) reportDate = dateMatch[1];
 
-    const patterns = [
-      /^(.+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s+([a-zA-Z%µ\/\^0-9²³\.]+)$/,
-      /^(.+?)[\s:,]+([<>≤≥]?\s*[\d.,]+)$/,
-      /(.+?)\s+([<>≤≥]?\s*[\d.,]+)\s+([a-zA-Z%µ\/\^0-9²³\.]+)/,
-    ];
-
-    for (const pattern of patterns) {
-      const match = line.match(pattern);
-      if (!match) continue;
-
-      const name = match[1].trim().replace(/^[\-›\s]+/, "");
-      const rawValue = match[2].replace(/[<>≤≥\s]/g, "").replace(",", ".");
-      const value = parseFloat(rawValue);
-      if (isNaN(value)) continue;
-
-      const marker = findMarker(name);
-      if (!marker || seen.has(marker.id)) continue;
-
-      const unit = match[3]?.trim() || marker.defaultUnit;
-      const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
-      const labStatus = getLabStatus(marker, value, unit);
-
-      seen.add(marker.id);
-      results.push({
-        id: `${marker.id}-${Date.now()}-${results.length}`,
-        markerId: marker.id,
-        name: marker.name,
-        value: normalized.value,
-        unit: normalized.unit,
-        sourceValue: normalized.sourceValue,
-        sourceUnit: normalized.sourceUnit,
-        converted: normalized.converted,
-        date: reportDate,
-        labStatus,
-        selected: labStatus !== "lab-normal",
-        needsReview: labStatus !== "lab-normal",
-      });
-      break;
-    }
+    const parsed = tryParseLine(line, reportDate, seen);
+    if (parsed) results.push(parsed);
   }
 
   if (results.length === 0) {
+    const blob = preprocessLabText(text).replace(/\n/g, " ");
+    const fallbackPattern =
+      /([A-Za-z][A-Za-z0-9\s\-\/\(\)\.]{2,40}?)[\s:,]+([<>≤≥]?\s*[\d.,]+)\s*([A-Za-z%µ\/\^0-9²³\.]+)?/g;
     let match: RegExpExecArray | null;
-    const globalPattern = new RegExp(VALUE_PATTERN.source, "g");
-    while ((match = globalPattern.exec(text)) !== null) {
-      const name = match[1].trim();
-      const rawValue = match[2].replace(/[<>≤≥\s]/g, "").replace(",", ".");
-      const value = parseFloat(rawValue);
-      if (isNaN(value)) continue;
 
-      const marker = findMarker(name);
-      if (!marker || seen.has(marker.id)) continue;
-
-      const unit = match[3]?.trim() || marker.defaultUnit;
-      const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
-      const labStatus = getLabStatus(marker, value, unit);
-
-      seen.add(marker.id);
-      results.push({
-        id: `${marker.id}-${Date.now()}-${results.length}`,
-        markerId: marker.id,
-        name: marker.name,
-        value: normalized.value,
-        unit: normalized.unit,
-        sourceValue: normalized.sourceValue,
-        sourceUnit: normalized.sourceUnit,
-        converted: normalized.converted,
-        date: reportDate,
-        labStatus,
-        selected: true,
-        needsReview: labStatus !== "lab-normal",
-      });
+    while ((match = fallbackPattern.exec(blob)) !== null) {
+      const parsed = tryParseLine(
+        `${match[1]} ${match[2]}${match[3] ? ` ${match[3]}` : ""}`,
+        reportDate,
+        seen
+      );
+      if (parsed) results.push(parsed);
     }
   }
 
@@ -126,16 +164,15 @@ export function parseCSV(text: string): ExtractedMarker[] {
     if (i === 0 && /marker|test|name/i.test(parts[0])) continue;
 
     const name = parts[0];
-    const rawValue = parts[1].replace(",", ".");
-    const value = parseFloat(rawValue);
-    if (isNaN(value)) continue;
+    const value = parseNumericValue(parts[1]);
+    if (value === null) continue;
 
     const marker = findMarker(name);
     if (!marker || seen.has(marker.id)) continue;
 
-    const unit = parts[2] || marker.defaultUnit;
+    const unit = parts[2] ? normalizeUnitString(parts[2]) : marker.defaultUnit;
     const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
-    const labStatus = getLabStatus(marker, value, unit);
+    const labStatus = getLabStatus(marker, normalized.value, normalized.unit);
 
     seen.add(marker.id);
     results.push({

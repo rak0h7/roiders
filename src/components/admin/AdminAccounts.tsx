@@ -17,6 +17,7 @@ type AdminAccountsProps = {
   onGenerate: () => void;
   onDelete: (user: AdminUser) => void;
   onInspect: (user: AdminUser) => void;
+  onTogglePremiumSync: (user: AdminUser, enabled: boolean) => void;
 };
 
 export function AdminAccounts({
@@ -29,6 +30,7 @@ export function AdminAccounts({
   onGenerate,
   onDelete,
   onInspect,
+  onTogglePremiumSync,
 }: AdminAccountsProps) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "synced" | "pending" | "admin">("all");
@@ -120,7 +122,8 @@ export function AdminAccounts({
             <tr className="border-b border-[var(--border)] text-[11px] uppercase tracking-wider text-[var(--muted)]">
               <th className="px-4 py-3 font-medium">Account</th>
               <th className="px-4 py-3 font-medium">Created</th>
-              <th className="px-4 py-3 font-medium">Cloud</th>
+              <th className="px-4 py-3 font-medium">Premium</th>
+              <th className="px-4 py-3 font-medium">Cloud data</th>
               <th className="px-4 py-3 font-medium">Modules</th>
               <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium" />
@@ -147,6 +150,28 @@ export function AdminAccounts({
                   </td>
                   <td className="px-4 py-3 font-mono text-xs text-[var(--muted)]">
                     {new Date(row.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    {row.is_admin ? (
+                      <span className="rounded-full bg-[var(--labs-dim)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--labs)]">
+                        Owner
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={busyId === row.id}
+                        onClick={() => onTogglePremiumSync(row, !row.premium_sync_enabled)}
+                        className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition",
+                          row.premium_sync_enabled
+                            ? "bg-[var(--success)]/15 text-[var(--success)] hover:bg-[var(--success)]/25"
+                            : "bg-[var(--bg-elevated)] text-[var(--muted)] hover:text-[var(--foreground)]",
+                        )}
+                        title={row.premium_sync_enabled ? "Disable premium sync" : "Enable premium sync"}
+                      >
+                        {row.premium_sync_enabled ? "Sync on" : "Local only"}
+                      </button>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     {bytes > 0 ? (

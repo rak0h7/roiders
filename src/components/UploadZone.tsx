@@ -1,39 +1,26 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
+import { useLabFilePicker } from "@/components/labs/useLabFilePicker";
+import { isMobileDevice } from "@/lib/device";
+import { LAB_UPLOAD_ACCEPT } from "@/lib/labUpload";
 import { SAMPLE_LAB_TEXT } from "@/lib/parser";
 import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
-import { Droplet, FileText } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { Droplet, FileText, ImageIcon, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function UploadZone() {
-  const { parseAndExtract, handleFileUpload } = useApp();
+  const { parseAndExtract } = useApp();
+  const { fileRef, parsing, onInputChange, onDrop, pickPhotos, pickDocument } = useLabFilePicker();
   const [pasteText, setPasteText] = useState("");
   const [showPaste, setShowPaste] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  const onDrop = useCallback(
-    async (e: React.DragEvent) => {
-      e.preventDefault();
-      const file = e.dataTransfer.files[0];
-      if (file) await handleFileUpload(file);
-    },
-    [handleFileUpload]
-  );
-
-  const onFileSelect = async (accept: string) => {
-    if (!fileRef.current) return;
-    fileRef.current.accept = accept;
-    fileRef.current.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) await handleFileUpload(file);
-    e.target.value = "";
-  };
+  useEffect(() => {
+    setIsMobile(isMobileDevice());
+  }, []);
 
   return (
     <Panel
@@ -42,7 +29,13 @@ export function UploadZone() {
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
     >
-      <input ref={fileRef} type="file" className="hidden" onChange={handleFileChange} />
+      <input
+        ref={fileRef}
+        type="file"
+        className="hidden"
+        accept={LAB_UPLOAD_ACCEPT}
+        onChange={onInputChange}
+      />
 
       <div className="mb-4 text-center">
         <Droplet
@@ -51,11 +44,23 @@ export function UploadZone() {
         />
         <h3 className="mt-2 font-display text-lg font-semibold text-[var(--foreground)]">Drop Your Blood Test</h3>
         <p className="mt-1 text-xs text-[var(--muted)]">
-          Upload your lab report PDF and we&apos;ll extract every marker value automatically — or paste your results below
+          Upload a PDF, add screenshots from your camera roll, or paste results below — we&apos;ll extract marker values automatically
         </p>
       </div>
 
       <div className="mb-4 flex flex-wrap justify-center gap-2">
+        <button
+          onClick={pickPhotos}
+          disabled={parsing}
+          className={cn(
+            ui.btnToolbar,
+            "border-[var(--labs)]/40 bg-[var(--labs-dim)] uppercase tracking-wider text-[var(--labs)] hover:border-[var(--labs)]/60",
+            isMobile && "order-first"
+          )}
+        >
+          {parsing ? <Loader2 className="mr-1 inline h-3 w-3 animate-spin" /> : <ImageIcon className="mr-1 inline h-3 w-3" />}
+          Photos
+        </button>
         {[
           { label: "PDF", accept: ".pdf" },
           { label: "TXT", accept: ".txt" },
@@ -63,7 +68,8 @@ export function UploadZone() {
         ].map((btn) => (
           <button
             key={btn.label}
-            onClick={() => onFileSelect(btn.accept)}
+            onClick={() => pickDocument(btn.accept)}
+            disabled={parsing}
             className={cn(
               ui.btnToolbar,
               "border-[var(--labs)]/30 bg-[var(--labs-dim)] uppercase tracking-wider text-[var(--labs)] hover:border-[var(--labs)]/50"
@@ -74,11 +80,18 @@ export function UploadZone() {
         ))}
         <button
           onClick={() => setShowPaste(!showPaste)}
+          disabled={parsing}
           className={cn(ui.btnToolbar, "uppercase tracking-wider")}
         >
           Paste Text
         </button>
       </div>
+
+      {isMobile && (
+        <p className="mb-4 text-center text-[11px] text-[var(--muted)]">
+          Tap Photos to pick multiple screenshots from your camera roll
+        </p>
+      )}
 
       {(showPaste || pasteText) && (
         <div className="space-y-2">

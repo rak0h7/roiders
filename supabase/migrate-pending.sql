@@ -49,5 +49,62 @@ update public.site_settings
 set allow_public_signup = false, max_accounts = 50
 where id = 1 and allow_public_signup = true and max_accounts = 0;
 
+-- 5) Vendors (approved resellers)
+alter table public.profiles add column if not exists is_vendor boolean not null default false;
+alter table public.profiles add column if not exists issued_by_vendor_id uuid;
+
+create table if not exists public.vendors (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null unique references auth.users (id) on delete cascade,
+  name text not null,
+  contact_url text not null default '',
+  key_quota int not null default 0,
+  keys_issued int not null default 0,
+  enabled boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists vendors_profile_id_idx on public.vendors (profile_id);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'profiles_issued_by_vendor_id_fkey'
+  ) then
+    alter table public.profiles
+      add constraint profiles_issued_by_vendor_id_fkey
+      foreign key (issued_by_vendor_id) references public.vendors (id) on delete set null;
+  end if;
+end $$;
+
+create index if not exists profiles_issued_by_vendor_id_idx on public.profiles (issued_by_vendor_id)
+  where issued_by_vendor_id is not null;
+
+alter table public.vendors enable row level security;
+
+-- Free product defaults for new installs
+update public.site_settings
+set allow_public_signup = true
+where id = 1 and allow_public_signup = false and max_accounts = 50;
+
+-- 6) Per-user premium cloud sync (off by default for new accounts)
+alter table public.profiles add column if not exists premium_sync_enabled boolean not null default false;
+
+-- Existing site admins keep sync; everyone else starts local-only until upgraded
+update public.profiles
+set premium_sync_enabled = true
+where is_admin = true;
+
+-- 7) Extended site settings (admin panel)
+alter table public.site_settings add column if not exists public_landing_enabled boolean not null default true;
+alter table public.site_settings add column if not exists premium_sources_enabled boolean not null default true;
+alter table public.site_settings add column if not exists vendor_portal_enabled boolean not null default true;
+alter table public.site_settings add column if not exists default_labs_range_mode text not null default 'optimized';
+alter table public.site_settings add column if not exists legal_contact_email text not null default '';
+alter table public.site_settings add column if not exists signup_closed_message text not null default '';
+alter table public.site_settings add column if not exists site_description text not null default '';
+alter table public.site_settings add column if not exists announcement_guest_visible boolean not null default false;
+
 -- Refresh PostgREST schema cache (safe to run; no-op if already current)
 notify pgrst, 'reload schema';

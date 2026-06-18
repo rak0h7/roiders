@@ -17,7 +17,7 @@ import { ui } from "@/lib/ui";
 
 const TABS = [
   { id: "calendar", label: "Calendar", icon: Calendar },
-  { id: "pk-curves", label: "PK Curves", icon: LineChart },
+  { id: "pk-curves", label: "Saturation", icon: LineChart },
   { id: "heatmap", label: "Heatmap", icon: Flame },
   { id: "stacked", label: "Stacked Load", icon: BarChart3 },
   { id: "risk", label: "Risk Radar", icon: Radar },

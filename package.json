@@ -16,7 +16,9 @@
     "db:migrate:print": "node scripts/apply-migrations.mjs --print-sql",
     "db:bootstrap": "node scripts/post-migrate-bootstrap.mjs",
     "deploy": "vercel --prod --yes",
-    "deploy:preview": "vercel --yes"
+    "deploy:preview": "vercel --yes",
+    "assets:tiktok": "node scripts/generate-tiktok-assets.mjs",
+    "assets:avatar": "node scripts/generate-profile-avatar.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
@@ -32,6 +34,7 @@
     "react-dom": "19.2.4",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.6.0",
+    "tesseract.js": "^6.0.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
@@ -43,6 +46,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "pg": "^8.21.0",
+    "playwright": "^1.61.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vercel": "^54.14.1",

@@ -127,13 +127,20 @@ export function buildCycleReviewFlags(
     if (!marker) continue;
 
     const names = [...compoundIds].map(compoundLabel);
+    const aromatizerNoAi =
+      markerId === "estradiol" && hasAromatizer(compounds) && !hasEstrogenControl(compounds);
+
     flags.push({
       markerId: `cycle-watch-${markerId}`,
       name: `${marker.name} — not on panel`,
       date,
       severity: "yellow",
-      deviation: `${names.join(", ")} on your stack — ${COMPOUND_MONITOR_MARKERS[[...compoundIds][0]]?.note ?? "monitor on-cycle."}`,
-      recommendation: `Add ${marker.name.toLowerCase()} to your panel for stack-aware monitoring.`,
+      deviation: aromatizerNoAi
+        ? "Aromatizing compounds on stack with no estrogen control ancillary logged."
+        : `${names.join(", ")} on your stack — ${COMPOUND_MONITOR_MARKERS[[...compoundIds][0]]?.note ?? "monitor on-cycle."}`,
+      recommendation: aromatizerNoAi
+        ? "Monitor estradiol every 4–6 weeks; add an AI to your stack if E2 climbs."
+        : `Add ${marker.name.toLowerCase()} to your panel for stack-aware monitoring.`,
       noDosing: true,
       source: "cycle",
       relatedCompounds: [...compoundIds],
@@ -153,25 +160,6 @@ export function buildCycleReviewFlags(
       source: "cycle",
       relatedCompounds: compounds
         .filter((c) => getCompoundById(c.compoundId)?.hepatotoxic)
-        .map((c) => c.compoundId),
-    });
-  }
-
-  if (hasAromatizer(compounds) && !hasEstrogenControl(compounds) && !onPanel.has("estradiol")) {
-    flags.push({
-      markerId: "cycle-watch-estradiol-control",
-      name: "Estradiol — not on panel",
-      date,
-      severity: "yellow",
-      deviation: "Aromatizing compounds on stack with no estrogen control ancillary logged.",
-      recommendation: "Monitor estradiol every 4–6 weeks; add an AI to your stack if E2 climbs.",
-      noDosing: true,
-      source: "cycle",
-      relatedCompounds: compounds
-        .filter((c) => {
-          const def = getCompoundById(c.compoundId);
-          return def?.tags.includes("Test") || def?.id.startsWith("test-") || def?.id === "dbol";
-        })
         .map((c) => c.compoundId),
     });
   }
@@ -248,17 +236,22 @@ export function buildCycleReviewFlags(
   if (hctFlag && compounds.length > 0) {
     const linked = compoundsLinkedToMarker(hctFlag.markerId, compounds);
     if (linked.length > 0) {
+      const criticalHct = hctFlag.markerId === "hematocrit" && (hctFlag.value ?? 0) >= 52;
       flags.push({
         markerId: "cycle-stack-polycythemia",
-        name: "Elevated hematocrit / hemoglobin",
+        name: criticalHct ? "Critical hematocrit — stop androgens" : "Elevated hematocrit / hemoglobin",
         value: hctFlag.value,
         unit: hctFlag.unit,
         date,
-        severity: hctFlag.severity === "stop" || hctFlag.severity === "high" ? "high" : "yellow",
+        severity: criticalHct || hctFlag.severity === "stop" ? "stop" : hctFlag.severity === "high" ? "high" : "yellow",
         labRange: hctFlag.labRange,
         optimalRange: hctFlag.optimalRange,
-        deviation: "Polycythemia risk is elevated — common with testosterone and EQ cycles.",
-        recommendation: "Schedule therapeutic phlebotomy, increase cardio, and monitor CBC weekly.",
+        deviation: criticalHct
+          ? "Hematocrit is at or above 52% — major cardiovascular risk on an androgen stack."
+          : "Polycythemia risk is elevated — common with testosterone and EQ cycles.",
+        recommendation: criticalHct
+          ? "Reduce or stop androgen dose immediately. Book therapeutic phlebotomy, stay hydrated, and recheck CBC within a week."
+          : "Schedule therapeutic phlebotomy, increase cardio, and monitor CBC weekly.",
         noDosing: true,
         source: "cycle",
         relatedCompounds: linked.map((c) => c.compoundId),

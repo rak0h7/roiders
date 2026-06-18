@@ -18,6 +18,22 @@ describe("resolveFlagForMarker", () => {
     const map = new Map(flags.map((f) => [f.markerId, f]));
     expect(resolveFlagForMarker("prolactin", map)?.source).toBe("cycle");
   });
+
+  it("resolves legacy estradiol control flag ids", () => {
+    const flags: ReviewFlag[] = [
+      {
+        markerId: "cycle-watch-estradiol-control",
+        name: "Estradiol — not on panel",
+        date: "2026-01-01",
+        severity: "yellow",
+        deviation: "No AI logged",
+        noDosing: true,
+        source: "cycle",
+      },
+    ];
+    const map = new Map(flags.map((f) => [f.markerId, f]));
+    expect(resolveFlagForMarker("estradiol", map)?.deviation).toBe("No AI logged");
+  });
 });
 
 describe("categoryBreakdown", () => {

@@ -4,15 +4,34 @@ import Link from "next/link";
 import { useState } from "react";
 import { AtSign, Cloud, LogIn, LogOut, RefreshCw, Shield } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { useToast } from "@/context/ToastContext";
+import { PREMIUM_SYNC_REQUIRED_MESSAGE } from "@/lib/cloudSyncAccess";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
+function requestHref(supportUrl: string) {
+  return supportUrl.trim() || "mailto:support@roiders.club?subject=Premium%20sync%20request";
+}
+
 export function AccountSettings() {
   const {
-    configured, user, username, accountName, isAdmin, loading, signOut, syncNow, syncStatus,
-    syncConflicts, resolveConflict, setUsername,
+    configured,
+    user,
+    username,
+    accountName,
+    isAdmin,
+    canCloudSync,
+    premiumSyncEnabled,
+    loading,
+    signOut,
+    syncNow,
+    syncStatus,
+    syncConflicts,
+    resolveConflict,
+    setUsername,
   } = useAuth();
+  const { settings } = useSiteConfig();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -113,7 +132,26 @@ export function AccountSettings() {
               </Link>
             )}
 
-            {syncConflicts.length > 0 && (
+            {!canCloudSync && (
+              <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/60 p-3">
+                <p className="text-sm font-medium">Local-only account</p>
+                <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+                  {settings.cloud_sync_enabled
+                    ? PREMIUM_SYNC_REQUIRED_MESSAGE
+                    : "Cloud sync is currently disabled site-wide."}
+                </p>
+                {settings.cloud_sync_enabled && (
+                  <a
+                    href={requestHref(settings.support_url)}
+                    className={cn(ui.btnSecondary, "mt-3 text-xs")}
+                  >
+                    Request premium sync
+                  </a>
+                )}
+              </div>
+            )}
+
+            {canCloudSync && syncConflicts.length > 0 && (
               <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--warning)]/30 bg-[var(--warning)]/5 p-3">
                 <p className="text-xs font-semibold text-[var(--warning)]">Sync conflicts</p>
                 <p className="text-[11px] text-[var(--muted)]">
@@ -154,7 +192,7 @@ export function AccountSettings() {
               </div>
             )}
 
-            {(syncStatus.lastSyncAt || syncStatus.lastError) && (
+            {canCloudSync && (syncStatus.lastSyncAt || syncStatus.lastError) && (
               <p className="text-[11px] text-[var(--muted)]">
                 {syncStatus.syncing
                   ? "Syncing…"
@@ -167,21 +205,28 @@ export function AccountSettings() {
             )}
 
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={syncStatus.syncing}
-                onClick={handleSync}
-                className={cn(ui.btnSecondary, "text-xs")}
-              >
-                <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", syncStatus.syncing && "animate-spin")} />
-                {syncStatus.syncing ? "Syncing…" : "Sync now"}
-              </button>
+              {canCloudSync && (
+                <button
+                  type="button"
+                  disabled={syncStatus.syncing}
+                  onClick={handleSync}
+                  className={cn(ui.btnSecondary, "text-xs")}
+                >
+                  <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", syncStatus.syncing && "animate-spin")} />
+                  {syncStatus.syncing ? "Syncing…" : "Sync now"}
+                </button>
+              )}
               <button type="button" onClick={handleSignOut} className={cn(ui.btnGhost, "text-xs text-[var(--danger)]")}>
                 <LogOut className="mr-1.5 h-3.5 w-3.5" />
                 Sign out
               </button>
             </div>
-            <p className="text-[11px] text-[var(--muted)]">Auto-sync runs every 45 seconds while signed in.</p>
+            {canCloudSync && (
+              <p className="text-[11px] text-[var(--muted)]">
+                Premium sync runs every 45 seconds while signed in.
+                {premiumSyncEnabled && !isAdmin ? " Enabled on your account." : null}
+              </p>
+            )}
           </div>
         ) : (
           <Link href="/auth/login" className={cn(ui.btnPrimary, "inline-flex text-xs")}>

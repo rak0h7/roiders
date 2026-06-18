@@ -36,7 +36,7 @@ Numbered files (`002_admin.sql` … `005_comprehensive_settings.sql`) are histor
 
 ## Deploy (Vercel)
 
-Production: https://roiders.vercel.app
+Production: https://roiders.club
 
 ```bash
 npm run deploy

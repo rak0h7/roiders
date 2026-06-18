@@ -183,7 +183,7 @@ export function NutritionDiary() {
                         className={cn(
                           "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition",
                           entry.checked
-                            ? "border-[var(--protocol)] bg-[var(--protocol)] text-[var(--bg-base)]"
+                            ? "border-[var(--protocol)] bg-[var(--protocol)] text-[var(--text-on-protocol)]"
                             : "border-[var(--border)]"
                         )}
                       >

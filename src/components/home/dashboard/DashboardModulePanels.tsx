@@ -145,11 +145,11 @@ export function DashboardModulePanels({
       </motion.div>
       )}
 
-      {/* Protocol */}
+      {/* Gear */}
       {moduleEnabled("cycle") && (
       <motion.div custom={1} variants={fade} initial="hidden" animate="show" className={cn(ui.cardProtocol, ui.cardPad, "flex h-full flex-col gap-4")}>
         <ModuleHeader
-          title="Protocol"
+          title="Gear"
           status={compounds.length > 0 ? `${weeks}-week cycle active` : "No stack configured"}
           statusColor={compounds.length > 0 ? "text-[var(--success)]" : "text-[var(--muted)]"}
           route="cycle-dashboard"

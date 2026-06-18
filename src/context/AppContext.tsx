@@ -1,13 +1,23 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useSiteConfig } from "@/context/SiteConfigContext";
+import { CLOUD_SYNC_EVENT, labsModuleChanged, type CloudSyncEventDetail } from "@/lib/storeRehydrate";
 import { parseCSV, parseLabText } from "@/lib/parser";
+import { extractTextFromImages } from "@/lib/ocr";
+import { isLabCsv, isLabImage, isLabPdf, normalizeLabUpload } from "@/lib/labUpload";
 import { extractTextFromPDF } from "@/lib/pdf";
 import { buildMergedReviewFlags } from "@/lib/cycleLabFlags";
 import { useCycleStore } from "@/store/cycleStore";
 import { calculateCategoryScores, calculateOverallScore } from "@/lib/scoring";
-import { generateId, hydrateLabsState, loadReports, reportToValuesRecord, saveReports } from "@/lib/storage";
+import {
+  generateId,
+  hasUnsavedLabEdits,
+  hydrateLabsState,
+  loadReports,
+  reportToValuesRecord,
+  saveReports,
+} from "@/lib/storage";
 import type {
   AppState,
   BloodworkReport,
@@ -25,7 +35,7 @@ interface AppContextValue extends AppState {
   setMarkerValue: (markerId: string, value: number | null, unit: string) => void;
   setCurrentValues: (values: Record<string, MarkerValue>) => void;
   parseAndExtract: (text: string, fileName?: string) => void;
-  handleFileUpload: (file: File) => Promise<void>;
+  handleFileUpload: (input: File | File[]) => Promise<void>;
   toggleExtracted: (id: string) => void;
   selectAllCurrent: () => void;
   selectAbnormalOnly: () => void;
@@ -67,7 +77,9 @@ const initialState: AppState = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const { settings: siteSettings } = useSiteConfig();
   const compounds = useCycleStore((s) => s.compounds);
+  const rangeModeUserSet = useRef(false);
   const [state, setState] = useState<AppState>(() => {
     const reports = loadReports();
     const hydrated = hydrateLabsState(reports, null);
@@ -81,16 +93,53 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    const reload = () => {
+    if (rangeModeUserSet.current) return;
+    setState((s) => ({ ...s, rangeMode: siteSettings.default_labs_range_mode }));
+  }, [siteSettings.default_labs_range_mode]);
+
+  useEffect(() => {
+    const reload = (event: Event) => {
+      const detail = (event as CustomEvent<CloudSyncEventDetail>).detail;
+      if (!labsModuleChanged(detail)) return;
+
       setState((s) => {
         const reports = loadReports();
-        const hydrated = hydrateLabsState(reports, s.activeReportId);
+        const activeStillExists = s.activeReportId
+          ? reports.some((r) => r.id === s.activeReportId)
+          : reports.length === 0;
+
+        if (s.activeReportId && activeStillExists && hasUnsavedLabEdits(s.currentValues, reports, s.activeReportId)) {
+          return { ...s, reports };
+        }
+
+        const hydrated = hydrateLabsState(reports, activeStillExists ? s.activeReportId : null);
         return { ...s, reports, ...hydrated };
       });
     };
     window.addEventListener(CLOUD_SYNC_EVENT, reload);
     return () => window.removeEventListener(CLOUD_SYNC_EVENT, reload);
   }, []);
+
+  useEffect(() => {
+    const reconcileRangeMode = () => {
+      if (rangeModeUserSet.current) return;
+      setState((s) => {
+        const next = defaultRangeMode(s.reports);
+        return s.rangeMode === next ? s : { ...s, rangeMode: next };
+      });
+    };
+
+    reconcileRangeMode();
+
+    const onCycleSync = (event: Event) => {
+      const modules = (event as CustomEvent<CloudSyncEventDetail>).detail?.modules;
+      if (modules?.length && !modules.includes("cycle")) return;
+      reconcileRangeMode();
+    };
+
+    window.addEventListener(CLOUD_SYNC_EVENT, onCycleSync);
+    return () => window.removeEventListener(CLOUD_SYNC_EVENT, onCycleSync);
+  }, [compounds.length]);
 
   const setMainTab = useCallback((tab: MainTab) => {
     setState((s) => ({ ...s, mainTab: tab, showComparison: false }));
@@ -105,6 +154,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setRangeMode = useCallback((mode: RangeMode) => {
+    rangeModeUserSet.current = true;
     setState((s) => ({ ...s, rangeMode: mode }));
   }, []);
 
@@ -135,19 +185,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }));
   }, []);
 
-  const handleFileUpload = useCallback(async (file: File) => {
-    let text = "";
-    const ext = file.name.split(".").pop()?.toLowerCase();
+  const handleFileUpload = useCallback(async (input: File | File[]) => {
+    const files = normalizeLabUpload(input);
+    const file = files[0];
+    if (!file) return;
 
-    if (ext === "pdf") {
+    let text = "";
+    let fileName = file.name;
+
+    if (files.length > 1 && files.every(isLabImage)) {
+      text = await extractTextFromImages(files);
+      fileName = `${files.length} photos`;
+    } else if (isLabImage(file)) {
+      text = await extractTextFromImages([file]);
+    } else if (isLabPdf(file)) {
       text = await extractTextFromPDF(file);
-    } else if (ext === "csv") {
+    } else if (isLabCsv(file)) {
       text = await file.text();
       const extracted = parseCSV(text);
       setState((s) => ({
         ...s,
         extractedMarkers: extracted,
-        extractionFileName: file.name,
+        extractionFileName: fileName,
         logView: "extraction",
         mainTab: "log",
       }));
@@ -160,7 +219,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({
       ...s,
       extractedMarkers: extracted,
-      extractionFileName: file.name,
+      extractionFileName: fileName,
       logView: "extraction",
       mainTab: "log",
     }));

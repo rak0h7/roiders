@@ -1,5 +1,5 @@
 import type { BloodworkReport, MarkerValue } from "./types";
-import { LOCAL_STORAGE_KEYS, writeLocalModule } from "./cloudSync";
+import { LEGACY_LOCAL_EPOCH, LOCAL_STORAGE_KEYS, writeLocalModule } from "./cloudSync";
 
 const LEGACY_STORAGE_KEY = "bloodwork-logger-reports";
 
@@ -9,7 +9,7 @@ function migrateLabsStorage(): void {
   const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
   if (!legacy) return;
   try {
-    writeLocalModule("labs", JSON.parse(legacy));
+    writeLocalModule("labs", JSON.parse(legacy), LEGACY_LOCAL_EPOCH, { touchLocal: false });
   } catch {
     return;
   }
@@ -52,6 +52,35 @@ export function pickLatestReport(reports: BloodworkReport[]): BloodworkReport | 
     const bTime = new Date(b.createdAt || b.date).getTime();
     return bTime - aTime;
   })[0];
+}
+
+export function hasUnsavedLabEdits(
+  currentValues: Record<string, MarkerValue>,
+  reports: BloodworkReport[],
+  activeReportId: string | null
+): boolean {
+  if (activeReportId == null) {
+    return Object.keys(currentValues).length > 0;
+  }
+
+  const report = reports.find((r) => r.id === activeReportId);
+  if (!report) {
+    return Object.keys(currentValues).length > 0;
+  }
+
+  const saved = reportToValuesRecord(report);
+  const currentIds = Object.keys(currentValues);
+  const savedIds = Object.keys(saved);
+  if (currentIds.length !== savedIds.length) return true;
+
+  for (const id of currentIds) {
+    const current = currentValues[id];
+    const savedValue = saved[id];
+    if (!savedValue) return true;
+    if (current.value !== savedValue.value || current.unit !== savedValue.unit) return true;
+  }
+
+  return false;
 }
 
 export function hydrateLabsState(

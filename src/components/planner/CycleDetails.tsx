@@ -22,11 +22,11 @@ const INTENSITY_LEVELS = [
 ] as const;
 
 const INTENSITY_COLORS: Record<number, string> = {
-  1: "bg-[var(--success)] text-[var(--bg-base)]",
-  2: "bg-[var(--labs)] text-[var(--bg-base)]",
-  3: "bg-[var(--protocol)] text-[var(--bg-base)]",
-  4: "bg-[var(--warning)] text-[var(--bg-base)]",
-  5: "bg-[var(--intel)] text-[var(--bg-base)]",
+  1: "bg-[var(--success)] text-[var(--text-on-success)]",
+  2: "bg-[var(--labs)] text-[var(--text-on-labs)]",
+  3: "bg-[var(--protocol)] text-[var(--text-on-protocol)]",
+  4: "bg-[var(--warning)] text-[var(--text-on-warning)]",
+  5: "bg-[var(--intel)] text-[var(--text-on-intel)]",
 };
 
 export function CycleDetails() {

@@ -75,9 +75,11 @@ describe("buildCycleReviewFlags", () => {
     expect(flags.some((f) => f.markerId === "cycle-stack-liver-support")).toBe(true);
   });
 
-  it("warns when aromatizing test is on stack without estradiol on panel", () => {
+  it("warns once when aromatizing test is on stack without estradiol on panel", () => {
     const flags = buildCycleReviewFlags(testStack, {}, [], "18/06/2026");
-    expect(flags.some((f) => f.markerId === "cycle-watch-estradiol-control")).toBe(true);
+    const estradiolFlags = flags.filter((f) => f.markerId.startsWith("cycle-watch-estradiol"));
+    expect(estradiolFlags).toHaveLength(1);
+    expect(estradiolFlags[0]?.deviation).toContain("no estrogen control");
   });
 });
 

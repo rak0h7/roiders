@@ -7,6 +7,8 @@ export type UserProfileGate = {
   username: string | null;
   display_name: string | null;
   is_admin: boolean;
+  is_vendor: boolean;
+  premium_sync_enabled: boolean;
   key_fingerprint: string | null;
   usernames_enabled: boolean;
 };
@@ -28,10 +30,14 @@ export function resolveProfileGate(row: Record<string, unknown> | null | undefin
         ? OWNER_DISPLAY_NAME
         : null;
 
+  const is_admin = Boolean(row?.is_admin) || isSiteAdmin;
+
   return {
     username,
     display_name,
-    is_admin: Boolean(row?.is_admin) || isSiteAdmin,
+    is_admin,
+    is_vendor: Boolean(row?.is_vendor),
+    premium_sync_enabled: Boolean(row?.premium_sync_enabled) || isSiteAdmin,
     key_fingerprint,
     usernames_enabled: true,
   };
@@ -84,7 +90,7 @@ export async function loadUserProfile(supabase: any, userId: string): Promise<Us
 
   const full = await supabase
     .from("profiles")
-    .select("username, display_name, is_admin, key_fingerprint")
+    .select("username, display_name, is_admin, is_vendor, premium_sync_enabled, key_fingerprint")
     .eq("id", userId)
     .maybeSingle();
 

@@ -15,6 +15,8 @@ alter table public.profiles add column if not exists display_name text;
 alter table public.profiles add column if not exists created_at timestamptz not null default now();
 alter table public.profiles add column if not exists updated_at timestamptz not null default now();
 alter table public.profiles add column if not exists is_admin boolean not null default false;
+alter table public.profiles add column if not exists is_vendor boolean not null default false;
+alter table public.profiles add column if not exists premium_sync_enabled boolean not null default false;
 alter table public.profiles add column if not exists username text;
 
 create unique index if not exists profiles_username_idx
@@ -39,6 +41,27 @@ create table if not exists public.user_modules (
 );
 
 create index if not exists user_modules_user_id_idx on public.user_modules (user_id);
+
+-- Approved vendors (resellers who issue customer access keys)
+create table if not exists public.vendors (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null unique references auth.users (id) on delete cascade,
+  name text not null,
+  contact_url text not null default '',
+  key_quota int not null default 0,
+  keys_issued int not null default 0,
+  enabled boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists vendors_profile_id_idx on public.vendors (profile_id);
+
+alter table public.profiles add column if not exists issued_by_vendor_id uuid references public.vendors (id) on delete set null;
+create index if not exists profiles_issued_by_vendor_id_idx on public.profiles (issued_by_vendor_id)
+  where issued_by_vendor_id is not null;
+
+alter table public.vendors enable row level security;
 
 -- Unique fingerprint lookup (partial index allows legacy rows without keys)
 create unique index if not exists profiles_key_fingerprint_idx
@@ -102,7 +125,7 @@ create table if not exists public.site_settings (
   site_tagline text not null default 'Private performance tracking',
   maintenance_mode boolean not null default false,
   maintenance_message text not null default 'Roiders Club is undergoing maintenance. Please check back soon.',
-  allow_public_signup boolean not null default false,
+  allow_public_signup boolean not null default true,
   announcement_enabled boolean not null default false,
   announcement_message text not null default '',
   announcement_level text not null default 'info' check (announcement_level in ('info', 'warning', 'danger')),
@@ -118,6 +141,14 @@ create table if not exists public.site_settings (
   module_cycle_enabled boolean not null default true,
   module_gym_enabled boolean not null default true,
   module_nutrition_enabled boolean not null default true,
+  public_landing_enabled boolean not null default true,
+  premium_sources_enabled boolean not null default true,
+  vendor_portal_enabled boolean not null default true,
+  default_labs_range_mode text not null default 'optimized' check (default_labs_range_mode in ('lab', 'optimized')),
+  legal_contact_email text not null default '',
+  signup_closed_message text not null default '',
+  site_description text not null default '',
+  announcement_guest_visible boolean not null default false,
   updated_at timestamptz not null default now(),
   updated_by uuid references auth.users (id) on delete set null
 );

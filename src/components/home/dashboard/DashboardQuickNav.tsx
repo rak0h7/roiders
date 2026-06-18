@@ -27,7 +27,7 @@ const NAV_ITEMS: {
   { icon: Activity, label: "Lab Analysis", desc: "Scores, flags & past logs", route: "bloodwork-insights", accent: "labs", module: "labs" },
   { icon: Blocks, label: "Cycle Builder", desc: "Compose your stack", route: "cycle-planner", accent: "protocol", module: "cycle" },
   { icon: BookOpen, label: "Compound Guides", desc: "Injectables & orals reference", route: "cycle-guides", accent: "protocol", module: "cycle" },
-  { icon: Spline, label: "PK Simulation", desc: "Curves & risk radar", route: "cycle-dashboard", accent: "protocol", module: "cycle" },
+  { icon: Spline, label: "Saturation Sim", desc: "Steady-state curves & risk", route: "cycle-dashboard", accent: "protocol", module: "cycle" },
   { icon: Dumbbell, label: "Train", desc: "Active workout logging", route: "gym-workout", accent: "protocol", module: "gym" },
   { icon: ClipboardList, label: "Programs", desc: "Routines & templates", route: "gym-routines", accent: "protocol", module: "gym" },
   { icon: TrendingUp, label: "Training Stats", desc: "Volume, PRs & charts", route: "gym-progress", accent: "intel", module: "gym" },

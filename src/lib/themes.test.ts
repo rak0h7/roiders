@@ -25,6 +25,29 @@ describe("presetToTheme", () => {
     expect(patch.accentPrimary).toBe("#ff00ff");
     expect(patch.customSwatches?.[0]).toBe("#ff00ff");
     expect(patch.paletteHue).toBeTypeOf("number");
+    expect(patch.gradientIntensity).toBeGreaterThan(90);
+  });
+
+  it("applies muted effects for plain presets", () => {
+    const preset = THEME_PRESETS.find((p) => p.id === "graphite")!;
+    const patch = presetToTheme(preset, DEFAULT_THEME);
+    expect(patch.gradientIntensity).toBeLessThan(20);
+    expect(patch.particleEffects).toBe(false);
+    expect(patch.borderGlow).toBe(false);
+  });
+
+  it("ships a large ordered preset catalog", () => {
+    expect(THEME_PRESETS.length).toBeGreaterThanOrEqual(49);
+    expect(THEME_PRESETS[0]?.id).toBe("graphite");
+    expect(THEME_PRESETS.at(-1)?.id).toBe("chaos");
+  });
+
+  it("applies halotestin black surfaces and deep blue accents", () => {
+    const preset = THEME_PRESETS.find((p) => p.id === "halotestin")!;
+    const patch = presetToTheme(preset, DEFAULT_THEME);
+    expect(patch.baseColor).toBe("#000000");
+    expect(patch.accentPrimary).toBe("#1e3a8a");
+    expect(patch.gradientIntensity).toBeLessThan(45);
   });
 });
 

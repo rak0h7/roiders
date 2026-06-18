@@ -61,6 +61,7 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
     const profilePatch = {
       is_admin: true,
       display_name: DISPLAY_NAME,
+      premium_sync_enabled: true,
       updated_at: new Date().toISOString(),
     };
     if (rotateKey) {
@@ -100,6 +101,7 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
     display_name: DISPLAY_NAME,
     username: USERNAME,
     is_admin: true,
+    premium_sync_enabled: true,
     updated_at: new Date().toISOString(),
   });
 
@@ -125,6 +127,7 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
       is_admin: true,
       username: USERNAME,
       display_name: DISPLAY_NAME,
+      premium_sync_enabled: true,
       updated_at: new Date().toISOString(),
     })
     .eq("id", created.user.id);
@@ -151,7 +154,8 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
       );
       await client.query(
         `update public.profiles
-         set is_admin = true, display_name = $2, key_fingerprint = $3, access_key_hash = $4, updated_at = now()
+         set is_admin = true, display_name = $2, key_fingerprint = $3, access_key_hash = $4,
+             premium_sync_enabled = true, updated_at = now()
          where id = $1`,
         [existingId, DISPLAY_NAME, keyFingerprint, accessKeyHash],
       );
@@ -164,7 +168,7 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
     } else {
       await client.query(
         `update public.profiles
-         set is_admin = true, display_name = $2, updated_at = now()
+         set is_admin = true, display_name = $2, premium_sync_enabled = true, updated_at = now()
          where id = $1`,
         [existingId, DISPLAY_NAME],
       );
@@ -206,14 +210,15 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
 
     await client.query(
       `insert into public.profiles (
-        id, key_fingerprint, access_key_hash, display_name, username, is_admin, updated_at
-      ) values ($1, $2, $3, $4, $5, true, now())
+        id, key_fingerprint, access_key_hash, display_name, username, is_admin, premium_sync_enabled, updated_at
+      ) values ($1, $2, $3, $4, $5, true, true, now())
       on conflict (id) do update set
         key_fingerprint = excluded.key_fingerprint,
         access_key_hash = excluded.access_key_hash,
         display_name = excluded.display_name,
         username = excluded.username,
         is_admin = excluded.is_admin,
+        premium_sync_enabled = excluded.premium_sync_enabled,
         updated_at = excluded.updated_at`,
       [userId, keyFingerprint, accessKeyHash, DISPLAY_NAME, USERNAME],
     );
@@ -226,7 +231,7 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
     await client.query(`update public.profiles set is_admin = false where id <> $1`, [userId]);
     await client.query(
       `update public.profiles
-       set is_admin = true, username = $2, display_name = $3, updated_at = now()
+       set is_admin = true, username = $2, display_name = $3, premium_sync_enabled = true, updated_at = now()
        where id = $1`,
       [userId, USERNAME, DISPLAY_NAME],
     );

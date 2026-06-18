@@ -18,7 +18,13 @@ export type CreatedAccessKeyAccount = {
   };
 };
 
-export async function createAccessKeyAccount(): Promise<CreatedAccessKeyAccount> {
+export type CreateAccessKeyAccountOptions = {
+  issuedByVendorId?: string | null;
+};
+
+export async function createAccessKeyAccount(
+  options: CreateAccessKeyAccountOptions = {},
+): Promise<CreatedAccessKeyAccount> {
   const admin = createAdminClient();
   const accessKey = generateAccessKey();
   const keyFingerprint = fingerprintAccessKey(accessKey);
@@ -39,14 +45,21 @@ export async function createAccessKeyAccount(): Promise<CreatedAccessKeyAccount>
     throw new Error(createError?.message ?? "Failed to create account");
   }
 
-  const { error: profileError } = await admin.from("profiles").upsert({
+  const profilePayload: Record<string, unknown> = {
     id: created.user.id,
     key_fingerprint: keyFingerprint,
     access_key_hash: accessKeyHash,
     display_name: null,
     username: null,
+    premium_sync_enabled: false,
     updated_at: new Date().toISOString(),
-  });
+  };
+
+  if (options.issuedByVendorId) {
+    profilePayload.issued_by_vendor_id = options.issuedByVendorId;
+  }
+
+  const { error: profileError } = await admin.from("profiles").upsert(profilePayload);
 
   if (profileError) {
     await admin.auth.admin.deleteUser(created.user.id);

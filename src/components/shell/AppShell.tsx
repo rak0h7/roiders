@@ -7,6 +7,7 @@ import { CheatSheet } from "@/components/CheatSheet";
 import { ComparisonView } from "@/components/ComparisonView";
 import { CyclePlannerView } from "@/components/CyclePlannerView";
 import { CycleTabNav } from "@/components/CycleTabNav";
+import { CycleSourcesShell } from "@/components/CycleSourcesShell";
 import { DebugPanel } from "@/components/DebugPanel";
 import { ExtractionReview } from "@/components/ExtractionReview";
 
@@ -101,14 +102,16 @@ export function AppShell() {
       case "cycle-planner":
       case "cycle-guides":
         return <CyclePlannerShell />;
+      case "cycle-sources":
+        return <CycleSourcesShell />;
       case "cycle-dashboard":
         if (compounds.length === 0) {
           return (
             <EmptyState
               icon={Blocks}
               variant="protocol"
-              title="No protocol to simulate"
-              description="Add compounds in the builder first to unlock calendar views, PK curves, and risk analytics."
+              title="No gear to simulate"
+              description="Add compounds in the builder first to unlock calendar views, saturation curves, and risk analytics."
               action={
                 <button onClick={() => setRoute("cycle-planner")} className={ui.btnProtocol}>
                   Open Builder

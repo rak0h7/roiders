@@ -1,15 +1,7 @@
-export type ThemePresetId =
-  | "crimson"
-  | "ember"
-  | "violet"
-  | "ocean"
-  | "rose-gold"
-  | "matrix"
-  | "cyberpunk-neon"
-  | "deep-void"
-  | "solar-flare"
-  | "arctic-frost"
-  | "custom";
+import { THEME_PRESET_DEFINITIONS, THEME_PRESETS } from "@/lib/themePresets";
+import { resolveThemeContrast } from "@/lib/themeContrast";
+
+export type ThemePresetId = (typeof THEME_PRESET_DEFINITIONS)[number]["id"] | "custom";
 
 export type ContentWidth = "narrow" | "default" | "wide" | "full";
 export type FontFamilyId = "dm-sans" | "inter" | "satoshi" | "orbitron" | "syne" | "jetbrains";
@@ -121,34 +113,7 @@ export interface ThemePreset {
   tertiary: string;
 }
 
-export const THEME_PRESETS: ThemePreset[] = [
-  { id: "crimson", name: "Crimson", description: "Bold red with soft rose gradients", primary: "#ff2e4a", secondary: "#ff6b8a", tertiary: "#c084fc" },
-  { id: "ember", name: "Ember", description: "Warm orange and amber fire", primary: "#f97316", secondary: "#fb923c", tertiary: "#fbbf24" },
-  { id: "violet", name: "Violet Night", description: "Deep purple neon accents", primary: "#a855f7", secondary: "#c084fc", tertiary: "#818cf8" },
-  { id: "ocean", name: "Ocean", description: "Cool cyan and teal currents", primary: "#06b6d4", secondary: "#22d3ee", tertiary: "#34d399" },
-  { id: "rose-gold", name: "Rose Gold", description: "Luxury rose with gold highlights", primary: "#e11d48", secondary: "#fda4af", tertiary: "#fbbf24" },
-  { id: "matrix", name: "Matrix", description: "Electric green cyber tones", primary: "#22c55e", secondary: "#4ade80", tertiary: "#06b6d4" },
-  { id: "cyberpunk-neon", name: "Cyberpunk Neon", description: "Magenta pulse & cyan voltage", primary: "#ff00ff", secondary: "#00ffff", tertiary: "#7c3aed" },
-  { id: "deep-void", name: "Deep Void", description: "Ultraviolet abyss & indigo bloom", primary: "#6366f1", secondary: "#8b5cf6", tertiary: "#312e81" },
-  { id: "solar-flare", name: "Solar Flare", description: "Blazing gold & coral eruption", primary: "#ff4500", secondary: "#ff8c00", tertiary: "#ffd700" },
-  { id: "arctic-frost", name: "Arctic Frost", description: "Icy blue & platinum shimmer", primary: "#38bdf8", secondary: "#a5f3fc", tertiary: "#e0f2fe" },
-];
-
-export const ADVANCED_PRESET_IDS: ThemePresetId[] = [
-  "cyberpunk-neon",
-  "deep-void",
-  "solar-flare",
-  "arctic-frost",
-];
-
-export const BASE_PRESET_IDS: ThemePresetId[] = [
-  "crimson",
-  "ember",
-  "violet",
-  "ocean",
-  "rose-gold",
-  "matrix",
-];
+export { THEME_PRESETS, THEME_PRESET_DEFINITIONS };
 
 export const FONT_FAMILY_OPTIONS: { id: FontFamilyId; label: string; stack: string }[] = [
   { id: "dm-sans", label: "DM Sans", stack: "var(--font-dm-sans), system-ui, sans-serif" },
@@ -260,25 +225,37 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   const scale = theme.radiusScale;
 
   const { accentPrimary: p, accentSecondary: s, accentTertiary: t } = theme;
+  const contrast = resolveThemeContrast(theme);
 
   root.style.setProperty("--bg-base", theme.baseColor);
   root.style.setProperty("--bg-elevated", theme.elevatedColor);
   root.style.setProperty("--bg-surface", theme.surfaceColor);
   root.style.setProperty("--bg-hover", lighten(theme.elevatedColor, 0.18));
 
-  root.style.setProperty("--accent", p);
-  root.style.setProperty("--accent-soft", s);
-  root.style.setProperty("--accent-tertiary", t);
+  root.style.setProperty("--foreground", contrast.foreground);
+  root.style.setProperty("--muted", contrast.muted);
+  root.style.setProperty("--muted-2", contrast.muted2);
+  root.style.setProperty("--border", contrast.border);
+  root.style.setProperty("--border-strong", contrast.borderStrong);
+  root.style.setProperty("--text-on-labs", contrast.textOnLabs);
+  root.style.setProperty("--text-on-protocol", contrast.textOnProtocol);
+  root.style.setProperty("--text-on-intel", contrast.textOnIntel);
+  root.style.setProperty("--text-on-warning", contrast.textOnWarning);
+  root.style.setProperty("--text-on-success", contrast.textOnSuccess);
 
-  root.style.setProperty("--labs", p);
+  root.style.setProperty("--accent", contrast.accent);
+  root.style.setProperty("--accent-soft", contrast.accentSoft);
+  root.style.setProperty("--accent-tertiary", contrast.accentTertiary);
+
+  root.style.setProperty("--labs", contrast.labs);
   root.style.setProperty("--labs-dim", rgba(p, 0.1 + intensity * 0.06));
   root.style.setProperty("--labs-glow", rgba(p, 0.15 + intensity * 0.25));
 
-  root.style.setProperty("--protocol", s);
+  root.style.setProperty("--protocol", contrast.protocol);
   root.style.setProperty("--protocol-dim", rgba(s, 0.1 + intensity * 0.05));
   root.style.setProperty("--protocol-glow", rgba(s, 0.12 + intensity * 0.2));
 
-  root.style.setProperty("--intel", t);
+  root.style.setProperty("--intel", contrast.intel);
   root.style.setProperty("--intel-dim", rgba(t, 0.1 + intensity * 0.05));
   root.style.setProperty("--intel-glow", rgba(t, 0.12 + intensity * 0.18));
 
@@ -404,15 +381,19 @@ export function presetToTheme(
   preset: ThemePreset,
   current?: Pick<ThemeConfig, "baseColor" | "surfaceColor" | "elevatedColor">,
 ): Partial<ThemeConfig> {
+  const definition = THEME_PRESET_DEFINITIONS.find((p) => p.id === preset.id);
+  const surfaces = definition?.surfaces ?? current;
   const hsl = hexToHsl(preset.primary);
   return {
     preset: preset.id,
     accentPrimary: preset.primary,
     accentSecondary: preset.secondary,
     accentTertiary: preset.tertiary,
-    customSwatches: buildSwatchesFromAccents(preset.primary, preset.secondary, preset.tertiary, current),
+    customSwatches: buildSwatchesFromAccents(preset.primary, preset.secondary, preset.tertiary, surfaces ?? current),
     paletteHue: hsl.h,
     paletteSaturation: hsl.s,
     paletteLightness: hsl.l,
+    ...definition?.surfaces,
+    ...definition?.settings,
   };
 }

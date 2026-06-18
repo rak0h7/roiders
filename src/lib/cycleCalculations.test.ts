@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculateStats,
   doseCountForEntry,
+  generatePKCards,
   generatePKData,
   generateStackedLoadData,
   weeklyDoseAmount,
@@ -72,5 +73,14 @@ describe("simulation series", () => {
     expect(w1).toBe(weeklyMgLoadAtWeek(1, ascendedStack));
     expect(w2).toBe(w1);
     expect(w11).toBeGreaterThan(w2);
+  });
+
+  it("PK cards expose saturation percent for classic compounds", () => {
+    const cards = generatePKCards(20, ascendedStack);
+    const testCard = cards.find((c) => c.id === "test");
+    expect(testCard).toBeDefined();
+    expect(testCard?.saturationPct).not.toBeNull();
+    expect(testCard?.saturationPct).toBeGreaterThan(90);
+    expect(testCard?.saturated).toBe(true);
   });
 });

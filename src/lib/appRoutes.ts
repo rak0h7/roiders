@@ -7,6 +7,7 @@ export const ROUTE_TO_PATH: Record<AppRoute, string> = {
   "cycle-planner": "/cycle/builder",
   "cycle-guides": "/cycle/guides",
   "cycle-dashboard": "/cycle/simulation",
+  "cycle-sources": "/cycle/sources",
   "gym-workout": "/gym/workout",
   "gym-routines": "/gym/programs",
   "gym-history": "/gym/history",
