@@ -15,8 +15,8 @@ import { ui } from "@/lib/ui";
 
 export function SettingsView() {
   const { reports, overallScore, resetAll } = useApp();
-  const { defaultRangeMode, updateSettings, resetSettings } = useSettings();
-  const { weeks, startDate, compounds, getEffectiveWeeks, clearCycle } = useCycleStore();
+  const { defaultRangeMode, resetSettings } = useSettings();
+  const { startDate, compounds, getEffectiveWeeks, clearCycle } = useCycleStore();
   const { toast } = useToast();
 
   const handleExportJSON = () => {

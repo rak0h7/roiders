@@ -13,20 +13,26 @@ Roiders Club uses **private access keys** — no email, no verification links.
 ## Local development
 
 ```bash
-cp .env.example .env.local   # add anon + service_role keys
+cp .env.example .env.local   # fill in Supabase + DB credentials
 npm install
 npm run dev                  # http://localhost:1337
 ```
 
 ## Supabase setup
 
-Project: `https://uhssspbmgsijvygrxvaw.supabase.co`
+1. Create a project at [supabase.com](https://supabase.com)
+2. Copy keys from **Project Settings → API** into `.env.local`
+3. Apply schema migrations:
 
-1. [SQL Editor](https://supabase.com/dashboard/project/uhssspbmgsijvygrxvaw/sql/new) → run `supabase/schema.sql`
-2. **Authentication → Providers** → disable email signups (optional; keys are used instead)
-3. Copy keys from **Project Settings → API** into `.env.local`:
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (anon public)
-   - `SUPABASE_SERVICE_ROLE_KEY` (server only)
+```bash
+npm run db:migrate           # requires DATABASE_URL or SUPABASE_DB_PASSWORD
+npm run db:bootstrap         # promotes admin + verifies schema
+npm run create-admin         # if no service role key (uses Postgres fallback)
+```
+
+**Greenfield manual fallback:** paste `supabase/schema.sql` then `supabase/migrate-pending.sql` in the [SQL Editor](https://supabase.com/dashboard).
+
+Numbered files (`002_admin.sql` … `005_comprehensive_settings.sql`) are historical — `migrate-pending.sql` is the canonical incremental migration.
 
 ## Deploy (Vercel)
 
@@ -36,14 +42,35 @@ Production: https://roiders.vercel.app
 npm run deploy
 ```
 
-Required environment variables on Vercel:
+### Required environment variables
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (required for key auth API routes)
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Public anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Server auth + admin API (optional if `DATABASE_URL` set) |
+| `DATABASE_URL` or `SUPABASE_DB_PASSWORD` | Postgres for login fallback + migrations |
+| `ADMIN_FINGERPRINT` | Fingerprint of sole admin access key |
+
+### Optional
+
+- `SUPABASE_ACCESS_TOKEN` — Management API for `db:migrate` without direct Postgres
+- `POSTGRES_URL` / `POSTGRES_URL_NON_POOLING` — Vercel-injected pooler URLs
+- `NEXT_PUBLIC_ADMIN_FINGERPRINT` — client-side admin detection
 
 ## Cloud sync
 
 - Sign-in required (access key)
 - Data syncs automatically while signed in
 - Modules: labs, cycle, gym, nutrition, settings
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript check |
+| `npm run build` | Production build |
+| `npm run db:migrate` | Apply `migrate-pending.sql` |
+| `npm run db:bootstrap` | Post-migration admin promotion |
+| `npm run create-admin` | Create sole admin account |

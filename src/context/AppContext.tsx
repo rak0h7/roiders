@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { parseCSV, parseLabText } from "@/lib/parser";
 import { extractTextFromPDF } from "@/lib/pdf";
 import { buildReviewFlags } from "@/lib/ranges";
@@ -9,7 +9,6 @@ import { generateId, loadReports, saveReports } from "@/lib/storage";
 import type {
   AppState,
   BloodworkReport,
-  ExtractedMarker,
   MainTab,
   MarkerValue,
   RangeMode,
@@ -62,12 +61,10 @@ const initialState: AppState = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>(initialState);
-
-  useEffect(() => {
-    const reports = loadReports();
-    setState((s) => ({ ...s, reports }));
-  }, []);
+  const [state, setState] = useState<AppState>(() => ({
+    ...initialState,
+    reports: loadReports(),
+  }));
 
   const setMainTab = useCallback((tab: MainTab) => {
     setState((s) => ({ ...s, mainTab: tab, showComparison: false }));

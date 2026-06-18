@@ -1,7 +1,13 @@
 /** Shared helpers for Supabase migration / bootstrap scripts. */
+// projectRefFromUrl mirrors src/lib/supabase/projectRef.ts
 
 export function projectRefFromUrl(url) {
   return (url ?? "").match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? null;
+}
+
+export function projectRefFromHost(host) {
+  if (!host) return null;
+  return host.match(/^db\.([^.]+)\.supabase\.co$/)?.[1] ?? null;
 }
 
 export function projectRefFromJwt(jwt) {
@@ -59,11 +65,43 @@ export function printProjectBanner({ url, anonKey, serviceKey }) {
 }
 
 export function resolveDatabaseUrls(env = process.env) {
-  const projectRef = projectRefFromUrl(env.NEXT_PUBLIC_SUPABASE_URL);
   const password = env.SUPABASE_DB_PASSWORD ?? env.POSTGRES_PASSWORD;
-  const databaseUrl =
-    env.DATABASE_URL ?? env.SUPABASE_DB_URL ?? env.POSTGRES_URL ?? null;
-  return buildDatabaseUrls({ projectRef, password, databaseUrl });
+  const projectRef =
+    projectRefFromUrl(env.NEXT_PUBLIC_SUPABASE_URL ?? env.SUPABASE_URL) ??
+    projectRefFromHost(env.POSTGRES_HOST);
+  const onVercel = Boolean(env.VERCEL);
+  const urls = [];
+
+  if (password && projectRef) {
+    const enc = encodeURIComponent(password);
+    const poolers = [
+      `postgresql://postgres.${projectRef}:${enc}@aws-0-eu-west-1.pooler.supabase.com:6543/postgres`,
+      `postgresql://postgres.${projectRef}:${enc}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`,
+      `postgresql://postgres.${projectRef}:${enc}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`,
+    ];
+    const direct = `postgresql://postgres:${enc}@db.${projectRef}.supabase.co:5432/postgres`;
+    if (onVercel) urls.push(...poolers, direct);
+    else urls.push(direct, ...poolers);
+  }
+
+  for (const candidate of [
+    env.DATABASE_URL,
+    env.SUPABASE_DB_URL,
+    env.POSTGRES_URL,
+    env.POSTGRES_URL_NON_POOLING,
+  ]) {
+    if (candidate?.trim() && !urls.includes(candidate)) urls.push(candidate);
+  }
+
+  const host = env.POSTGRES_HOST;
+  if (host && password && !urls.some((u) => u.includes(host))) {
+    const enc = encodeURIComponent(password);
+    const user = env.POSTGRES_USER ?? "postgres";
+    const database = env.POSTGRES_DATABASE ?? "postgres";
+    urls.push(`postgresql://${user}:${enc}@${host}:5432/${database}`);
+  }
+
+  return urls;
 }
 
 export async function checkSchemaViaPg(client) {
@@ -131,24 +169,6 @@ export async function checkSchema(admin) {
     site_settings: !siteSettings.error || !siteSettingsMissing,
     site_settings_error: siteSettings.error?.message,
   };
-}
-
-export function buildDatabaseUrls({ projectRef, password, databaseUrl }) {
-  const urls = [];
-  if (databaseUrl) urls.push(databaseUrl);
-  if (!password || !projectRef) return urls;
-
-  const enc = encodeURIComponent(password);
-  for (const url of [
-    `postgresql://postgres:${enc}@db.${projectRef}.supabase.co:5432/postgres`,
-    `postgresql://postgres.${projectRef}:${enc}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`,
-    `postgresql://postgres.${projectRef}:${enc}@aws-0-us-west-1.pooler.supabase.com:6543/postgres`,
-    `postgresql://postgres.${projectRef}:${enc}@aws-0-eu-west-1.pooler.supabase.com:6543/postgres`,
-    `postgresql://postgres.${projectRef}:${enc}@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres`,
-  ]) {
-    if (!urls.includes(url)) urls.push(url);
-  }
-  return urls;
 }
 
 export async function connectPg(urls) {

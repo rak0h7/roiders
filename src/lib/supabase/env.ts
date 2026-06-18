@@ -1,6 +1,4 @@
-function projectRefFromUrl(url: string | undefined): string | null {
-  return (url ?? "").match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? null;
-}
+import { projectRefFromUrl } from "@/lib/supabase/projectRef";
 
 function projectRefFromJwt(jwt: string): string | null {
   try {

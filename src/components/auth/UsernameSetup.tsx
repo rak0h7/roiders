@@ -17,12 +17,10 @@ export function UsernameSetup() {
 
   const normalized = normalizeUsername(value);
   const validationError = value ? validateUsername(value) : null;
+  const displayedAvailable = !normalized || validationError ? null : available;
 
   useEffect(() => {
-    if (!normalized || validationError) {
-      setAvailable(null);
-      return;
-    }
+    if (!normalized || validationError) return;
 
     const timer = setTimeout(async () => {
       setChecking(true);
@@ -101,13 +99,13 @@ export function UsernameSetup() {
               <span className="text-[var(--danger)]">{validationError}</span>
             </>
           )}
-          {!checking && !validationError && available === true && normalized && (
+          {!checking && !validationError && displayedAvailable === true && normalized && (
             <>
               <Check className="h-3.5 w-3.5 text-[var(--success)]" />
               <span className="text-[var(--success)]">@{normalized} is available</span>
             </>
           )}
-          {!checking && !validationError && available === false && (
+          {!checking && !validationError && displayedAvailable === false && (
             <>
               <X className="h-3.5 w-3.5 text-[var(--danger)]" />
               <span className="text-[var(--danger)]">Already taken</span>
@@ -124,7 +122,7 @@ export function UsernameSetup() {
 
       <button
         type="submit"
-        disabled={busy || checking || Boolean(validationError) || !available}
+        disabled={busy || checking || Boolean(validationError) || !displayedAvailable}
         className={cn(ui.btnPrimary, "w-full disabled:opacity-50")}
       >
         {busy ? "Saving…" : "Continue"}

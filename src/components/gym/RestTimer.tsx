@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, X } from "lucide-react";
 import { useGymStore } from "@/store/gymStore";
@@ -8,19 +8,25 @@ import { cn } from "@/lib/utils";
 
 export function RestTimer() {
   const { restTimer, skipRestTimer, startRestTimer, tickRestTimer, defaultRestSeconds } = useGymStore();
+  const [secondsLeft, setSecondsLeft] = useState(0);
 
   useEffect(() => {
-    if (!restTimer.active) return;
-    const id = setInterval(tickRestTimer, 250);
-    return () => clearInterval(id);
-  }, [restTimer.active, tickRestTimer]);
+    if (!restTimer.active || !restTimer.endsAt) return;
 
-  const secondsLeft = restTimer.active && restTimer.endsAt
-    ? Math.max(0, Math.ceil((restTimer.endsAt - Date.now()) / 1000))
-    : 0;
+    const id = setInterval(() => {
+      tickRestTimer();
+      setSecondsLeft(Math.max(0, Math.ceil((restTimer.endsAt! - Date.now()) / 1000)));
+    }, 250);
+    return () => clearInterval(id);
+  }, [restTimer.active, restTimer.endsAt, tickRestTimer]);
+
+  const shownSeconds =
+    restTimer.active && restTimer.endsAt
+      ? secondsLeft
+      : 0;
 
   const progress = restTimer.totalSeconds > 0
-    ? ((restTimer.totalSeconds - secondsLeft) / restTimer.totalSeconds) * 100
+    ? ((restTimer.totalSeconds - shownSeconds) / restTimer.totalSeconds) * 100
     : 0;
 
   return (
@@ -40,7 +46,7 @@ export function RestTimer() {
               </button>
             </div>
             <p className="font-display mt-1 text-4xl font-bold tabular-nums text-[var(--foreground)]">
-              {Math.floor(secondsLeft / 60)}:{String(secondsLeft % 60).padStart(2, "0")}
+              {Math.floor(shownSeconds / 60)}:{String(shownSeconds % 60).padStart(2, "0")}
             </p>
             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--bg-hover)]">
               <div

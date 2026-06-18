@@ -1,4 +1,4 @@
-import { CATEGORY_INSIGHT_LABELS, CATEGORY_ORDER, MARKER_MAP, MARKERS_BY_CATEGORY } from "./markers";
+import { CATEGORY_INSIGHT_LABELS, CATEGORY_ORDER, MARKERS_BY_CATEGORY } from "./markers";
 import type { CategoryScore, MarkerValue, RangeMode } from "./types";
 import { evaluateSeverity } from "./ranges";
 

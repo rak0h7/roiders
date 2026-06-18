@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Bar, BarChart, CartesianGrid, Cell, Pie, PieChart,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -20,6 +20,7 @@ export function GymAnalytics() {
   const { history, personalRecords, customExercises, weightUnit } = useGymStore();
   const chartTheme = getChartTheme();
   const colors = getChartColors();
+  const [thirtyDayCutoff] = useState(() => Date.now() - 30 * 86_400_000);
 
   const stats = useMemo(() => {
     const totalVolume = history.reduce((s, w) => s + w.totalVolume, 0);
@@ -28,10 +29,10 @@ export function GymAnalytics() {
       ? Math.round(history.reduce((s, w) => s + w.durationMinutes, 0) / totalSessions)
       : 0;
     const last30 = history.filter(
-      (w) => Date.now() - new Date(w.completedAt).getTime() < 30 * 86400000
+      (w) => new Date(w.completedAt).getTime() >= thirtyDayCutoff
     ).length;
     return { totalVolume, totalSessions, avgDuration, last30 };
-  }, [history]);
+  }, [history, thirtyDayCutoff]);
 
   const weeklyData = useMemo(() => volumeByWeek(history), [history]);
   const muscleData = useMemo(() => {

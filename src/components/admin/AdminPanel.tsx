@@ -39,8 +39,8 @@ export function AdminPanel() {
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options?: { showLoading?: boolean }) => {
+    if (options?.showLoading) setLoading(true);
     setError(null);
     try {
       const [statsRes, usersRes] = await Promise.all([
@@ -64,8 +64,32 @@ export function AdminPanel() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    (async () => {
+      setError(null);
+      try {
+        const [statsRes, usersRes] = await Promise.all([
+          fetch("/api/admin/stats", { credentials: "same-origin" }),
+          fetch("/api/admin/users", { credentials: "same-origin" }),
+        ]);
+        const statsJson = await statsRes.json();
+        const usersJson = await usersRes.json();
+        if (!statsRes.ok) throw new Error(statsJson.error ?? "Failed to load stats");
+        if (!usersRes.ok) throw new Error(usersJson.error ?? "Failed to load users");
+        if (!cancelled) {
+          setStats(statsJson);
+          setUsers(usersJson.users ?? []);
+        }
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load admin data");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const generateAccount = async () => {
     setGenerating(true);
@@ -124,7 +148,7 @@ export function AdminPanel() {
               Owner panel — signed in as {accountName ?? "Admin"}
             </p>
           </div>
-          <button type="button" onClick={() => void load()} className={ui.btnSecondary} disabled={loading}>
+          <button type="button" onClick={() => void load({ showLoading: true })} className={ui.btnSecondary} disabled={loading}>
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
             Refresh
           </button>
@@ -135,7 +159,8 @@ export function AdminPanel() {
             {error}
             {error.includes("is_admin") && (
               <p className="mt-2 text-xs">
-                Run <code className="rounded bg-black/20 px-1">supabase/002_admin.sql</code> in the Supabase SQL Editor.
+                Run <code className="rounded bg-black/20 px-1">npm run db:migrate</code> or paste{" "}
+                <code className="rounded bg-black/20 px-1">supabase/migrate-pending.sql</code> in the Supabase SQL Editor.
               </p>
             )}
           </div>

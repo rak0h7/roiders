@@ -105,10 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, user, siteSettings.cloud_sync_enabled]);
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    if (!supabase) return;
 
     const schemaPromise = fetch("/api/profile/schema", { credentials: "same-origin" })
       .then((res) => res.json())

@@ -16,9 +16,9 @@ import { fileURLToPath } from "url";
 import { loadEnv } from "./load-env.mjs";
 import {
   assertProjectEnvConsistency,
-  buildDatabaseUrls,
   connectPg,
   printProjectBanner,
+  resolveDatabaseUrls,
   runSqlViaManagementApi,
 } from "./db-utils.mjs";
 
@@ -35,10 +35,7 @@ const projectRef = assertProjectEnvConsistency({
   anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
 });
-const password = process.env.SUPABASE_DB_PASSWORD ?? process.env.POSTGRES_PASSWORD;
 const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
-const databaseUrl =
-  process.env.DATABASE_URL ?? process.env.SUPABASE_DB_URL ?? process.env.POSTGRES_URL ?? null;
 
 printProjectBanner({
   url,
@@ -46,7 +43,7 @@ printProjectBanner({
   serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY,
 });
 
-const pgUrls = buildDatabaseUrls({ projectRef, password, databaseUrl });
+const pgUrls = resolveDatabaseUrls();
 const canUsePg = pgUrls.length > 0;
 const canUseApi = Boolean(accessToken && projectRef);
 

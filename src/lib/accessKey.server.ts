@@ -1,4 +1,5 @@
 import "server-only";
+// Crypto helpers mirror scripts/shared/access-key-crypto.mjs — keep in sync.
 import { createHash, randomBytes, scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { normalizeAccessKey } from "@/lib/accessKey.shared";

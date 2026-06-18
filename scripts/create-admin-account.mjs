@@ -2,47 +2,20 @@
  * Creates the sole site admin account. Run once:
  *   npm run create-admin
  */
-import { createHash, randomBytes, randomUUID, scrypt } from "crypto";
-import { promisify } from "util";
+import { randomBytes, randomUUID } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { loadEnv } from "./load-env.mjs";
 import { connectPg, resolveDatabaseUrls } from "./db-utils.mjs";
+import {
+  fingerprintAccessKey,
+  generateAccessKey,
+  hashAccessKey,
+  internalEmail,
+} from "./shared/access-key-crypto.mjs";
 
 loadEnv();
 
-const scryptAsync = promisify(scrypt);
-const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
-
-function normalizeAccessKey(raw) {
-  return raw.trim().toLowerCase().replace(/\s+/g, "");
-}
-
-function generateAccessKey() {
-  const bytes = randomBytes(16);
-  const groups = [];
-  for (let g = 0; g < 4; g++) {
-    let group = "";
-    for (let i = 0; i < 4; i++) group += ALPHABET[bytes[g * 4 + i] % ALPHABET.length];
-    groups.push(group);
-  }
-  return `roiders_${groups.join("_")}`;
-}
-
-function fingerprintAccessKey(key) {
-  return createHash("sha256").update(normalizeAccessKey(key)).digest("hex").slice(0, 16);
-}
-
-async function hashAccessKey(key) {
-  const salt = randomBytes(16);
-  const hash = await scryptAsync(normalizeAccessKey(key), salt, 64);
-  return `${salt.toString("hex")}:${hash.toString("hex")}`;
-}
-
-function internalEmail(userId) {
-  return `${userId}@users.roidersclub.internal`;
-}
-
-async function createAdminViaApi({ url, serviceKey, accessKey, keyFingerprint, accessKeyHash, sessionSecret, userId, email }) {
+async function createAdminViaApi({ url, serviceKey, keyFingerprint, accessKeyHash, sessionSecret, userId, email }) {
   const admin = createClient(url, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
@@ -96,7 +69,7 @@ async function createAdminViaApi({ url, serviceKey, accessKey, keyFingerprint, a
   return created.user.id;
 }
 
-async function createAdminViaPg(client, { accessKey, keyFingerprint, accessKeyHash, sessionSecret, userId, email }) {
+async function createAdminViaPg(client, { keyFingerprint, accessKeyHash, sessionSecret, userId, email }) {
   const identityId = randomUUID();
   await client.query("BEGIN");
   try {
@@ -187,7 +160,6 @@ if (serviceKey) {
   createdUserId = await createAdminViaApi({
     url,
     serviceKey,
-    accessKey,
     keyFingerprint,
     accessKeyHash,
     sessionSecret,
@@ -204,7 +176,6 @@ if (serviceKey) {
   const client = await connectPg(pgUrls);
   try {
     createdUserId = await createAdminViaPg(client, {
-      accessKey,
       keyFingerprint,
       accessKeyHash,
       sessionSecret,

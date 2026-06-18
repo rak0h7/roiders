@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { RangeMode } from "@/lib/types";
+import { LOCAL_STORAGE_KEYS } from "@/lib/cloudSync";
 import {
   DEFAULT_THEME,
   applyThemeToDocument,
@@ -18,8 +19,6 @@ export interface AppSettings {
   compactSidebar: boolean;
   theme: ThemeConfig;
 }
-
-const STORAGE_KEY = "roiders-club-settings-v2";
 
 const DEFAULTS: AppSettings = {
   defaultRangeMode: "optimized",
@@ -45,25 +44,25 @@ function mergeSettings(raw: Partial<AppSettings>): AppSettings {
   };
 }
 
+function readStoredSettings(): AppSettings {
+  if (typeof window === "undefined") return DEFAULTS;
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEYS.settings);
+    if (raw) return mergeSettings(JSON.parse(raw));
+  } catch { /* ignore */ }
+  return DEFAULTS;
+}
+
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<AppSettings>(DEFAULTS);
-  const [hydrated, setHydrated] = useState(false);
+  const [settings, setSettings] = useState<AppSettings>(readStoredSettings);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setSettings(mergeSettings(JSON.parse(raw)));
-    } catch { /* ignore */ }
-    setHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (hydrated) applyThemeToDocument(settings.theme);
-  }, [settings.theme, hydrated]);
+    applyThemeToDocument(settings.theme);
+  }, [settings.theme]);
 
   const persist = useCallback((next: AppSettings) => {
     setSettings(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(LOCAL_STORAGE_KEYS.settings, JSON.stringify(next));
   }, []);
 
   const updateSettings = useCallback(

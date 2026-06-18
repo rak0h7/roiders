@@ -1,13 +1,4 @@
-function projectRefFromUrl(url: string | undefined): string | null {
-  return (url ?? "").match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] ?? null;
-}
-
-function projectRefFromHost(host: string | undefined): string | null {
-  if (!host) return null;
-  const direct = host.match(/^db\.([^.]+)\.supabase\.co$/)?.[1];
-  if (direct) return direct;
-  return null;
-}
+import { projectRefFromHost, projectRefFromUrl } from "@/lib/supabase/projectRef";
 
 /** Build candidate Postgres URLs — pooler first on Vercel (direct host often unreachable). */
 export function resolveDatabaseUrls(): string[] {

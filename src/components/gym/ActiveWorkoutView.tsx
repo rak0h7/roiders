@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Check, ChevronDown, ChevronUp, Clock, Dumbbell, Plus, Trash2, Trophy,
@@ -32,11 +32,19 @@ export function ActiveWorkoutView() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [plateTarget, setPlateTarget] = useState("");
 
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!activeWorkout) return;
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, [activeWorkout]);
+
   const elapsed = useMemo(() => {
     if (!activeWorkout) return "";
-    const mins = Math.floor((Date.now() - new Date(activeWorkout.startedAt).getTime()) / 60000);
+    const mins = Math.floor((now - new Date(activeWorkout.startedAt).getTime()) / 60000);
     return mins < 60 ? `${mins}m` : `${Math.floor(mins / 60)}h ${mins % 60}m`;
-  }, [activeWorkout]);
+  }, [activeWorkout, now]);
 
   if (!activeWorkout) {
     return (

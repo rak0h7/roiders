@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Blocks,
   Cloud,
@@ -83,24 +83,25 @@ export function AdminSiteSettings({ onSaved }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/settings", { credentials: "same-origin" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to load settings");
-      setDraft(data.settings);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load settings");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    void load();
-  }, [load]);
+    let cancelled = false;
+    (async () => {
+      setError(null);
+      try {
+        const res = await fetch("/api/admin/settings", { credentials: "same-origin" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? "Failed to load settings");
+        if (!cancelled) setDraft(data.settings);
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Failed to load settings");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const patch = (next: Partial<SiteSettings>) => {
     if (!draft) return;
@@ -156,9 +157,8 @@ export function AdminSiteSettings({ onSaved }: Props) {
           {error}
           {error.includes("site_settings") && (
             <p className="mt-2 text-xs">
-              Run <code className="rounded bg-black/20 px-1">supabase/migrate-pending.sql</code> and{" "}
-              <code className="rounded bg-black/20 px-1">supabase/005_comprehensive_settings.sql</code> in
-              the Supabase SQL Editor.
+              Run <code className="rounded bg-black/20 px-1">npm run db:migrate</code> or paste{" "}
+              <code className="rounded bg-black/20 px-1">supabase/migrate-pending.sql</code> in the Supabase SQL Editor.
             </p>
           )}
         </div>

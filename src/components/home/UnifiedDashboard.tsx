@@ -132,9 +132,10 @@ export function UnifiedDashboard() {
   const criticalFlags = reviewFlags.filter((f) => f.severity === "stop" || f.severity === "high").length;
   const markerCount = Object.keys(currentValues).length;
 
+  const [thirtyDayCutoff] = useState(() => Date.now() - 30 * 86_400_000);
   const gym30d = useMemo(
-    () => gymHistory.filter((w) => Date.now() - new Date(w.completedAt).getTime() < 30 * 86400000),
-    [gymHistory]
+    () => gymHistory.filter((w) => new Date(w.completedAt).getTime() >= thirtyDayCutoff),
+    [gymHistory, thirtyDayCutoff]
   );
 
   const today = todayStr();

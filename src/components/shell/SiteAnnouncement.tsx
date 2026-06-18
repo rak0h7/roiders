@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { ExternalLink, Megaphone, X } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { cn } from "@/lib/utils";
@@ -13,21 +13,34 @@ const LEVEL_STYLES = {
   danger: "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]",
 } as const;
 
+function useClientMounted(): boolean {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
+
 export function SiteAnnouncement() {
   const { settings } = useSiteConfig();
-  const [dismissed, setDismissed] = useState(true);
+  const mounted = useClientMounted();
+  const enabled = settings.announcement_enabled && settings.announcement_message.trim().length > 0;
+  const token = enabled ? `${settings.updated_at}:${settings.announcement_message}` : "";
+  const [manualDismiss, setManualDismiss] = useState(false);
 
-  useEffect(() => {
-    if (!settings.announcement_enabled || !settings.announcement_message.trim()) return;
-    const token = `${settings.updated_at}:${settings.announcement_message}`;
-    setDismissed(localStorage.getItem(DISMISS_KEY) === token);
-  }, [settings]);
+  const storedDismissed = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("storage", onStoreChange);
+      return () => window.removeEventListener("storage", onStoreChange);
+    },
+    () => localStorage.getItem(DISMISS_KEY) === token,
+    () => true,
+  );
 
-  if (!settings.announcement_enabled || !settings.announcement_message.trim() || dismissed) {
-    return null;
-  }
+  const dismissed = !enabled || manualDismiss || storedDismissed;
 
-  const token = `${settings.updated_at}:${settings.announcement_message}`;
+  if (!mounted || dismissed) return null;
+
   const link = settings.announcement_link?.trim();
 
   return (
@@ -56,7 +69,7 @@ export function SiteAnnouncement() {
         type="button"
         onClick={() => {
           localStorage.setItem(DISMISS_KEY, token);
-          setDismissed(true);
+          setManualDismiss(true);
         }}
         className="shrink-0 rounded p-1 opacity-70 transition hover:opacity-100"
         aria-label="Dismiss announcement"

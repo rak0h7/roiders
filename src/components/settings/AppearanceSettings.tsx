@@ -28,7 +28,6 @@ import {
   hslToHex,
   type ContentWidth,
   type FontFamilyId,
-  type IconStyleId,
   type LayoutPresetId,
   type SavedPalette,
   type ThemePresetId,

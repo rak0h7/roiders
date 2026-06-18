@@ -37,6 +37,17 @@ import { MobileNav } from "./MobileNav";
 import { CommandPalette } from "./CommandPalette";
 import { cn } from "@/lib/utils";
 
+function CyclePlannerShell() {
+  return (
+    <div>
+      <CycleTabNav />
+      <div className="mt-6">
+        <CyclePlannerView />
+      </div>
+    </div>
+  );
+}
+
 export function AppShell() {
   const { route, sidebarCollapsed, setRoute, setSidebarCollapsed } = useNavigation();
   const { settings, routeEnabled } = useSiteConfig();
@@ -92,12 +103,7 @@ export function AppShell() {
         return <InsightsDashboard />;
       case "cycle-planner":
       case "cycle-guides":
-        return (
-          <div>
-            <CycleTabNav />
-            <div className="mt-6"><CyclePlannerView /></div>
-          </div>
-        );
+        return <CyclePlannerShell />;
       case "cycle-dashboard":
         if (compounds.length === 0) {
           return (
@@ -114,12 +120,7 @@ export function AppShell() {
             />
           );
         }
-        return (
-          <div>
-            <CycleTabNav />
-            <div className="mt-6"><CyclePlannerView /></div>
-          </div>
-        );
+        return <CyclePlannerShell />;
       case "gym-workout":
       case "gym-routines":
       case "gym-history":

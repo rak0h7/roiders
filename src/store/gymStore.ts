@@ -168,7 +168,7 @@ export const useGymStore = create<GymState>()(
           notes: active.notes,
         };
 
-        const prs = computePRsFromWorkout(completed, get().personalRecords, get().customExercises);
+        const prs = computePRsFromWorkout(completed, get().personalRecords);
 
         set({
           activeWorkout: null,

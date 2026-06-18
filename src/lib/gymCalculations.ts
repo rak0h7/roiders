@@ -49,7 +49,6 @@ export function getBestSet(sets: WorkoutSet[]): WorkoutSet | null {
 export function computePRsFromWorkout(
   workout: CompletedWorkout,
   existing: PersonalRecord[],
-  _customExercises: Exercise[] = []
 ): PersonalRecord[] {
   const map = new Map(existing.map((pr) => [pr.exerciseId, pr]));
   const next = [...existing];

@@ -3,7 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type CloudModule = "labs" | "cycle" | "gym" | "nutrition" | "settings";
 
 export const LOCAL_STORAGE_KEYS: Record<CloudModule, string> = {
-  labs: "bloodwork-logger-reports",
+  labs: "roiders-club-labs-v1",
   cycle: "cycle-planner-store-v2",
   gym: "roiders-club-gym-store-v1",
   nutrition: "roiders-club-nutrition-store-v1",
@@ -63,12 +63,12 @@ export async function pushUserData(
   modules: CloudModule[] = Object.keys(LOCAL_STORAGE_KEYS) as CloudModule[]
 ): Promise<void> {
   const rows: { user_id: string; module: CloudModule; data: unknown; updated_at: string }[] = [];
-  for (const module of modules) {
-    const data = readLocalModule(module);
+  for (const cloudModule of modules) {
+    const data = readLocalModule(cloudModule);
     if (data == null) continue;
     rows.push({
       user_id: userId,
-      module,
+      module: cloudModule,
       data,
       updated_at: new Date().toISOString(),
     });

@@ -63,7 +63,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Username support is not enabled yet. Run supabase/migrate-pending.sql in the Supabase SQL Editor.",
+            "Username support is not enabled yet. Run npm run db:migrate or paste supabase/migrate-pending.sql in the Supabase SQL Editor.",
         },
         { status: 503 }
       );
@@ -92,7 +92,7 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Username support is not enabled yet. Run supabase/003_usernames.sql in the Supabase SQL Editor.",
+            "Username support is not enabled yet. Run npm run db:migrate or paste supabase/migrate-pending.sql in the Supabase SQL Editor.",
         },
         { status: 503 }
       );

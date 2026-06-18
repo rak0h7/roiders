@@ -37,8 +37,22 @@ export function SiteConfigProvider({ children }: { children: React.ReactNode }) 
   }, []);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/site/settings", { credentials: "same-origin" });
+        const data = (await res.json()) as PublicSiteSettings;
+        if (!cancelled && res.ok) setSettings({ ...DEFAULT_SITE_SETTINGS, ...data });
+      } catch {
+        /* keep defaults */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const value = useMemo<SiteConfigContextValue>(
     () => ({
