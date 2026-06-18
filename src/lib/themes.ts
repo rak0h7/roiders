@@ -153,7 +153,7 @@ export const BASE_PRESET_IDS: ThemePresetId[] = [
 export const FONT_FAMILY_OPTIONS: { id: FontFamilyId; label: string; stack: string }[] = [
   { id: "dm-sans", label: "DM Sans", stack: "var(--font-dm-sans), system-ui, sans-serif" },
   { id: "inter", label: "Inter", stack: "var(--font-inter), var(--font-dm-sans), system-ui, sans-serif" },
-  { id: "satoshi", label: "Satoshi", stack: "'Satoshi', var(--font-dm-sans), system-ui, sans-serif" },
+  { id: "satoshi", label: "Satoshi (DM Sans)", stack: "var(--font-dm-sans), system-ui, sans-serif" },
   { id: "orbitron", label: "Orbitron", stack: "var(--font-orbitron), var(--font-syne), sans-serif" },
   { id: "syne", label: "Syne", stack: "var(--font-syne), system-ui, sans-serif" },
   { id: "jetbrains", label: "JetBrains Mono", stack: "var(--font-geist-mono), monospace" },
@@ -298,7 +298,13 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   root.style.setProperty("--radius-lg", `${Math.round(20 * scale)}px`);
   root.style.setProperty("--radius-xl", `${Math.round(28 * scale)}px`);
 
+  const densityScale = theme.density === "compact" ? 0.88 : 1;
   root.style.setProperty("--space-unit", theme.density === "compact" ? "0.85" : "1");
+  root.style.setProperty("--control-height", `${Math.round(40 * densityScale)}px`);
+  root.style.setProperty("--control-height-sm", `${Math.round(36 * densityScale)}px`);
+  root.style.setProperty("--control-height-xs", `${Math.round(32 * densityScale)}px`);
+  root.style.setProperty("--control-height-icon", `${Math.round(36 * densityScale)}px`);
+  root.style.setProperty("--control-height-micro", `${Math.round(28 * densityScale)}px`);
   root.style.setProperty("--font-scale", String(theme.fontScale / 100));
   root.style.setProperty("--shadow-depth", String(theme.shadowDepth / 100));
   root.style.setProperty("--letter-spacing", `${theme.letterSpacing / 100}em`);
@@ -311,10 +317,15 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   const fontStack =
     FONT_FAMILY_OPTIONS.find((f) => f.id === theme.fontFamily)?.stack ??
     FONT_FAMILY_OPTIONS[0].stack;
+  const displayStack =
+    theme.fontFamily === "orbitron" || theme.fontFamily === "jetbrains"
+      ? fontStack
+      : "var(--font-syne), system-ui, sans-serif";
   root.style.setProperty("--font-sans-active", fontStack);
-  root.style.setProperty("--font-display-active", fontStack);
+  root.style.setProperty("--font-display-active", displayStack);
   root.style.fontWeight = String(theme.fontWeight);
 
+  root.dataset.density = theme.density;
   root.dataset.animatedBg = theme.animatedBackground ? "true" : "false";
   root.dataset.borderGlow = theme.borderGlow ? "true" : "false";
   root.dataset.showAmbientBg = theme.showAmbientBackground ? "true" : "false";

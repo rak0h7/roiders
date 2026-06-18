@@ -65,8 +65,8 @@ export function UploadZone() {
             key={btn.label}
             onClick={() => onFileSelect(btn.accept)}
             className={cn(
-              ui.btnSecondary,
-              "h-9 border-[var(--labs)]/30 bg-[var(--labs-dim)] text-[10px] font-bold uppercase tracking-wider text-[var(--labs)] hover:border-[var(--labs)]/50"
+              ui.btnToolbar,
+              "border-[var(--labs)]/30 bg-[var(--labs-dim)] uppercase tracking-wider text-[var(--labs)] hover:border-[var(--labs)]/50"
             )}
           >
             {btn.label}
@@ -74,7 +74,7 @@ export function UploadZone() {
         ))}
         <button
           onClick={() => setShowPaste(!showPaste)}
-          className={cn(ui.btnSecondary, "h-9 text-[10px] font-bold uppercase tracking-wider")}
+          className={cn(ui.btnToolbar, "uppercase tracking-wider")}
         >
           Paste Text
         </button>

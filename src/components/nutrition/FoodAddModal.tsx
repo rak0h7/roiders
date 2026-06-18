@@ -68,12 +68,12 @@ export function FoodAddModal({ food, defaultMeal = "lunch", onClose }: FoodAddMo
               <button
                 type="button"
                 onClick={() => toggleFavorite(food.id)}
-                className={cn(ui.btnGhost, "h-9 w-9 p-0", isFav && "text-[var(--warning)]")}
+                className={cn(ui.btnIcon, isFav && "text-[var(--warning)]")}
                 aria-label={isFav ? "Remove from favorites" : "Add to favorites"}
               >
                 <Star className={cn("h-4 w-4", isFav && "fill-current")} />
               </button>
-              <button type="button" onClick={onClose} className={cn(ui.btnGhost, "h-9 w-9 p-0")}>
+              <button type="button" onClick={onClose} className={ui.btnIcon}>
                 <X className="h-4 w-4" />
               </button>
             </div>

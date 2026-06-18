@@ -123,7 +123,7 @@ export function ActiveWorkoutView() {
           value={plateTarget}
           onChange={(e) => setPlateTarget(e.target.value)}
           placeholder={`Target (${weightUnit})`}
-          className={cn(ui.input, "h-9 w-32 text-xs")}
+          className={cn(ui.inputCompact, "w-32")}
         />
         {plates && plateTarget && (
           <span className="text-xs text-[var(--muted)]">
@@ -283,7 +283,7 @@ export function ActiveWorkoutView() {
                             <button
                               onClick={() => toggleSetComplete(entry.id, set.id)}
                               className={cn(
-                                "mx-auto flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] border transition",
+                                "mx-auto flex h-[var(--control-height-xs)] w-[var(--control-height-xs)] items-center justify-center rounded-[var(--radius-sm)] border transition",
                                 set.completed
                                   ? "border-[var(--success)]/40 bg-[var(--success)]/15 text-[var(--success)]"
                                   : "border-[var(--border)] hover:border-[var(--protocol)]/40"

@@ -29,19 +29,12 @@ export function AdminToggleRow({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative h-7 w-12 shrink-0 rounded-full border transition",
-          checked
-            ? "border-[var(--labs)]/50 bg-[var(--labs)]"
-            : "border-[var(--border)] bg-[var(--bg-elevated)]",
+          ui.toggle,
+          checked ? "[background:var(--gradient-primary)]" : "bg-[var(--bg-hover)]",
           disabled && "opacity-50"
         )}
       >
-        <span
-          className={cn(
-            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition",
-            checked ? "left-[1.375rem]" : "left-0.5"
-          )}
-        />
+        <span className={cn(ui.toggleKnob, checked ? "left-[22px]" : "left-0.5")} />
       </button>
     </div>
   );

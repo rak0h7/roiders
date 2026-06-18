@@ -159,7 +159,7 @@ export function DashboardModulePanels({
             </div>
             <div className="flex flex-wrap gap-1.5">
               {compounds.slice(0, 5).map((c) => (
-                <span key={c.compoundId} className={cn(ui.pillInactive, "h-6 px-2.5 text-[10px]")}>
+                <span key={c.compoundId} className={cn(ui.tag, "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--muted)]")}>
                   {c.compoundId}
                 </span>
               ))}

@@ -72,7 +72,7 @@ export function MarkerGrid() {
                       onChange={(e) =>
                         setMarkerValue(marker.id, current?.value ?? null, e.target.value)
                       }
-                      className="mb-1 h-7 w-full rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--bg-surface)] px-1 text-[10px] text-[var(--muted)] focus:border-[var(--labs)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--labs)]/15"
+                      className={cn(ui.selectCompact, "mb-1")}
                     >
                       {marker.units.map((u) => (
                         <option key={u} value={u}>{u}</option>
@@ -87,7 +87,7 @@ export function MarkerGrid() {
                         setMarkerValue(marker.id, val, current?.unit ?? marker.defaultUnit);
                       }}
                       placeholder="—"
-                      className={cn(ui.input, "h-9 px-2 py-1.5 text-sm font-semibold")}
+                      className={cn(ui.inputCompact, "px-2 font-semibold")}
                     />
                   </div>
                 );

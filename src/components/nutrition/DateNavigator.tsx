@@ -19,7 +19,7 @@ export function DateNavigator({ date, onChange }: DateNavigatorProps) {
       <button
         type="button"
         onClick={() => shift(-1)}
-        className={cn(ui.btnGhost, "h-9 w-9 shrink-0 rounded-[var(--radius-md)] p-0")}
+        className={cn(ui.btnIcon, "shrink-0")}
         aria-label="Previous day"
       >
         <ChevronLeft className="h-4 w-4" />
@@ -33,7 +33,7 @@ export function DateNavigator({ date, onChange }: DateNavigatorProps) {
       <button
         type="button"
         onClick={() => shift(1)}
-        className={cn(ui.btnGhost, "h-9 w-9 shrink-0 rounded-[var(--radius-md)] p-0")}
+        className={cn(ui.btnIcon, "shrink-0")}
         aria-label="Next day"
       >
         <ChevronRight className="h-4 w-4" />
@@ -42,7 +42,7 @@ export function DateNavigator({ date, onChange }: DateNavigatorProps) {
         <button
           type="button"
           onClick={() => onChange(format(new Date(), "yyyy-MM-dd"))}
-          className={cn(ui.btnSecondary, "h-9 shrink-0 px-3 text-xs")}
+          className={cn(ui.btnToolbar, "shrink-0")}
         >
           Today
         </button>

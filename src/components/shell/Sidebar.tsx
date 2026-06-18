@@ -7,31 +7,34 @@ import {
   Dumbbell, FlaskConical, History, Leaf, Library, Search, Settings2, Shield, Spline,
   Target, TrendingUp, UtensilsCrossed,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { useNavigation, type AppRoute, type NavItem } from "@/context/NavigationContext";
 import { visibleNavItems } from "@/lib/navVisibility";
+import { AppIcon } from "@/components/ui/AppIcon";
+import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
-const ICONS: Record<string, React.ReactNode> = {
-  compass: <Compass className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  flask: <FlaskConical className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  archive: <Archive className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  chart: <BarChart2 className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  blocks: <Blocks className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  book: <BookOpen className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  waveform: <Spline className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  dumbbell: <Dumbbell className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  clipboard: <ClipboardList className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  history: <History className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  trending: <TrendingUp className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  library: <Library className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  utensils: <UtensilsCrossed className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  "search-food": <Search className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  leaf: <Leaf className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  target: <Target className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  apple: <Apple className="h-[18px] w-[18px]" strokeWidth={1.75} />,
-  sliders: <Settings2 className="h-[18px] w-[18px]" strokeWidth={1.75} />,
+const ICONS: Record<string, LucideIcon> = {
+  compass: Compass,
+  flask: FlaskConical,
+  archive: Archive,
+  chart: BarChart2,
+  blocks: Blocks,
+  book: BookOpen,
+  waveform: Spline,
+  dumbbell: Dumbbell,
+  clipboard: ClipboardList,
+  history: History,
+  trending: TrendingUp,
+  library: Library,
+  utensils: UtensilsCrossed,
+  "search-food": Search,
+  leaf: Leaf,
+  target: Target,
+  apple: Apple,
+  sliders: Settings2,
 };
 
 const GROUPS: { id: NavItem["group"]; label: string }[] = [
@@ -72,7 +75,7 @@ export function Sidebar() {
     >
       <div className="flex h-[60px] items-center gap-3 px-4">
         <div
-          className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+          className="relative flex h-[var(--control-height-sm)] w-[var(--control-height-sm)] shrink-0 items-center justify-center rounded-[var(--radius-md)]"
           style={{ background: "var(--gradient-primary)", boxShadow: "0 4px 16px var(--labs-glow)" }}
         >
           <span className="font-display text-sm font-bold text-white">{siteInitial}</span>
@@ -80,7 +83,7 @@ export function Sidebar() {
         {!sidebarCollapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <p className="font-display text-[15px] font-semibold text-gradient">{settings.site_name}</p>
-            <p className="text-[11px] text-[var(--muted)]">{settings.site_tagline}</p>
+            <p className="text-xs text-[var(--muted)]">{settings.site_tagline}</p>
           </motion.div>
         )}
       </div>
@@ -92,13 +95,12 @@ export function Sidebar() {
           return (
             <div key={id}>
               {!sidebarCollapsed && label && (
-                <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted-2)]">
-                  {label}
-                </p>
+                <p className={cn(ui.overline, "mb-2 px-3 text-[var(--muted-2)]")}>{label}</p>
               )}
               <ul className="space-y-0.5">
                 {items.map((item) => {
                   const active = route === item.id;
+                  const Icon = ICONS[item.icon] ?? Compass;
                   return (
                     <li key={item.id}>
                       <motion.button
@@ -106,7 +108,7 @@ export function Sidebar() {
                         onClick={() => setRoute(item.id as AppRoute)}
                         title={sidebarCollapsed ? item.label : undefined}
                         className={cn(
-                          "group relative flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-left text-[13px] transition",
+                          ui.navItem,
                           active
                             ? "glass-panel text-[var(--foreground)]"
                             : "text-[var(--muted)] hover:bg-[var(--bg-hover)]/60 hover:text-[var(--foreground)]"
@@ -119,7 +121,7 @@ export function Sidebar() {
                           />
                         )}
                         <span className={cn(active ? ACCENT_TEXT[item.accent] : "text-[var(--muted-2)] group-hover:" + ACCENT_TEXT[item.accent])}>
-                          {ICONS[item.icon]}
+                          <AppIcon icon={Icon} size="sm" />
                         </span>
                         {!sidebarCollapsed && <span className="font-medium">{item.label}</span>}
                       </motion.button>
@@ -137,12 +139,9 @@ export function Sidebar() {
           <Link
             href="/admin"
             title={sidebarCollapsed ? "Site Admin" : undefined}
-            className={cn(
-              "flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-[13px] font-medium transition",
-              "text-[var(--labs)] hover:bg-[var(--labs-dim)]"
-            )}
+            className={cn(ui.navItem, "text-[var(--labs)] hover:bg-[var(--labs-dim)]")}
           >
-            <Shield className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            <AppIcon icon={Shield} size="sm" />
             {!sidebarCollapsed && "Site Admin"}
           </Link>
         </div>
@@ -150,10 +149,13 @@ export function Sidebar() {
 
       <div className="border-t border-[var(--border)] p-3">
         <button
+          type="button"
           onClick={toggleSidebar}
-          className="flex w-full items-center justify-center gap-2 rounded-[var(--radius-md)] py-2 text-xs text-[var(--muted)] transition hover:bg-[var(--bg-hover)] hover:text-[var(--foreground)]"
+          className={cn(ui.btnGhost, "w-full justify-center text-xs")}
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", sidebarCollapsed && "rotate-180")} />
+          <span className={cn("inline-flex", sidebarCollapsed && "rotate-180")}>
+            <AppIcon icon={ChevronLeft} size="sm" />
+          </span>
           {!sidebarCollapsed && "Collapse"}
         </button>
       </div>

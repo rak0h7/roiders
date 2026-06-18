@@ -154,7 +154,7 @@ export function CustomFoods() {
               <button
                 type="button"
                 onClick={() => deleteCustomFood(food.id)}
-                className={cn(ui.btnGhost, "h-8 w-8 p-0 text-[var(--danger)]")}
+                className={cn(ui.btnIconSm, "text-[var(--danger)]")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Search, BookOpen } from "lucide-react";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { useCycleStore } from "@/store/cycleStore";
 import { COMPOUNDS, COMPOUND_CATEGORIES } from "@/data/compounds";
 import { getProfileForCompound } from "@/data/compoundProfiles";
@@ -41,9 +42,9 @@ export function CompoundBrowser() {
           <h2 className="text-lg font-bold text-[var(--foreground)]">Choose a Compound</h2>
           <button
             onClick={() => setCompoundModalOpen(false)}
-            className={cn(ui.btnGhost, "h-9 w-9 rounded-[var(--radius-sm)] p-0")}
+            className={ui.btnIcon}
           >
-            <X className="h-5 w-5" />
+            <AppIcon icon={X} />
           </button>
         </div>
 
@@ -65,7 +66,8 @@ export function CompoundBrowser() {
                 key={cat.id}
                 onClick={() => setCompoundCategory(cat.id)}
                 className={cn(
-                  "inline-flex h-8 items-center rounded-full px-3 text-[10px] font-bold uppercase tracking-wider transition-all",
+                  ui.chip,
+                  "uppercase tracking-wider transition-all",
                   compoundCategory === cat.id
                     ? ui.pillProtocolActive
                     : ui.pillInactive
@@ -109,16 +111,16 @@ export function CompoundBrowser() {
                     <button
                       type="button"
                       onClick={() => openProfile(profile.id)}
-                      className={cn(ui.btnGhost, "h-8 gap-1 px-2.5 text-[10px] font-semibold uppercase")}
+                      className={cn(ui.btnToolbar, "uppercase")}
                       title={`Read ${profile.title} profile`}
                     >
-                      <BookOpen className="h-3.5 w-3.5" />
+                      <AppIcon icon={BookOpen} size="sm" />
                       Guide
                     </button>
                   )}
                   <button
                     onClick={() => addAndConfigure(compound.id)}
-                    className={cn(ui.btnProtocol, "h-8 shrink-0 rounded-[var(--radius-sm)] px-4 text-[10px] font-bold uppercase")}
+                    className={cn(ui.btnProtocolSm, "shrink-0")}
                     style={{ background: compound.color }}
                   >
                     {addedIds.has(compound.id) ? "Edit" : "Configure"}

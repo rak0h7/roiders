@@ -106,7 +106,7 @@ export function CompoundConfigureModal() {
           </div>
           <button
             onClick={() => setConfiguringCompoundId(null)}
-            className={cn(ui.btnGhost, "h-9 w-9 rounded-[var(--radius-sm)] p-0")}
+            className={ui.btnIcon}
           >
             <X className="h-5 w-5" />
           </button>

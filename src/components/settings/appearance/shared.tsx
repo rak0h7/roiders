@@ -34,19 +34,19 @@ export function ColorField({
   return (
     <div className={cn(ui.cardInner, "p-4")}>
       <label className={ui.label}>{label}</label>
-      <p className="mb-3 text-[10px] text-[var(--muted-2)]">{desc}</p>
+      <p className="mb-3 text-xs text-[var(--muted-2)]">{desc}</p>
       <div className="flex items-center gap-3">
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="h-10 w-14 cursor-pointer rounded-[var(--radius-sm)] border border-[var(--border)] bg-transparent"
+          className="h-[var(--control-height)] w-14 cursor-pointer rounded-[var(--radius-sm)] border border-[var(--border)] bg-transparent"
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={cn(ui.input, "h-9 font-mono text-xs")}
+          className={cn(ui.inputCompact, "font-mono")}
         />
       </div>
     </div>
@@ -111,18 +111,12 @@ export function ToggleRow({
       </div>
       <button
         type="button"
+        role="switch"
+        aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={cn(
-          "relative h-6 w-11 shrink-0 rounded-full transition",
-          checked ? "[background:var(--gradient-primary)]" : "bg-[var(--bg-hover)]",
-        )}
+        className={cn(ui.toggle, checked ? "[background:var(--gradient-primary)]" : "bg-[var(--bg-hover)]")}
       >
-        <span
-          className={cn(
-            "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition",
-            checked ? "left-[22px]" : "left-0.5",
-          )}
-        />
+        <span className={cn(ui.toggleKnob, checked ? "left-[22px]" : "left-0.5")} />
       </button>
     </div>
   );

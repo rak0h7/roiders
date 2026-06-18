@@ -51,6 +51,12 @@
   --font-scale: 1;
   --shadow-depth: 0.5;
   --mobile-nav-inner: 4.25rem;
+  --icon-size: 20px;
+  --control-height: 2.5rem;
+  --control-height-sm: 2.25rem;
+  --control-height-xs: 2rem;
+  --control-height-icon: 2.25rem;
+  --control-height-micro: 1.75rem;
 }
 
 @theme inline {
@@ -95,6 +101,43 @@ body {
 
 .font-display {
   font-family: var(--font-display-active, var(--font-display)), var(--font-sans), system-ui, sans-serif;
+}
+
+.app-icon {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex-shrink: 0;
+}
+
+.app-icon--sm {
+  width: calc(var(--icon-size) * 0.75);
+  height: calc(var(--icon-size) * 0.75);
+}
+
+[data-icon-style="bold"] .app-icon {
+  stroke-width: 2.5;
+}
+
+[data-icon-style="minimal"] .app-icon {
+  opacity: 0.72;
+}
+
+[data-icon-style="filled"] .app-icon {
+  fill: currentColor;
+  stroke-width: 0;
+}
+
+[data-density="compact"] {
+  --gap-scale: 0.88;
+}
+
+[data-density="compact"] .glass-panel,
+[data-density="compact"] .glass {
+  padding: calc(var(--space-unit, 1) * 0.15em);
+}
+
+[data-density="compact"] .tab-nav-scroll nav {
+  gap: calc(0.25rem * var(--gap-scale, 0.88));
 }
 
 [data-bg-pattern="grid"] body::before,

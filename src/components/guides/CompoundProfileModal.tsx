@@ -28,14 +28,14 @@ export function CompoundProfileModal() {
                 openGuidesAt(profile.id);
                 setRoute("cycle-guides");
               }}
-              className={cn(ui.btnGhost, "h-8 px-2 text-xs text-[var(--protocol)]")}
+              className={cn(ui.btnToolbar, "text-[var(--protocol)]")}
             >
               Open in Guides
             </button>
             <button
               type="button"
               onClick={() => setProfileModalId(null)}
-              className={cn(ui.btnGhost, "h-9 w-9 p-0")}
+              className={ui.btnIcon}
             >
               <X className="h-5 w-5" />
             </button>

@@ -5,6 +5,7 @@ import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { FileText, Trash2, BarChart3, GitCompare } from "lucide-react";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { LabTrendChart } from "@/components/labs/LabTrendChart";
 
 export function HistoryView() {
@@ -48,13 +49,11 @@ export function HistoryView() {
             </div>
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={() => loadReport(report.id)}
-                className={cn(
-                  ui.btnSecondary,
-                  "h-8 gap-1 px-3 text-[10px] font-bold uppercase hover:border-[var(--labs)]/40 hover:text-[var(--labs)]"
-                )}
+                className={cn(ui.btnToolbar, "uppercase hover:border-[var(--labs)]/40 hover:text-[var(--labs)]")}
               >
-                <BarChart3 className="h-3 w-3" /> Insights
+                <AppIcon icon={BarChart3} size="sm" /> Insights
               </button>
               <button
                 onClick={() => {
@@ -68,22 +67,23 @@ export function HistoryView() {
                   }
                 }}
                 className={cn(
-                  ui.btnSecondary,
-                  "h-8 gap-1 border-[var(--intel)]/30 bg-[var(--intel-dim)] px-3 text-[10px] font-bold uppercase text-[var(--intel)] hover:border-[var(--intel)]/50"
+                  ui.btnToolbar,
+                  "border-[var(--intel)]/30 bg-[var(--intel-dim)] uppercase text-[var(--intel)] hover:border-[var(--intel)]/50"
                 )}
               >
-                <GitCompare className="h-3 w-3" /> Compare
+                <AppIcon icon={GitCompare} size="sm" /> Compare
               </button>
               <button
+                type="button"
                 onClick={() => {
                   if (confirm("Delete this report?")) deleteReport(report.id);
                 }}
                 className={cn(
-                  ui.btnSecondary,
-                  "h-8 gap-1 border-[var(--danger)]/30 px-3 text-[10px] font-bold uppercase text-[var(--danger)] hover:bg-[var(--danger)]/10"
+                  ui.btnToolbar,
+                  "border-[var(--danger)]/30 uppercase text-[var(--danger)] hover:bg-[var(--danger)]/10"
                 )}
               >
-                <Trash2 className="h-3 w-3" />
+                <AppIcon icon={Trash2} size="sm" />
               </button>
             </div>
           </Panel>

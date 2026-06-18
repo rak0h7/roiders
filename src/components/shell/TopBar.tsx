@@ -5,6 +5,8 @@ import { Search, Settings2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigation, NAV_ITEMS } from "@/context/NavigationContext";
 import { useSettings } from "@/context/SettingsContext";
+import { AppIcon } from "@/components/ui/AppIcon";
+import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
 const ACCENT: Record<string, string> = {
@@ -57,7 +59,7 @@ export function TopBar() {
       >
         <div className="flex min-w-0 flex-1 items-center gap-2.5 overflow-hidden pr-1 sm:gap-3 sm:pr-2">
           <div
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[9px] lg:hidden"
+            className="flex h-[var(--control-height-xs)] w-[var(--control-height-xs)] shrink-0 items-center justify-center rounded-[var(--radius-md)] lg:hidden"
             style={{ background: "var(--gradient-primary)", boxShadow: "0 2px 12px var(--labs-glow)" }}
             aria-hidden
           >
@@ -75,7 +77,7 @@ export function TopBar() {
             {showSubtitle && (
               <p
                 className={cn(
-                  "mt-0.5 hidden truncate text-[11px] leading-tight text-[var(--muted)] transition-all duration-200 ease-out md:block sm:text-xs",
+                  "mt-0.5 hidden truncate text-xs leading-tight text-[var(--muted)] transition-all duration-200 ease-out md:block",
                   scrolled && "pointer-events-none"
                 )}
                 style={{
@@ -97,7 +99,10 @@ export function TopBar() {
             <button
               type="button"
               onClick={() => setRoute("settings")}
-              className="hidden max-w-[140px] truncate rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11px] text-[var(--muted)] transition hover:border-[var(--border-strong)] hover:text-[var(--foreground)] sm:block"
+              className={cn(
+                ui.btnToolbar,
+                "hidden max-w-[140px] truncate border-[var(--border)] bg-[var(--bg-surface)] font-normal normal-case sm:block"
+              )}
               title={accountName}
             >
               {accountName}
@@ -107,9 +112,9 @@ export function TopBar() {
             type="button"
             onClick={() => setCommandOpen(true)}
             aria-label="Open command palette"
-            className="flex h-9 min-w-9 items-center justify-center gap-2 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] px-2.5 text-xs text-[var(--muted)] transition hover:border-[var(--border-strong)] hover:text-[var(--foreground)] sm:min-w-0 sm:px-3.5"
+            className={cn(ui.btnToolbar, "min-w-[var(--control-height-icon)] border-[var(--border)] bg-[var(--bg-surface)] font-normal normal-case sm:min-w-0")}
           >
-            <Search className="h-3.5 w-3.5 shrink-0" />
+            <AppIcon icon={Search} size="sm" />
             <span className="hidden md:inline">Search</span>
             <kbd className="hidden rounded border border-[var(--border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 font-mono text-[10px] lg:inline">
               ⌘K
@@ -119,9 +124,9 @@ export function TopBar() {
             type="button"
             onClick={() => setRoute("settings")}
             aria-label="Settings"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--muted)] transition hover:border-[var(--border-strong)] hover:text-[var(--foreground)]"
+            className={ui.btnIcon}
           >
-            <Settings2 className="h-4 w-4" />
+            <AppIcon icon={Settings2} size="sm" />
           </button>
         </div>
       </div>

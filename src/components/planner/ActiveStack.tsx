@@ -5,6 +5,7 @@ import { useCycleStore } from "@/store/cycleStore";
 import { getCompoundById } from "@/data/compounds";
 import { frequencyLabel } from "@/data/frequencies";
 import { formatDose } from "@/lib/cycleCalculations";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -30,18 +31,12 @@ export function ActiveStack() {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {compounds.length > 0 && (
-            <button
-              onClick={clearCycle}
-              className={cn(ui.btnGhost, "h-8 text-[10px] font-bold uppercase", ui.statDanger)}
-            >
+            <button type="button" onClick={clearCycle} className={cn(ui.btnToolbar, "uppercase", ui.statDanger)}>
               Clear All
             </button>
           )}
-          <button
-            onClick={() => setCompoundModalOpen(true)}
-            className={cn(ui.btnProtocol, "h-8 gap-1.5 rounded-full px-3 text-[10px] font-bold uppercase")}
-          >
-            <Plus className="h-3 w-3" />
+          <button type="button" onClick={() => setCompoundModalOpen(true)} className={cn(ui.btnProtocolSm, "rounded-full")}>
+            <AppIcon icon={Plus} size="sm" />
             Add
           </button>
         </div>
@@ -62,27 +57,29 @@ export function ActiveStack() {
                 className={cn(ui.cardInner, ui.cardHover, "flex items-center gap-3 p-3 hover:border-[var(--protocol)]/25")}
               >
                 <div
-                  className="h-9 w-1 shrink-0 self-stretch rounded-full"
+                  className="h-[var(--control-height-sm)] w-1 shrink-0 self-stretch rounded-full"
                   style={{ background: compound.color }}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-[var(--foreground)]">{compound.name}</p>
-                  <p className="text-[10px] text-[var(--muted)]">
+                  <p className="text-xs text-[var(--muted)]">
                     {formatDose(cc.doseMg, compound.unit)} • {frequencyLabel(cc.frequency)} • Wk {cc.activeWeeks[0]}–{cc.activeWeeks[1]}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
+                    type="button"
                     onClick={() => setConfiguringCompoundId(cc.compoundId)}
-                    className={cn(ui.btnGhost, "h-8 w-8 rounded-[var(--radius-sm)] p-0")}
+                    className={ui.btnIconSm}
                   >
-                    <Pencil className="h-3.5 w-3.5" />
+                    <AppIcon icon={Pencil} size="sm" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => removeCompound(cc.compoundId)}
-                    className={cn(ui.btnGhost, "h-8 w-8 rounded-[var(--radius-sm)] p-0 hover:text-[var(--danger)]")}
+                    className={cn(ui.btnIconSm, "hover:text-[var(--danger)]")}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <AppIcon icon={Trash2} size="sm" />
                   </button>
                 </div>
               </div>

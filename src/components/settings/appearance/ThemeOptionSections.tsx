@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from "react";
 import { Circle, Grid3X3, Hexagon, LayoutGrid, Upload, Zap } from "lucide-react";
+import { AppIcon } from "@/components/ui/AppIcon";
 import {
   FONT_FAMILY_OPTIONS,
   type ContentWidth,
@@ -68,20 +69,13 @@ export function IconLayoutSection({
               type="button"
               onClick={() => updateTheme({ iconStyle: id })}
               className={cn(
-                "flex flex-col items-center gap-2 rounded-[var(--radius-md)] border px-3 py-3 text-xs font-semibold transition",
+                "flex min-h-[var(--control-height)] flex-col items-center justify-center gap-2 rounded-[var(--radius-md)] border px-3 py-3 text-xs font-semibold transition",
                 theme.iconStyle === id
                   ? "border-[var(--accent)]/50 bg-[var(--labs-dim)] text-[var(--accent)]"
                   : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)]",
               )}
             >
-              <Icon
-                className={cn(
-                  theme.iconStyle === id && id === "filled" ? "fill-current" : "",
-                  theme.iconStyle === id && id === "bold" ? "stroke-[2.5]" : "",
-                  theme.iconStyle === id && id === "minimal" ? "opacity-70" : "",
-                )}
-                style={{ width: theme.iconSize, height: theme.iconSize }}
-              />
+              <AppIcon icon={Icon} />
               {label}
             </button>
           ))}
@@ -132,10 +126,10 @@ export function IconLayoutSection({
               type="button"
               onClick={() => updateTheme({ contentWidth: id })}
               className={cn(
-                "rounded-[var(--radius-md)] border px-3 py-2.5 text-xs font-semibold transition",
+                ui.segment,
                 theme.contentWidth === id
-                  ? "border-[var(--accent)]/50 bg-[var(--labs-dim)] text-[var(--accent)]"
-                  : "border-[var(--border)] text-[var(--muted)] hover:border-[var(--border-strong)]",
+                  ? ui.segmentActiveLabs
+                  : ui.segmentInactive,
               )}
             >
               {label}

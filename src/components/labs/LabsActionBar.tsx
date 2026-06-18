@@ -3,6 +3,7 @@
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { ArrowLeft, Flag, Save } from "lucide-react";
+import { AppIcon } from "@/components/ui/AppIcon";
 
 interface LabsActionBarProps {
   onBack?: () => void;
@@ -26,8 +27,8 @@ export function LabsActionBar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       {onBack ? (
-        <button onClick={onBack} className={cn(ui.btnGhost, "h-10 gap-1.5 text-xs")}>
-          <ArrowLeft className="h-3.5 w-3.5" />
+        <button type="button" onClick={onBack} className={cn(ui.btnGhost, "gap-1.5 text-xs")}>
+          <AppIcon icon={ArrowLeft} size="sm" />
           {backLabel}
         </button>
       ) : (
@@ -37,19 +38,24 @@ export function LabsActionBar({
         <div className="flex flex-wrap items-center gap-2">
           {showReviewFlags && onReviewFlags && (
             <button
+              type="button"
               onClick={onReviewFlags}
               className={cn(
-                ui.btnSecondary,
-                "gap-1.5 border-[var(--warning)]/30 bg-[var(--protocol-dim)] text-xs font-bold uppercase text-[var(--warning)] hover:bg-[var(--bg-hover)]"
+                ui.btnToolbar,
+                "border-[var(--warning)]/30 bg-[var(--protocol-dim)] uppercase text-[var(--warning)] hover:bg-[var(--bg-hover)]"
               )}
             >
-              <Flag className="h-3.5 w-3.5" />
+              <AppIcon icon={Flag} size="sm" />
               Review Flags
             </button>
           )}
           {showSaveInsights && onSaveInsights && (
-            <button onClick={onSaveInsights} className={cn(ui.btnPrimary, "gap-1.5 text-xs font-bold uppercase")}>
-              <Save className="h-3.5 w-3.5" />
+            <button
+              type="button"
+              onClick={onSaveInsights}
+              className={cn(ui.btnPrimary, "gap-1.5 text-xs font-bold uppercase")}
+            >
+              <AppIcon icon={Save} size="sm" />
               {saveInsightsLabel}
             </button>
           )}

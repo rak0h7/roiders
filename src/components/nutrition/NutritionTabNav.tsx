@@ -2,9 +2,7 @@
 
 import { useNavigation } from "@/context/NavigationContext";
 import { useNutritionStore } from "@/store/nutritionStore";
-import { TabNav } from "@/components/ui/TabNav";
-import { cn } from "@/lib/utils";
-import { ui } from "@/lib/ui";
+import { ModuleTabBar, ModuleTabButton } from "@/components/ui/ModuleTabButton";
 
 const TABS = [
   { id: "diary" as const, label: "Diary", route: "nutrition-diary" as const },
@@ -19,21 +17,16 @@ export function NutritionTabNav() {
   const { setRoute } = useNavigation();
 
   return (
-    <TabNav>
-      <nav className="glass inline-flex shrink-0 gap-1 rounded-full p-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setRoute(tab.route)}
-            className={cn(
-              "shrink-0 whitespace-nowrap rounded-full px-3.5 py-2 text-xs font-semibold transition sm:px-5",
-              nutritionView === tab.id ? ui.pillProtocolActive : "text-[var(--muted)] hover:text-[var(--foreground)]"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-    </TabNav>
+    <ModuleTabBar>
+      {TABS.map((tab) => (
+        <ModuleTabButton
+          key={tab.id}
+          active={nutritionView === tab.id}
+          onClick={() => setRoute(tab.route)}
+        >
+          {tab.label}
+        </ModuleTabButton>
+      ))}
+    </ModuleTabBar>
   );
 }

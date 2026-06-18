@@ -64,7 +64,7 @@ export function FoodSearch() {
           <button
             type="button"
             onClick={() => setAddMealSlot(null)}
-            className={cn(ui.btnGhost, "h-8 px-2 text-xs")}
+            className={cn(ui.btnToolbar, "px-2")}
           >
             Clear
           </button>

@@ -96,7 +96,7 @@ export function RoutineEditor({ routineId, onClose }: RoutineEditorProps) {
                       next[ei].sets[si].type = e.target.value as SetType;
                       setExercises(next);
                     }}
-                    className={cn(ui.input, "h-9 w-28 text-xs")}
+                    className={cn(ui.inputCompact, "w-28")}
                   >
                     {Object.entries(SET_TYPE_LABELS).map(([k, v]) => (
                       <option key={k} value={k}>{v}</option>
@@ -110,7 +110,7 @@ export function RoutineEditor({ routineId, onClose }: RoutineEditorProps) {
                       next[ei].sets[si].targetReps = parseInt(e.target.value, 10) || 0;
                       setExercises(next);
                     }}
-                    className={cn(ui.input, "h-9 w-20 text-xs")}
+                    className={cn(ui.inputCompact, "w-20")}
                     placeholder="Reps"
                   />
                   <span className="text-xs text-[var(--muted)]">reps</span>

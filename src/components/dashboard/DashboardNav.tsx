@@ -11,6 +11,7 @@ import {
   Shield,
 } from "lucide-react";
 import { useCycleStore } from "@/store/cycleStore";
+import { AppIcon } from "@/components/ui/AppIcon";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -30,22 +31,21 @@ export function DashboardNav() {
 
   return (
     <div className="no-print mb-6 flex justify-center">
-      <div className="inline-flex max-w-full flex-wrap justify-center gap-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] p-1.5">
+      <div className={cn(ui.navBar, "inline-flex max-w-full flex-wrap justify-center")}>
         {TABS.map((tab) => {
-          const Icon = tab.icon;
           const active = dashboardTab === tab.id;
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => setDashboardTab(tab.id)}
               className={cn(
-                "inline-flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-3 text-[10px] font-bold uppercase tracking-wider transition-all",
-                active
-                  ? ui.pillProtocolActive
-                  : cn(ui.btnGhost, "h-9 text-[var(--muted)]")
+                ui.navBarBtn,
+                "gap-1.5 uppercase tracking-wider",
+                active ? ui.pillProtocolActive : ui.navBarBtnInactive
               )}
             >
-              <Icon className="h-3 w-3 shrink-0" />
+              <AppIcon icon={tab.icon} size="sm" />
               <span className="hidden sm:inline">{tab.label}</span>
             </button>
           );

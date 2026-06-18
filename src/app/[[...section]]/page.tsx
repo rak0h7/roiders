@@ -10,7 +10,7 @@ function SessionLoader() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--labs)]"
+        className="h-[var(--control-height-xs)] w-[var(--control-height-xs)] animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--labs)]"
         aria-hidden
       />
     </div>

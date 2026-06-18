@@ -149,7 +149,7 @@ export function PaletteBuilderSection({
                     next[i] = e.target.value;
                     updateTheme({ customSwatches: next, preset: "custom" });
                   }}
-                  className={cn(ui.input, "h-8 font-mono text-[10px]")}
+                  className={cn(ui.inputCompact, "font-mono text-[10px]")}
                 />
               </div>
             ))}

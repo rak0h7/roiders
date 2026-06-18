@@ -1,6 +1,7 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
+import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -15,37 +16,34 @@ export function SecondaryNav() {
   const { secondaryTab, setSecondaryTab, cycleMode, setCycleMode, rangeMode, resetAll } = useApp();
 
   return (
-    <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)] p-1.5">
+    <div className={ui.navBar}>
       {ITEMS.map((item) => {
         const active = secondaryTab === item.id || cycleMode === item.id;
         return (
           <button
             key={item.id}
+            type="button"
             onClick={() => {
               if (item.id === "pre-cycle" || item.id === "during-cycle") {
                 setCycleMode(cycleMode === item.id ? null : item.id);
               }
               setSecondaryTab(secondaryTab === item.id ? null : item.id);
             }}
-            className={cn(
-              "rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium transition",
-              active
-                ? "bg-[var(--labs-dim)] text-[var(--labs)]"
-                : "text-[var(--muted)] hover:bg-[var(--bg-surface)] hover:text-[var(--foreground)]"
-            )}
+            className={cn(ui.navBarBtn, active ? ui.navBarBtnActive : ui.navBarBtnInactive)}
           >
             {item.label}
           </button>
         );
       })}
       {cycleMode && (
-        <span className="rounded-[var(--radius-sm)] bg-[var(--bg-surface)] px-2 py-1 text-[10px] text-[var(--muted)]">
+        <span className={cn(ui.tag, "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--muted)]")}>
           Ranges: {rangeMode === "lab" ? "lab reference" : "optimized"}
         </span>
       )}
       <button
+        type="button"
         onClick={() => confirm("Reset all lab data?") && resetAll()}
-        className="rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium text-[var(--danger)] transition hover:bg-[var(--danger)]/10"
+        className={cn(ui.navBarBtn, "text-[var(--danger)] hover:bg-[var(--danger)]/10")}
       >
         Reset
       </button>

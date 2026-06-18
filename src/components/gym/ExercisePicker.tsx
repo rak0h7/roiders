@@ -73,13 +73,13 @@ export function ExercisePicker({ open, onClose, onSelect, excludeIds = [] }: Exe
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                <select value={muscle} onChange={(e) => setMuscle(e.target.value as MuscleGroup | "all")} className={cn(ui.input, "h-9 w-auto text-xs")}>
+                <select value={muscle} onChange={(e) => setMuscle(e.target.value as MuscleGroup | "all")} className={cn(ui.inputCompact, "w-auto")}>
                   <option value="all">All muscles</option>
                   {Object.entries(MUSCLE_GROUP_LABELS).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>
                   ))}
                 </select>
-                <select value={equipment} onChange={(e) => setEquipment(e.target.value as Equipment | "all")} className={cn(ui.input, "h-9 w-auto text-xs")}>
+                <select value={equipment} onChange={(e) => setEquipment(e.target.value as Equipment | "all")} className={cn(ui.inputCompact, "w-auto")}>
                   <option value="all">All equipment</option>
                   {Object.entries(EQUIPMENT_LABELS).map(([k, v]) => (
                     <option key={k} value={k}>{v}</option>

@@ -160,7 +160,7 @@ export function NutritionDiary() {
                 <button
                   type="button"
                   onClick={() => handleAddToMeal(meal)}
-                  className={cn(ui.btnGhost, "h-8 gap-1 px-2 text-xs")}
+                  className={cn(ui.btnToolbar, "px-2")}
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add
@@ -202,7 +202,7 @@ export function NutritionDiary() {
                       <button
                         type="button"
                         onClick={() => removeEntry(selectedDate, entry.id)}
-                        className={cn(ui.btnGhost, "h-7 w-7 shrink-0 p-0 text-[var(--danger)]")}
+                        className={cn(ui.btnIconMicro, "text-[var(--danger)]")}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
