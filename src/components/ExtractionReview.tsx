@@ -44,10 +44,7 @@ export function ExtractionReview() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setLogView("entry")}
-            className={cn(ui.btnGhost, "text-xs")}
-          >
+          <button onClick={() => setLogView("entry")} className={cn(ui.btnGhost, "h-10 gap-1.5 text-xs")}>
             ← Back to Entry
           </button>
         </div>
@@ -64,16 +61,13 @@ export function ExtractionReview() {
             <button
               key={btn.label}
               onClick={btn.action}
-              className={cn(ui.btnSecondary, "h-8 px-3 text-[10px] font-bold uppercase")}
+              className={cn(ui.btnSecondary, "text-xs font-bold uppercase")}
             >
               {btn.label}
             </button>
           ))}
         </div>
-        <button
-          onClick={applySelected}
-          className={cn(ui.btnPrimary, "rounded-full px-5 text-xs font-bold uppercase shadow-[0_0_20px_var(--labs-glow)]")}
-        >
+        <button onClick={applySelected} className={cn(ui.btnPrimary, "text-xs font-bold uppercase")}>
           Apply Selected →
         </button>
       </div>

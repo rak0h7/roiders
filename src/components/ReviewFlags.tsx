@@ -2,6 +2,8 @@
 
 import { useApp } from "@/context/AppContext";
 import { Panel } from "@/components/ui/Panel";
+import { LabsActionBar } from "@/components/labs/LabsActionBar";
+import { useLabsActions } from "@/components/labs/useLabsActions";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { ChevronDown, AlertTriangle } from "lucide-react";
@@ -17,7 +19,8 @@ const SEVERITY_STYLES: Record<Severity, string> = {
 };
 
 export function ReviewFlags() {
-  const { reviewFlags, rangeMode, setRangeMode, extractionFileName, currentValues, saveReport, setMainTab } = useApp();
+  const { reviewFlags, rangeMode, setRangeMode, extractionFileName, setLogView } = useApp();
+  const { saveAndOpenInsights, openInsights, markerCount } = useLabsActions();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const toggle = (id: string) => {
@@ -29,21 +32,27 @@ export function ReviewFlags() {
     });
   };
 
-  const markerCount = Object.keys(currentValues).length;
-
   return (
     <div className="space-y-4">
+      <LabsActionBar
+        onBack={() => setLogView("entry")}
+        backLabel="Back to Entry"
+        showSaveInsights
+        onSaveInsights={saveAndOpenInsights}
+        saveInsightsLabel="Save & View Insights"
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className={cn(ui.pageTitle, "text-[var(--labs)]")}>Review Flags</h2>
-          <p className="text-[10px] text-[var(--muted)]">
+          <p className="text-xs text-[var(--muted)]">
             {extractionFileName || "manual entry"} • {new Date().toLocaleDateString("en-GB")}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setRangeMode(rangeMode === "lab" ? "optimized" : "lab")}
-            className={cn(ui.btnSecondary, "h-8 text-[10px] font-bold uppercase")}
+            className={cn(ui.btnSecondary, "text-xs font-bold uppercase")}
           >
             {rangeMode === "lab" ? "Lab Reference Mode" : "Optimized Match"} • Switch
           </button>
@@ -51,7 +60,7 @@ export function ReviewFlags() {
             onClick={() => setRangeMode("optimized")}
             className={cn(
               ui.btnSecondary,
-              "h-8 border-[var(--protocol)]/30 bg-[var(--protocol-dim)] text-[10px] font-bold uppercase text-[var(--protocol)]"
+              "border-[var(--protocol)]/30 bg-[var(--protocol-dim)] text-xs font-bold uppercase text-[var(--protocol)]"
             )}
           >
             1–3 Optimize Lab Range
@@ -66,10 +75,7 @@ export function ReviewFlags() {
         Active report date: {new Date().toLocaleDateString("en-GB")}
       </Panel>
 
-      <Panel
-        variant="protocol"
-        className="p-4 text-xs text-[var(--foreground)]/80"
-      >
+      <Panel variant="protocol" className="p-4 text-xs text-[var(--foreground)]/80">
         <AlertTriangle className="mb-1 inline h-4 w-4 text-[var(--warning)]" />{" "}
         <strong>Interpretation only.</strong> This is not medical advice. Do not stop, or change any medication,
         treatment, or cycle based on this automated read. Discuss any concerns — especially repeat-tested
@@ -79,20 +85,14 @@ export function ReviewFlags() {
       {reviewFlags.length === 0 ? (
         <Panel className="border-[var(--success)]/30 bg-[var(--success)]/5 p-8 text-center">
           <p className="text-[var(--success)]">No flags — all assessed markers within range.</p>
-          <button
-            onClick={() => setMainTab("insights")}
-            className={cn(ui.btnPrimary, "mt-4 text-xs font-bold uppercase")}
-          >
+          <button onClick={openInsights} className={cn(ui.btnPrimary, "mt-4 text-xs font-bold uppercase")}>
             View Insights
           </button>
         </Panel>
       ) : (
         <div className="space-y-2">
           {reviewFlags.map((flag) => (
-            <Panel
-              key={flag.markerId}
-              className="border-l-4 border-l-[var(--warning)] p-0"
-            >
+            <Panel key={flag.markerId} className="border-l-4 border-l-[var(--warning)] p-0">
               <button
                 onClick={() => toggle(flag.markerId)}
                 className="flex w-full items-start justify-between p-4 text-left"
@@ -101,7 +101,12 @@ export function ReviewFlags() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-display font-semibold text-[var(--foreground)]">{flag.name}</span>
                     <span className="text-[10px] text-[var(--muted)]">{flag.date}</span>
-                    <span className={cn("rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase", SEVERITY_STYLES[flag.severity])}>
+                    <span
+                      className={cn(
+                        "rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase",
+                        SEVERITY_STYLES[flag.severity]
+                      )}
+                    >
                       {flag.severity === "stop" ? "STOP" : flag.severity.toUpperCase()}
                     </span>
                     <span className="text-[9px] text-[var(--muted-2)]">Interpretation only - No dosing</span>
@@ -134,18 +139,6 @@ export function ReviewFlags() {
           ))}
         </div>
       )}
-
-      <div className="flex gap-2">
-        <button
-          onClick={() => {
-            saveReport();
-            setMainTab("insights");
-          }}
-          className={cn(ui.btnPrimary, "text-xs font-bold uppercase")}
-        >
-          Save & View Insights
-        </button>
-      </div>
     </div>
   );
 }
