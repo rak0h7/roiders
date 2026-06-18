@@ -71,13 +71,19 @@ async function promoteOwner(profileId: string, keyFingerprint: string) {
 
   if (hasSupabaseServiceKey()) {
     const admin = createAdminClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("username, display_name")
+      .eq("id", profileId)
+      .maybeSingle();
+
     await admin.from("profiles").update({ is_admin: false }).neq("id", profileId);
     await admin
       .from("profiles")
       .update({
         is_admin: true,
-        username: OWNER_USERNAME,
-        display_name: OWNER_DISPLAY_NAME,
+        username: profile?.username ?? OWNER_USERNAME,
+        display_name: profile?.display_name ?? OWNER_DISPLAY_NAME,
         updated_at: new Date().toISOString(),
       })
       .eq("id", profileId);
@@ -87,7 +93,10 @@ async function promoteOwner(profileId: string, keyFingerprint: string) {
   await queryPg(`update public.profiles set is_admin = false where id <> $1`, [profileId]);
   await queryPg(
     `update public.profiles
-     set is_admin = true, username = $2, display_name = $3, updated_at = now()
+     set is_admin = true,
+         username = coalesce(username, $2),
+         display_name = coalesce(display_name, $3),
+         updated_at = now()
      where id = $1`,
     [profileId, OWNER_USERNAME, OWNER_DISPLAY_NAME],
   );
