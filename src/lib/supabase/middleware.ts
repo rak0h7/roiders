@@ -5,7 +5,7 @@ import { loadUserProfile } from "@/lib/profile";
 import { fetchSiteSettings } from "@/lib/siteSettings";
 
 const AUTH_ROUTES = ["/auth/login", "/auth/signup", "/api/auth"];
-const PUBLIC_ROUTES = ["/maintenance", "/terms", "/privacy", "/robots.txt", "/sitemap.xml"];
+const PUBLIC_ROUTES = ["/maintenance", "/terms", "/privacy", "/about", "/robots.txt", "/sitemap.xml"];
 
 function isAuthRoute(pathname: string) {
   return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));

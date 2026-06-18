@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono, Inter, Orbitron, Syne } from "next/font/google";
-import { getSiteUrl } from "@/lib/siteUrl";
+import { buildPageMetadata, DEFAULT_SITE_DESCRIPTION } from "@/lib/seo";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SiteConfigProvider } from "@/context/SiteConfigContext";
@@ -37,18 +37,13 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
-  title: "Roiders Club — Labs, Gear, Training & Nutrition",
-  description:
-    "Private performance health platform. Track bloodwork, gear, training, and nutrition in one command center with cross-module intelligence.",
+  ...buildPageMetadata({
+    title: "Roiders Club — Labs, Gear, Training & Nutrition",
+    description: DEFAULT_SITE_DESCRIPTION,
+    path: "/",
+  }),
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Roiders Club" },
-  openGraph: {
-    title: "Roiders Club — Your health command center",
-    description:
-      "Labs, gear, training, and nutrition trackers in one place. Private access-key auth, optional cloud sync.",
-    type: "website",
-  },
 };
 
 export const viewport = {

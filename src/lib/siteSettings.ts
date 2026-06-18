@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { DEFAULT_SITE_DESCRIPTION } from "@/lib/seo";
 import type { AppRoute } from "@/context/NavigationContext";
 import type { RangeMode } from "@/lib/types";
 
@@ -65,7 +66,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   default_labs_range_mode: "optimized",
   legal_contact_email: "",
   signup_closed_message: "",
-  site_description: "",
+  site_description: DEFAULT_SITE_DESCRIPTION,
   announcement_guest_visible: false,
   updated_at: new Date().toISOString(),
 };

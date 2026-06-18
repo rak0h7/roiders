@@ -19,7 +19,8 @@
     "deploy:preview": "vercel --yes",
     "assets:tiktok": "node scripts/generate-tiktok-assets.mjs",
     "assets:avatar": "node scripts/generate-profile-avatar.mjs",
-    "assets:labs-analysis": "node scripts/generate-labs-analysis-assets.mjs"
+    "assets:labs-analysis": "node scripts/generate-labs-analysis-assets.mjs",
+    "assets:og": "node scripts/generate-og-image.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
