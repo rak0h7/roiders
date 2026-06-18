@@ -1,6 +1,7 @@
 import { getCompoundById } from "@/data/compounds";
 import type { CycleCompound } from "@/lib/cycleTypes";
 import { calculateRiskProfile, hasHepatotoxicOrals } from "@/lib/cycleCalculations";
+import { COMPOUND_MONITOR_MARKERS } from "@/lib/cycleLabFlags";
 import type { AppRoute } from "@/context/NavigationContext";
 import type { MarkerValue, ReviewFlag } from "@/lib/types";
 import { macroSummary, pctOfGoal, sumNutrients } from "@/lib/nutritionCalculations";
@@ -274,31 +275,18 @@ export function generateCrossAlerts(
     }
   }
 
-  const COMPOUND_MARKERS: Record<string, { markers: string[]; title: string; message: string }> = {
-    anavar: { markers: ["hdl", "ldl", "alt"], title: "Anavar — monitor lipids & liver", message: "Anavar commonly suppresses HDL and can elevate liver enzymes." },
-    winstrol: { markers: ["hdl", "ldl", "alt", "ast"], title: "Winstrol — lipid & liver watch", message: "Winstrol is harsh on HDL and hepatotoxicity risk rises with dose." },
-    "winstrol-inj": { markers: ["hdl", "ldl"], title: "Winstrol — lipid watch", message: "Injectable winstrol still crushes HDL despite avoiding first-pass liver load." },
-    turinabol: { markers: ["alt", "ast", "hdl"], title: "Turinabol — liver & lipids", message: "Tbol is hepatotoxic with moderate lipid impact — track ALT/AST and HDL." },
-    anadrol: { markers: ["alt", "ast", "hematocrit"], title: "Anadrol — liver & CBC", message: "Anadrol can elevate liver enzymes and hematocrit." },
-    dbol: { markers: ["estradiol", "alt"], title: "Dianabol — estrogen & liver", message: "Dbol aromatizes heavily — watch estradiol and liver markers." },
-    "test-e": { markers: ["estradiol", "hematocrit", "testosterone"], title: "Testosterone — E2 & hematocrit", message: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-    "test-c": { markers: ["estradiol", "hematocrit", "testosterone"], title: "Testosterone — E2 & hematocrit", message: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-    deca: { markers: ["prolactin", "estradiol"], title: "Deca — prolactin watch", message: "19-nor compounds often elevate prolactin — monitor on-cycle." },
-    npp: { markers: ["prolactin", "estradiol"], title: "NPP — prolactin watch", message: "19-nor compounds often elevate prolactin — monitor on-cycle." },
-    "tren-a": { markers: ["prolactin", "alt", "hdl"], title: "Tren — multi-system load", message: "Tren affects prolactin, lipids, and liver stress — broad panel recommended." },
-    "tren-e": { markers: ["prolactin", "alt", "hdl"], title: "Tren — multi-system load", message: "Tren affects prolactin, lipids, and liver stress — broad panel recommended." },
-  };
-
   for (const compound of compounds) {
-    const hint = COMPOUND_MARKERS[compound.compoundId];
+    const hint = COMPOUND_MONITOR_MARKERS[compound.compoundId];
     if (!hint) continue;
+    const def = getCompoundById(compound.compoundId);
+    const title = def ? `${def.shortName} — on-cycle monitoring` : "On-cycle monitoring";
     const missing = hint.markers.filter((m) => !values[m]);
     if (missing.length === hint.markers.length) {
       alerts.push({
         id: `markers-missing-${compound.compoundId}`,
         severity: "info",
-        title: hint.title,
-        message: `${hint.message} None of the expected markers (${hint.markers.join(", ")}) are on your current panel.`,
+        title,
+        message: `${hint.note} None of the expected markers (${hint.markers.join(", ")}) are on your current panel.`,
         recommendation: "Add these markers to your next blood draw for on-cycle monitoring.",
         route: "bloodwork-log",
         markers: hint.markers,

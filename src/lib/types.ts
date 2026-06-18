@@ -56,21 +56,26 @@ export interface ExtractedMarker extends MarkerValue {
   needsReview?: boolean;
 }
 
+export type ReviewFlagSource = "lab" | "cycle";
+
 export interface ReviewFlag {
   markerId: string;
   name: string;
-  value: number;
-  unit: string;
+  value?: number;
+  unit?: string;
   sourceValue?: number;
   sourceUnit?: string;
   date: string;
   severity: Severity;
-  labRange: string;
-  optimalRange: string;
+  labRange?: string;
+  optimalRange?: string;
   cautionRange?: string;
   strictThreshold?: number;
   deviation: string;
   noDosing: boolean;
+  source?: ReviewFlagSource;
+  relatedCompounds?: string[];
+  recommendation?: string;
 }
 
 export interface CategoryScore {

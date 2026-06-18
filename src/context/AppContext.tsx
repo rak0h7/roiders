@@ -4,7 +4,8 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
 import { parseCSV, parseLabText } from "@/lib/parser";
 import { extractTextFromPDF } from "@/lib/pdf";
-import { buildReviewFlags } from "@/lib/ranges";
+import { buildMergedReviewFlags } from "@/lib/cycleLabFlags";
+import { useCycleStore } from "@/store/cycleStore";
 import { calculateCategoryScores, calculateOverallScore } from "@/lib/scoring";
 import { generateId, loadReports, saveReports } from "@/lib/storage";
 import type {
@@ -38,7 +39,7 @@ interface AppContextValue extends AppState {
   resetAll: () => void;
   setCompareReports: (a: string | null, b: string | null) => void;
   setShowComparison: (show: boolean) => void;
-  reviewFlags: ReturnType<typeof buildReviewFlags>;
+  reviewFlags: ReturnType<typeof buildMergedReviewFlags>;
   categoryScores: ReturnType<typeof calculateCategoryScores>;
   overallScore: ReturnType<typeof calculateOverallScore>;
   activeReport: BloodworkReport | null;
@@ -62,6 +63,7 @@ const initialState: AppState = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
+  const compounds = useCycleStore((s) => s.compounds);
   const [state, setState] = useState<AppState>(() => ({
     ...initialState,
     reports: loadReports(),
@@ -273,12 +275,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const reviewFlags = useMemo(
     () =>
-      buildReviewFlags(
+      buildMergedReviewFlags(
         Object.values(state.currentValues),
         new Date().toLocaleDateString("en-GB"),
-        state.rangeMode
+        state.rangeMode,
+        compounds,
+        state.currentValues
       ),
-    [state.currentValues, state.rangeMode]
+    [state.currentValues, state.rangeMode, compounds]
   );
 
   const categoryScores = useMemo(
