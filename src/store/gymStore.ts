@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { createCloudPersistStorage } from "@/lib/persistStorage";
 import { format } from "date-fns";
 import type {
   ActiveWorkout,
@@ -359,6 +360,9 @@ export const useGymStore = create<GymState>()(
         }
       },
     }),
-    { name: "roiders-club-gym-store-v1" }
+    {
+      name: "roiders-club-gym-store-v1",
+      storage: createJSONStorage(() => createCloudPersistStorage("gym")),
+    }
   )
 );

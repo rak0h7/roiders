@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
 import type { RangeMode } from "@/lib/types";
-import { LOCAL_STORAGE_KEYS } from "@/lib/cloudSync";
+import { LOCAL_STORAGE_KEYS, writeLocalModule } from "@/lib/cloudSync";
 import {
   DEFAULT_THEME,
   applyThemeToDocument,
@@ -73,7 +73,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   const persist = useCallback((next: AppSettings) => {
     setSettings(next);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.settings, JSON.stringify(next));
+    writeLocalModule("settings", next);
   }, []);
 
   const updateSettings = useCallback(

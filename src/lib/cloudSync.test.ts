@@ -4,6 +4,7 @@ import {
   isNutritionPersistedDataEmpty,
   LOCAL_STORAGE_KEYS,
   readLocalModule,
+  shouldPushModule,
   writeLocalModule,
 } from "./cloudSync";
 
@@ -41,6 +42,12 @@ describe("cloudSync", () => {
   it("treats empty labs array as empty module data", () => {
     expect(isModuleDataEmpty("labs", [])).toBe(true);
     expect(isModuleDataEmpty("labs", [{ id: "r1", name: "Panel", date: "2026-01-01", values: [] }])).toBe(false);
+  });
+
+  it("only pushes modules when local is newer than remote", () => {
+    writeLocalModule("labs", [{ id: "r1", name: "Panel", date: "2026-01-01", values: [] }], "2026-06-02T00:00:00.000Z");
+    expect(shouldPushModule("labs", "2026-06-01T00:00:00.000Z")).toBe(true);
+    expect(shouldPushModule("labs", "2026-06-03T00:00:00.000Z")).toBe(false);
   });
 
   it("treats nutrition with onboarding or custom goals as non-empty", () => {

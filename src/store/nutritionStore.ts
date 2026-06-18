@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { createCloudPersistStorage } from "@/lib/persistStorage";
 import { DEFAULT_GOALS, type DayJournal, type FoodItem, type FoodLogEntry, type MealSlot } from "@/lib/nutritionTypes";
 import { entryFromFood, todayStr, uid } from "@/lib/nutritionCalculations";
 import { calcMacroGoals, type NutritionProfile } from "@/lib/nutritionProfile";
@@ -132,6 +133,7 @@ export const useNutritionStore = create<NutritionState>()(
     }),
     {
       name: "roiders-club-nutrition-store-v1",
+      storage: createJSONStorage(() => createCloudPersistStorage("nutrition")),
       version: 2,
       migrate: (persisted, version) => {
         const state = persisted as Partial<NutritionState>;

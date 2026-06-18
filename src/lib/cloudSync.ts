@@ -39,10 +39,19 @@ export function readLocalModule(module: CloudModule): unknown | null {
   }
 }
 
-export function writeLocalModule(module: CloudModule, data: unknown, updatedAt?: string): void {
+export function writeLocalModule(
+  module: CloudModule,
+  data: unknown,
+  updatedAt?: string,
+  options?: { touchLocal?: boolean }
+): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(LOCAL_STORAGE_KEYS[module], JSON.stringify(data));
-  if (updatedAt) setLocalUpdatedAt(module, updatedAt);
+  if (updatedAt) {
+    setLocalUpdatedAt(module, updatedAt);
+  } else if (options?.touchLocal !== false) {
+    touchLocalModule(module);
+  }
 }
 
 function readSyncMeta(): SyncMeta {
@@ -68,11 +77,44 @@ function setLocalUpdatedAt(module: CloudModule, updatedAt: string): void {
   writeSyncMeta({ ...readSyncMeta(), [module]: updatedAt });
 }
 
-function remoteHasMoreData(module: CloudModule, local: unknown, remote: unknown): boolean {
-  if (module === "labs" && Array.isArray(local) && Array.isArray(remote)) {
-    return remote.length > local.length;
+export function touchLocalModule(module: CloudModule, at = new Date().toISOString()): void {
+  setLocalUpdatedAt(module, at);
+}
+
+function moduleRichness(module: CloudModule, data: unknown): number {
+  if (data == null) return 0;
+  if (module === "labs" && Array.isArray(data)) return data.length;
+  if (typeof data === "object" && "state" in data) {
+    const state = (data as { state: Record<string, unknown> }).state;
+    if (module === "cycle") return (state.compounds as unknown[])?.length ?? 0;
+    if (module === "gym") {
+      const history = (state.history as unknown[])?.length ?? 0;
+      const routines = (state.routines as unknown[])?.length ?? 0;
+      return history + routines;
+    }
+    if (module === "nutrition") {
+      const logs = state.logs as Record<string, unknown[]> | undefined;
+      if (!logs) return 0;
+      return Object.keys(logs).filter((d) => (logs[d]?.length ?? 0) > 0).length;
+    }
   }
-  return false;
+  if (module === "settings" && typeof data === "object") {
+    return Object.keys(data as object).length;
+  }
+  return 1;
+}
+
+function remoteHasMoreData(module: CloudModule, local: unknown, remote: unknown): boolean {
+  return moduleRichness(module, remote) > moduleRichness(module, local);
+}
+
+export function shouldPushModule(module: CloudModule, remoteUpdatedAt: string | null): boolean {
+  const data = readLocalModule(module);
+  if (data == null || isModuleDataEmpty(module, data)) return false;
+  const localUpdatedAt = getLocalUpdatedAt(module);
+  if (!localUpdatedAt) return true;
+  if (!remoteUpdatedAt) return true;
+  return new Date(localUpdatedAt).getTime() > new Date(remoteUpdatedAt).getTime();
 }
 
 function shouldTakeRemote(
@@ -155,7 +197,7 @@ export async function pullUserData(
     if (conflict) conflicts.push(conflict);
 
     if (shouldTakeRemote(mod, local, remote, remoteUpdatedAt)) {
-      writeLocalModule(mod, remote, remoteUpdatedAt);
+      writeLocalModule(mod, remote, remoteUpdatedAt, { touchLocal: false });
       pulled.push(mod);
       merged = true;
     }
@@ -184,19 +226,40 @@ export async function resolveSyncConflict(
 
   if (error) throw error;
   if (!data) return;
-  writeLocalModule(module, data.data, data.updated_at as string);
+  writeLocalModule(module, data.data, data.updated_at as string, { touchLocal: false });
+}
+
+async function fetchRemoteUpdatedAt(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<Map<CloudModule, string>> {
+  const { data, error } = await supabase
+    .from("user_modules")
+    .select("module, updated_at")
+    .eq("user_id", userId);
+
+  if (error) throw error;
+
+  const map = new Map<CloudModule, string>();
+  for (const row of data ?? []) {
+    map.set(row.module as CloudModule, row.updated_at as string);
+  }
+  return map;
 }
 
 export async function pushUserData(
   supabase: SupabaseClient,
   userId: string,
-  modules: CloudModule[] = Object.keys(LOCAL_STORAGE_KEYS) as CloudModule[]
+  modules: CloudModule[] = Object.keys(LOCAL_STORAGE_KEYS) as CloudModule[],
+  remoteTimes?: Map<CloudModule, string>
 ): Promise<CloudModule[]> {
+  const remoteMap = remoteTimes ?? (await fetchRemoteUpdatedAt(supabase, userId));
   const now = new Date().toISOString();
   const rows: { user_id: string; module: CloudModule; data: unknown; updated_at: string }[] = [];
   const pushed: CloudModule[] = [];
 
   for (const cloudModule of modules) {
+    if (!shouldPushModule(cloudModule, remoteMap.get(cloudModule) ?? null)) continue;
     const data = readLocalModule(cloudModule);
     if (data == null || isModuleDataEmpty(cloudModule, data)) continue;
     rows.push({ user_id: userId, module: cloudModule, data, updated_at: now });
@@ -213,14 +276,23 @@ export async function pushUserData(
   return pushed;
 }
 
-/** Pull remote changes first, then push only non-empty local modules. */
+/** Pull remote changes first, then push only modules with newer local edits. */
 export async function syncUserData(
   supabase: SupabaseClient,
   userId: string
 ): Promise<SyncResult> {
   const pull = await pullUserData(supabase, userId);
-  const pushed = await pushUserData(supabase, userId);
+  const remoteTimes = await fetchRemoteUpdatedAt(supabase, userId);
+  const pushed = await pushUserData(supabase, userId, undefined, remoteTimes);
   return { pulled: pull.pulled, pushed, merged: pull.merged, conflicts: pull.conflicts };
+}
+
+/** Pull cloud data and rehydrate all client stores (sign-in / session bootstrap). */
+export async function bootstrapUserCloudSync(
+  supabase: SupabaseClient,
+  userId: string
+): Promise<{ pulled: CloudModule[]; merged: boolean; conflicts: SyncConflict[] }> {
+  return pullUserData(supabase, userId);
 }
 
 function goalsMatchDefaults(goals: unknown): boolean {

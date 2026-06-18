@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { createCloudPersistStorage } from "@/lib/persistStorage";
 import type { CompoundCategory } from "@/data/compounds";
 import { getCompoundById } from "@/data/compounds";
 import { DEFAULT_DOSES, inferDefaultDose } from "@/data/frequencies";
@@ -141,6 +142,7 @@ export const useCycleStore = create<CycleState>()(
     }),
     {
       name: "cycle-planner-store-v2",
+      storage: createJSONStorage(() => createCloudPersistStorage("cycle")),
       merge: (persisted, current) => {
         const p = persisted as Partial<CycleState> | undefined;
         const compounds = ensureCompoundIds(p?.compounds ?? current.compounds);
