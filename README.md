@@ -1,65 +1,49 @@
-# Roiders.Club
+# Roiders Club
 
-AAS cycle tracker, compound library, bloodwork logger, and pharmacokinetic visualiser.
+Labs, protocol, training, and nutrition — one health command center.
 
-**Stack:** React (Vite) · Tailwind CSS · Supabase · Recharts · TanStack Query
+## Authentication (access key)
 
-## Quick start (local)
+Roiders Club uses **private access keys** — no email, no verification links.
+
+1. **Create account** → generates a key like `roiders_k7xm_9p2q_rn4w_h8tj`
+2. **Save it immediately** — shown once, cannot be recovered
+3. **Sign in** → paste your key
+
+## Local development
 
 ```bash
+cp .env.example .env.local   # add anon + service_role keys
 npm install
-cp .env.example .env.local   # add Supabase credentials
-npm run dev
+npm run dev                  # http://localhost:1337
 ```
 
 ## Supabase setup
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** → paste and run `supabase/migrations/001_initial_schema.sql`
-3. Copy your project URL and anon key from **Settings → API**
-4. Add to `.env.local`:
-   ```
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
-   ```
-5. **Disable email confirmation for development** (avoids Supabase's strict built-in email rate limits):
-   - Supabase Dashboard → **Authentication** → **Providers** → **Email**
-   - Turn off **Confirm email**
-   - Signups will work immediately without a confirmation email
-6. Seed compounds — add the **service role key** to `.env.local` (never commit this):
-   ```
-   SUPABASE_SERVICE_ROLE_KEY=eyJ...
-   npm run seed
-   ```
-   You should see `Done. Upserted 15 compounds.` Compounds will then appear in the cycle builder and Library.
+Project: `https://tfcplpxcorcqbjqbukem.supabase.co`
 
-## Deploy to Vercel
+1. [SQL Editor](https://supabase.com/dashboard/project/tfcplpxcorcqbjqbukem/sql/new) → run `supabase/schema.sql`
+2. **Authentication → Providers** → disable email signups (optional; keys are used instead)
+3. Copy keys from **Project Settings → API** into `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (anon public)
+   - `SUPABASE_SERVICE_ROLE_KEY` (server only)
 
-1. Push this repo to GitHub
-2. Import the repo in [Vercel](https://vercel.com)
-3. Add environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-4. Deploy — Vite builds automatically
+## Deploy (Vercel)
 
-## Project structure
+Production: https://roiders.vercel.app
 
-```
-compounds/          Compound .md files (source of truth)
-scripts/            Seed script for compounds
-src/
-  components/       UI, charts, layout
-  contexts/         Auth
-  lib/              Supabase client, PK engine, utils
-  pages/            Route pages
-supabase/
-  migrations/       SQL schema + RLS
+```bash
+npm run deploy
 ```
 
-## Features
+Required environment variables on Vercel:
 
-- **Cycle builder & tracker** — compounds, doses, Gantt timeline, dose logging
-- **PK engine** — half-life decay curves (HalfLife Kinetics–style)
-- **Bloodwork** — panels, marker flagging, trend charts
-- **Compound library** — A–Z index from seeded markdown data
-- **Calculators** — half-life, ester weight, weekly dose, reference ranges
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (required for key auth API routes)
+
+## Cloud sync
+
+- Sign-in required (access key)
+- Data syncs automatically while signed in
+- Modules: labs, cycle, gym, nutrition, settings

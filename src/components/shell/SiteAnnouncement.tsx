@@ -1,0 +1,68 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { ExternalLink, Megaphone, X } from "lucide-react";
+import { useSiteConfig } from "@/context/SiteConfigContext";
+import { cn } from "@/lib/utils";
+
+const DISMISS_KEY = "roiders-announcement-dismissed";
+
+const LEVEL_STYLES = {
+  info: "border-[var(--intel)]/30 bg-[var(--intel-dim)] text-[var(--intel)]",
+  warning: "border-[var(--warning)]/30 bg-[var(--warning)]/10 text-[var(--warning)]",
+  danger: "border-[var(--danger)]/30 bg-[var(--danger)]/10 text-[var(--danger)]",
+} as const;
+
+export function SiteAnnouncement() {
+  const { settings } = useSiteConfig();
+  const [dismissed, setDismissed] = useState(true);
+
+  useEffect(() => {
+    if (!settings.announcement_enabled || !settings.announcement_message.trim()) return;
+    const token = `${settings.updated_at}:${settings.announcement_message}`;
+    setDismissed(localStorage.getItem(DISMISS_KEY) === token);
+  }, [settings]);
+
+  if (!settings.announcement_enabled || !settings.announcement_message.trim() || dismissed) {
+    return null;
+  }
+
+  const token = `${settings.updated_at}:${settings.announcement_message}`;
+  const link = settings.announcement_link?.trim();
+
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-3 border-b px-4 py-2.5 text-sm",
+        LEVEL_STYLES[settings.announcement_level]
+      )}
+    >
+      <Megaphone className="mt-0.5 h-4 w-4 shrink-0" />
+      <div className="flex-1 leading-relaxed">
+        <p>{settings.announcement_message}</p>
+        {link && (
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex items-center gap-1 text-xs font-medium underline underline-offset-2"
+          >
+            Learn more
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.setItem(DISMISS_KEY, token);
+          setDismissed(true);
+        }}
+        className="shrink-0 rounded p-1 opacity-70 transition hover:opacity-100"
+        aria-label="Dismiss announcement"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
