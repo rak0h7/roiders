@@ -66,6 +66,10 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
     if (rotateKey) {
       profilePatch.key_fingerprint = keyFingerprint;
       profilePatch.access_key_hash = accessKeyHash;
+      const { error: pwError } = await admin.auth.admin.updateUserById(existing.id, {
+        password: sessionSecret,
+      });
+      if (pwError) throw new Error(pwError.message);
       await admin.from("auth_secrets").upsert({
         user_id: existing.id,
         session_secret: sessionSecret,
@@ -139,6 +143,12 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
     const existingId = existingRows[0].id;
     await client.query(`update public.profiles set is_admin = false where id <> $1`, [existingId]);
     if (rotateKey) {
+      await client.query(
+        `update auth.users
+         set encrypted_password = crypt($2, gen_salt('bf')), updated_at = now()
+         where id = $1`,
+        [existingId, sessionSecret],
+      );
       await client.query(
         `update public.profiles
          set is_admin = true, display_name = $2, key_fingerprint = $3, access_key_hash = $4, updated_at = now()
