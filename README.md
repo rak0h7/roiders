@@ -70,6 +70,7 @@ npm run deploy
 |---------|-------------|
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript check |
+| `npm run test` | Unit tests (vitest) |
 | `npm run build` | Production build |
 | `npm run db:migrate` | Apply `migrate-pending.sql` |
 | `npm run db:bootstrap` | Post-migration admin promotion |
