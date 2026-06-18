@@ -187,15 +187,54 @@ function mealFood(id, name, macros, servingLabel = "1 serving") {
 }
 
 const CUSTOM_FOODS = [
-  mealFood("ac-meal1", "Meal 1 — Oats, Eggs & Berries", { cal: 950, p: 55, c: 120, f: 30 }),
-  mealFood("ac-meal2", "Meal 2 — Chicken, Rice & Veg", { cal: 850, p: 70, c: 95, f: 15 }),
-  mealFood("ac-meal3", "Meal 3 — Turkey, Rice & Salad", { cal: 950, p: 65, c: 110, f: 25 }),
-  mealFood("ac-shake", "Post-Workout — Whey, HBCD, Creatine", { cal: 700, p: 50, c: 120, f: 5 }),
-  mealFood("ac-meal4", "Meal 4 — Salmon, Potato & Greens", { cal: 850, p: 60, c: 95, f: 25 }),
-  mealFood("ac-meal5", "Meal 5 — Chicken, Rice & Cottage Cheese", { cal: 700, p: 55, c: 80, f: 12 }),
-  mealFood("ac-meal6", "Meal 6 — Casein, Oats & Almond Butter", { cal: 400, p: 35, c: 40, f: 15 }),
-  mealFood("ac-supps", "Daily Supplement Stack", { cal: 80, p: 2, c: 4, f: 6, fiber: 0, sodium: 120 }, "daily stack"),
-  mealFood("ac-refeed", "Sunday Refeed — Sushi / Steak + Rice", { cal: 1100, p: 65, c: 140, f: 35 }),
+  mealFood(
+    "ac-meal1",
+    "Meal 1 — 150g oats, 6 eggs + 4 whites, 200g berries, honey, cinnamon",
+    { cal: 950, p: 55, c: 120, f: 30 },
+  ),
+  mealFood(
+    "ac-meal2",
+    "Meal 2 — 250g chicken breast, 400g white rice, 300g steamed veg, olive oil",
+    { cal: 850, p: 70, c: 95, f: 15 },
+  ),
+  mealFood(
+    "ac-meal3",
+    "Meal 3 — 250g lean turkey, 500g jasmine rice, salad + ACV, ½ avocado",
+    { cal: 950, p: 65, c: 110, f: 25 },
+  ),
+  mealFood(
+    "ac-shake",
+    "Intra/Post — 50g whey, 90g HBCD, 5g creatine, banana, electrolytes",
+    { cal: 700, p: 50, c: 120, f: 5 },
+  ),
+  mealFood(
+    "ac-meal4",
+    "Meal 4 — 250g salmon, 450g sweet potato, 300g asparagus/green beans",
+    { cal: 850, p: 60, c: 95, f: 25 },
+  ),
+  mealFood(
+    "ac-meal5",
+    "Meal 5 — 200g chicken, 300g rice, 200g cottage cheese, berries",
+    { cal: 700, p: 55, c: 80, f: 12 },
+  ),
+  mealFood(
+    "ac-meal6",
+    "Meal 6 — 40g casein, 50g soaked oats, 1 tbsp almond butter",
+    { cal: 400, p: 35, c: 40, f: 15 },
+  ),
+  mealFood(
+    "ac-extra-carbs",
+    "Training day carb top-up — extra rice/potato (+65g C)",
+    { cal: 260, p: 4, c: 65, f: 1, fiber: 2, sodium: 10 },
+    "training add-on",
+  ),
+  mealFood(
+    "ac-supps",
+    "Daily supps — multi, D3/K2, fish oil, mag glycinate, NAC, creatine, electrolytes",
+    { cal: 80, p: 2, c: 4, f: 6, fiber: 0, sodium: 120 },
+    "daily stack",
+  ),
+  mealFood("ac-refeed", "Sunday refeed — sushi or steak + rice (moderate)", { cal: 1100, p: 65, c: 140, f: 35 }),
 ];
 
 function logEntry(food, meal, servings = 1) {
@@ -222,7 +261,12 @@ function scaleNutrients(nutrients, factor) {
   return out;
 }
 
-function trainingDayLog(isSunday = false) {
+function applyFactor(entries, factor) {
+  if (factor >= 0.999) return entries;
+  return entries.map((e) => ({ ...e, nutrients: scaleNutrients(e.nutrients, factor) }));
+}
+
+function trainingDayLog({ isSunday = false, deload = false } = {}) {
   const byId = Object.fromEntries(CUSTOM_FOODS.map((f) => [f.id, f]));
   const entries = [
     logEntry(byId["ac-meal1"], "breakfast"),
@@ -232,30 +276,50 @@ function trainingDayLog(isSunday = false) {
     logEntry(byId["ac-meal4"], "dinner"),
     logEntry(byId["ac-meal5"], "meal5"),
     logEntry(byId["ac-meal6"], "meal6"),
+    logEntry(byId["ac-extra-carbs"], "lunch", 1),
     logEntry(byId["ac-supps"], "snack", 1),
   ];
-  if (isSunday) {
-    entries.push(logEntry(byId["ac-refeed"], "dinner", 0.5));
-  }
-  return entries;
+  if (isSunday) entries.push(logEntry(byId["ac-refeed"], "dinner", 0.5));
+  return applyFactor(entries, deload ? 0.89 : 1);
 }
 
-function restDayLog() {
+function restDayLog({ deload = false } = {}) {
   const byId = Object.fromEntries(CUSTOM_FOODS.map((f) => [f.id, f]));
   const trim = (food, meal, factor) => {
     const e = logEntry(food, meal);
     e.nutrients = scaleNutrients(food.nutrients, factor);
     return e;
   };
-  return [
+  const entries = [
     trim(byId["ac-meal1"], "breakfast", 1),
     trim(byId["ac-meal2"], "snack", 0.95),
-    trim(byId["ac-meal3"], "lunch", 0.9),
-    trim(byId["ac-meal4"], "dinner", 0.9),
-    trim(byId["ac-meal5"], "meal5", 1),
+    trim(byId["ac-meal3"], "lunch", 0.88),
+    trim(byId["ac-meal4"], "dinner", 0.88),
+    trim(byId["ac-meal5"], "meal5", 1.02),
     trim(byId["ac-meal6"], "meal6", 1),
     logEntry(byId["ac-supps"], "snack", 1),
   ];
+  return applyFactor(entries, deload ? 0.89 : 1);
+}
+
+function weekJournalNote(week) {
+  if (week === 0) return "Baseline — 60 kg @ 5'11. Test 250 mg/wk daily pins. Bro diet locked.";
+  if (week === 2) return "Week 2 labs — Total T ~700, gaining ~1 kg. ACV + betaine HCl before big meals.";
+  if (week === 4) return "Deload week — −500 kcal, protein high. Test saturation, ~66 kg.";
+  if (week === 6) return "Pre-Tren — ~70 kg. Mood/energy/libido up. Lipids starting to shift.";
+  if (week === 7) return "Tren intro ~150 mg/wk. Hunger increasing. Rotate proteins, change sheets often.";
+  if (week === 8) return "Deload week on calories. Tren ~250 mg/wk. Vascularity emerging.";
+  if (week === 9) return "Prolactin flagged — Caber started. HDL dropping, monitor cardio.";
+  if (week === 10) return "Tren ~450 mg/wk. Peak ramp — striations starting. Fish oil + cardio critical.";
+  if (week === 12) return "Deload week. Peak phase — 500 mg Tren + 250 mg Test. ~78 kg, hardness up.";
+  if (week === 14) return "Hct creeping 53%+. HDL ~20. Strength through the roof.";
+  if (week === 16) return "Deload week. ~79.5 kg. Consider donation if Hct >54%.";
+  if (week === 18) return "Peak physique ~80 kg. Extreme dryness and vascularity.";
+  if (week === 19) return "Tren taper. Prolactin dropping. Transition prep for cruise + HCG.";
+  if (week === 20) return "Cycle end — 80 kg (+20 kg). Tren cleared to 100–150 mg. Cruise next.";
+  if (week <= 6) return "Test base — track fasted weight weekly, target 0.8–1 kg/wk gain.";
+  if (week <= 18) return "Peak phase — 4,600–4,800 kcal training days. Sunday refeed for glycogen/leptin.";
+  return "Taper — maintain 80 kg, sides improving.";
 }
 
 const WEEKLY_WEIGHTS = [
@@ -284,21 +348,17 @@ export function buildNutritionState() {
       const dow = addDays(weekStart, d).getDay();
       const isRest = dow === 0;
       const isSunday = dow === 0;
-      logs[date] = isRest ? restDayLog() : trainingDayLog(isSunday);
+      const deload = w > 0 && w % 4 === 0;
+      logs[date] = isRest ? restDayLog({ deload }) : trainingDayLog({ isSunday, deload });
       if (d === 0) {
         journal[date] = {
           weight: WEEKLY_WEIGHTS[w] ?? 80,
-          notes:
-            w === 0
-              ? "Baseline — 60 kg, starting Test 250 mg/wk daily pins."
-              : w <= 6
-                ? "Test base — steady gain ~0.8 kg/wk. Bro diet locked in."
-                : w <= 10
-                  ? "Tren ramp — appetite up, prolactin/lipids flagged on labs."
-                  : w <= 18
-                    ? "Peak phase — 4,700 kcal training days, Sunday refeed."
-                    : "Tren taper — holding 80 kg, transitioning to cruise.",
-          workoutTitle: isRest ? "Rest / mobility" : "PPL — progressive overload",
+          notes: weekJournalNote(w),
+          workoutTitle: isRest
+            ? "Rest day — lower carbs, slightly higher fats"
+            : deload
+              ? "PPL — deload week (−500 kcal, protein high)"
+              : "PPL — progressive overload (5–6×/wk)",
         };
       }
       dayIndex++;
