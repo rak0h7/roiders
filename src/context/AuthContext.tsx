@@ -245,10 +245,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok) return { error: data.error ?? "Sign in failed" };
 
-      await supabase.auth.getSession();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const nextUser = sessionData.session?.user ?? null;
+      setUser(nextUser);
+
+      if (nextUser) {
+        pulledForUser.current = nextUser.id;
+        await refreshProfile(nextUser);
+        if (siteSettings.cloud_sync_enabled) {
+          try {
+            const result = await syncUserData(supabase, nextUser.id);
+            await rehydratePersistedStores();
+            setSyncConflicts(result.conflicts);
+            setSyncStatus({
+              syncing: false,
+              lastSyncAt: new Date().toISOString(),
+              lastPulled: result.pulled,
+              lastPushed: result.pushed,
+              lastError: null,
+            });
+          } catch (e) {
+            const msg = e instanceof Error ? e.message : "Sync failed";
+            setSyncStatus((s) => ({ ...s, syncing: false, lastError: msg }));
+          }
+        }
+      }
+
       return { error: null };
     },
-    [supabase]
+    [supabase, refreshProfile, siteSettings.cloud_sync_enabled]
   );
 
   const createAccount = useCallback(async () => {

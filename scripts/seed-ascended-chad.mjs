@@ -20,6 +20,8 @@ import {
 
 loadEnv();
 
+const rotateKey = process.argv.includes("--rotate-key");
+
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
@@ -56,17 +58,23 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
     .maybeSingle();
 
   if (existing?.id) {
+    const profilePatch = {
+      is_admin: true,
+      display_name: DISPLAY_NAME,
+      updated_at: new Date().toISOString(),
+    };
+    if (rotateKey) {
+      profilePatch.key_fingerprint = keyFingerprint;
+      profilePatch.access_key_hash = accessKeyHash;
+      await admin.from("auth_secrets").upsert({
+        user_id: existing.id,
+        session_secret: sessionSecret,
+      });
+    }
     await admin.from("profiles").update({ is_admin: false }).neq("id", existing.id);
-    await admin
-      .from("profiles")
-      .update({
-        is_admin: true,
-        display_name: DISPLAY_NAME,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", existing.id);
+    await admin.from("profiles").update(profilePatch).eq("id", existing.id);
     await upsertModules(admin, existing.id, modules);
-    return { userId: existing.id, recreated: false };
+    return { userId: existing.id, recreated: false, rotated: rotateKey };
   }
 
   const { data: created, error: createError } = await admin.auth.admin.createUser({
@@ -130,14 +138,29 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
   if (existingRows[0]?.id) {
     const existingId = existingRows[0].id;
     await client.query(`update public.profiles set is_admin = false where id <> $1`, [existingId]);
-    await client.query(
-      `update public.profiles
-       set is_admin = true, display_name = $2, updated_at = now()
-       where id = $1`,
-      [existingId, DISPLAY_NAME],
-    );
+    if (rotateKey) {
+      await client.query(
+        `update public.profiles
+         set is_admin = true, display_name = $2, key_fingerprint = $3, access_key_hash = $4, updated_at = now()
+         where id = $1`,
+        [existingId, DISPLAY_NAME, keyFingerprint, accessKeyHash],
+      );
+      await client.query(
+        `insert into public.auth_secrets (user_id, session_secret)
+         values ($1, $2)
+         on conflict (user_id) do update set session_secret = excluded.session_secret`,
+        [existingId, sessionSecret],
+      );
+    } else {
+      await client.query(
+        `update public.profiles
+         set is_admin = true, display_name = $2, updated_at = now()
+         where id = $1`,
+        [existingId, DISPLAY_NAME],
+      );
+    }
     await upsertModulesPg(client, existingId, modules);
-    return { userId: existingId, recreated: false };
+    return { userId: existingId, recreated: false, rotated: rotateKey };
   }
 
   const identityId = randomUUID();
@@ -236,7 +259,7 @@ const userId = randomUUID();
 const email = internalEmail(userId);
 
 let result;
-let outputKey = accessKey;
+let outputKey = rotateKey ? accessKey : accessKey;
 
 if (serviceKey) {
   result = await createViaApi({
@@ -247,7 +270,9 @@ if (serviceKey) {
     email,
     modules,
   });
-  if (!result.recreated) outputKey = "(unchanged — existing account; access key not rotated)";
+  if (!result.recreated && !result.rotated) {
+    outputKey = "(unchanged — existing account; pass --rotate-key for a new access key)";
+  }
 } else {
   const pgUrls = resolveDatabaseUrls();
   if (pgUrls.length === 0) {
@@ -265,7 +290,9 @@ if (serviceKey) {
       email,
       modules,
     });
-    if (!result.recreated) outputKey = "(unchanged — existing account; access key not rotated)";
+    if (!result.recreated && !result.rotated) {
+    outputKey = "(unchanged — existing account; pass --rotate-key for a new access key)";
+  }
   } finally {
     await client.end();
   }
@@ -273,7 +300,7 @@ if (serviceKey) {
 
 const summary = {
   accessKey: outputKey,
-  keyFingerprint: result.recreated ? keyFingerprint : "(existing)",
+  keyFingerprint: result.recreated || result.rotated ? keyFingerprint : "(existing)",
   userId: result.userId,
   displayName: DISPLAY_NAME,
   username: USERNAME,
