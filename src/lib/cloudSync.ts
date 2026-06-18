@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { DEFAULT_GOALS } from "@/lib/nutritionTypes";
 
 export type CloudModule = "labs" | "cycle" | "gym" | "nutrition" | "settings";
 
@@ -212,6 +213,28 @@ export async function syncUserData(
   return { pulled: pull.pulled, pushed, merged: pull.merged, conflicts: pull.conflicts };
 }
 
+function goalsMatchDefaults(goals: unknown): boolean {
+  if (!goals || typeof goals !== "object") return true;
+  const g = goals as Record<string, number>;
+  return Object.keys(DEFAULT_GOALS).every((key) => (g[key] ?? DEFAULT_GOALS[key]) === DEFAULT_GOALS[key]);
+}
+
+export function isNutritionPersistedDataEmpty(data: unknown): boolean {
+  if (typeof data !== "object" || data === null || !("state" in data)) return true;
+  const state = (data as { state: Record<string, unknown> }).state;
+  const logs = state.logs as Record<string, unknown[]> | undefined;
+  const hasLogs = Boolean(
+    logs && Object.keys(logs).some((day) => (logs[day]?.length ?? 0) > 0)
+  );
+  if (hasLogs) return false;
+  if (state.onboardingComplete === true) return false;
+  if (state.profile != null) return false;
+  if (!goalsMatchDefaults(state.goals)) return false;
+  if ((state.customFoods as unknown[] | undefined)?.length) return false;
+  if ((state.favorites as unknown[] | undefined)?.length) return false;
+  return true;
+}
+
 function isEmptyLocal(module: CloudModule, data: unknown): boolean {
   if (module === "labs") return Array.isArray(data) && data.length === 0;
   if (module === "settings") {
@@ -221,7 +244,7 @@ function isEmptyLocal(module: CloudModule, data: unknown): boolean {
     const state = (data as { state: Record<string, unknown> }).state;
     if (module === "cycle") return (state.compounds as unknown[])?.length === 0;
     if (module === "gym") return (state.history as unknown[])?.length === 0;
-    if (module === "nutrition") return Object.keys(state.logs ?? {}).length === 0;
+    if (module === "nutrition") return isNutritionPersistedDataEmpty(data);
   }
   return false;
 }

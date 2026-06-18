@@ -442,8 +442,14 @@ export function LandingPage() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[var(--muted)]">
               <Link href="/auth/login" className="hover:text-[var(--foreground)]">Sign in</Link>
-              <Link href="/auth/signup" className="hover:text-[var(--foreground)]">Sign up</Link>
-              {settings.support_url ? (
+              {signupEnabled ? (
+                <Link href="/auth/signup" className="hover:text-[var(--foreground)]">Sign up</Link>
+              ) : settings.support_url ? (
+                <a href={settings.support_url} className="hover:text-[var(--foreground)]" target="_blank" rel="noopener noreferrer">
+                  Request access
+                </a>
+              ) : null}
+              {signupEnabled && settings.support_url ? (
                 <a href={settings.support_url} className="hover:text-[var(--foreground)]" target="_blank" rel="noopener noreferrer">
                   Support
                 </a>

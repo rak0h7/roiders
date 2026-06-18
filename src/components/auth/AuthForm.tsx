@@ -1,31 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { KeyRound } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { AccessKeyReveal } from "@/components/auth/AccessKeyReveal";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { signIn, createAccount, configured } = useAuth();
+  const { settings, loading: siteSettingsLoading } = useSiteConfig();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "/";
   const [accessKey, setAccessKey] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [signupAllowed, setSignupAllowed] = useState(true);
-
-  useEffect(() => {
-    if (mode !== "signup") return;
-    void fetch("/api/site/settings")
-      .then((res) => res.json())
-      .then((data) => setSignupAllowed(data.allow_public_signup !== false))
-      .catch(() => setSignupAllowed(true));
-  }, [mode]);
+  const signupAllowed = settings.allow_public_signup;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,6 +79,18 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   if (mode === "signup") {
+    if (siteSettingsLoading) {
+      return (
+        <div className={cn(ui.card, ui.cardPad, "flex flex-col items-center gap-3 py-10")}>
+          <div
+            className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--labs)]"
+            aria-hidden
+          />
+          <p className="text-sm text-[var(--muted)]">Checking signup availability…</p>
+        </div>
+      );
+    }
+
     if (!signupAllowed) {
       return (
         <div className={cn(ui.card, ui.cardPad, "space-y-4 text-center")}>

@@ -136,11 +136,11 @@ export const useNutritionStore = create<NutritionState>()(
       migrate: (persisted, version) => {
         const state = persisted as Partial<NutritionState>;
         if (version < 2) {
-          const hasLogs = Boolean(state.logs && Object.keys(state.logs).length > 0);
           return {
             ...state,
             profile: state.profile ?? null,
-            onboardingComplete: state.onboardingComplete ?? hasLogs,
+            // Grandfather existing v1 stores; only fresh v2 installs start incomplete.
+            onboardingComplete: state.onboardingComplete ?? true,
           };
         }
         return state as NutritionState;

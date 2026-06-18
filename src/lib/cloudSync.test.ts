@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { LOCAL_STORAGE_KEYS, readLocalModule, writeLocalModule } from "./cloudSync";
+import {
+  isNutritionPersistedDataEmpty,
+  LOCAL_STORAGE_KEYS,
+  readLocalModule,
+  writeLocalModule,
+} from "./cloudSync";
 
 function mockBrowserStorage() {
   vi.stubGlobal("window", {});
@@ -30,5 +35,17 @@ describe("cloudSync", () => {
     writeLocalModule("cycle", { state: { compounds: [] } }, "2026-06-01T12:00:00.000Z");
     const meta = JSON.parse(localStorage.getItem("roiders-club-sync-meta") ?? "{}");
     expect(meta.cycle).toBe("2026-06-01T12:00:00.000Z");
+  });
+
+  it("treats nutrition with onboarding or custom goals as non-empty", () => {
+    expect(isNutritionPersistedDataEmpty({ state: { logs: {} } })).toBe(true);
+    expect(
+      isNutritionPersistedDataEmpty({ state: { logs: {}, onboardingComplete: true } })
+    ).toBe(false);
+    expect(
+      isNutritionPersistedDataEmpty({
+        state: { logs: {}, goals: { calories: 3000, protein: 165, fat: 73, carbs: 220, fiber: 30 } },
+      })
+    ).toBe(false);
   });
 });
