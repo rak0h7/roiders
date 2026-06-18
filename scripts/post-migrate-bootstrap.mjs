@@ -1,8 +1,11 @@
 /**
  * Run AFTER migrate-pending.sql. Promotes the owner account and verifies schema.
- *   node scripts/post-migrate-bootstrap.mjs
+ *   npm run db:bootstrap
  */
 import { createClient } from "@supabase/supabase-js";
+import { loadEnv } from "./load-env.mjs";
+
+loadEnv();
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -10,6 +13,7 @@ const adminFp = process.env.ADMIN_FINGERPRINT ?? process.env.NEXT_PUBLIC_ADMIN_F
 
 if (!url || !serviceKey) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+  console.error("Copy .env.example to .env.local and add your Supabase keys.");
   process.exit(1);
 }
 

@@ -8,6 +8,9 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { loadEnv } from "./load-env.mjs";
+
+loadEnv();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sqlPath = path.join(__dirname, "..", "supabase", "migrate-pending.sql");

@@ -5,6 +5,9 @@
 import { createHash, randomBytes, scrypt } from "crypto";
 import { promisify } from "util";
 import { createClient } from "@supabase/supabase-js";
+import { loadEnv } from "./load-env.mjs";
+
+loadEnv();
 
 const scryptAsync = promisify(scrypt);
 const ALPHABET = "abcdefghjkmnpqrstuvwxyz23456789";
