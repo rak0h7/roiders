@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "create-admin": "node scripts/create-admin-account.mjs",
+    "seed-ascended-chad": "node scripts/seed-ascended-chad.mjs",
     "db:migrate": "node scripts/apply-migrations.mjs",
     "db:migrate:print": "node scripts/apply-migrations.mjs --print-sql",
     "db:bootstrap": "node scripts/post-migrate-bootstrap.mjs",
