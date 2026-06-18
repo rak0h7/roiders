@@ -286,7 +286,7 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
     title: "Anavar (Oxandrolone)",
     route: "oral",
     tagline: "A mild DHT-derived oral popular for fat loss and a hard, quality look.",
-    compoundIds: [],
+    compoundIds: ["anavar"],
     sections: [
       { heading: "How to Use / Receptors", body: "Oral DHT derivative. Binds to AR." },
       { heading: "Aromatization?", body: "No. Strongly lowers SHBG, potentially shifting estrogen balance." },
@@ -307,7 +307,7 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
     title: "Winstrol (Stanozolol)",
     route: "oral",
     tagline: "A DHT-derived compound (oral or injectable) known for dry gains and joint issues.",
-    compoundIds: [],
+    compoundIds: ["winstrol", "winstrol-inj"],
     sections: [
       { heading: "How to Use / Receptors", body: "Oral/Injectable DHT derivative. Binds to AR." },
       { heading: "Aromatization?", body: "No." },
@@ -373,7 +373,7 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
     title: "Turinabol (Tbol)",
     route: "oral",
     tagline: "A balanced oral often described as a non-aromatizing hybrid of Anavar and Dianabol.",
-    compoundIds: [],
+    compoundIds: ["turinabol"],
     sections: [
       { heading: "How to Use / Receptors", body: "Chlorinated Dianabol derivative. Binds to AR." },
       { heading: "Aromatization?", body: "No." },
@@ -416,7 +416,7 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
     title: "Proviron (Mesterolone)",
     route: "oral",
     tagline: "Primarily used as an adjunct to increase free testosterone and provide mild AI effects. Also enhances vascularity pre-contest.",
-    compoundIds: [],
+    compoundIds: ["proviron"],
     sections: [
       { heading: "How to Use / Receptors", body: "Oral DHT derivative. Strongly binds SHBG, increasing free testosterone." },
       { heading: "Aromatization?", body: "No. Mild aromatase inhibition." },

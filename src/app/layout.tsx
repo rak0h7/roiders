@@ -39,6 +39,8 @@ export const metadata: Metadata = {
   title: "Roiders Club — Labs & Protocol",
   description:
     "Professional lab analysis and cycle protocol planning with cross-domain health intelligence.",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "Roiders Club" },
 };
 
 export const viewport = {

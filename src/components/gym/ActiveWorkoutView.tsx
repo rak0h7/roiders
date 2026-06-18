@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Check, ChevronDown, ChevronUp, Clock, Dumbbell, Plus, Trash2, Trophy,
+  Check, ChevronDown, ChevronUp, Clock, Dumbbell, Link2, Plus, Trash2, Trophy,
 } from "lucide-react";
 import { format } from "date-fns";
 import { getExerciseById } from "@/data/exercises";
@@ -26,11 +26,12 @@ export function ActiveWorkoutView() {
     activeWorkout, startEmptyWorkout, finishWorkout, discardWorkout,
     addExercise, removeExercise, addSet, removeSet, updateSet, toggleSetComplete,
     updateWorkoutMeta, exercisePickerOpen, setExercisePickerOpen,
-    customExercises, weightUnit, personalRecords,
+    customExercises, weightUnit, personalRecords, linkSuperset,
   } = useGymStore();
   const { toast } = useToast();
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [plateTarget, setPlateTarget] = useState("");
+  const [supersetPick, setSupersetPick] = useState<string[]>([]);
 
   const [now, setNow] = useState(() => Date.now());
 
@@ -133,6 +134,28 @@ export function ActiveWorkoutView() {
         )}
       </div>
 
+      {activeWorkout.exercises.length >= 2 && (
+        <div className={cn(ui.cardInner, "flex flex-wrap items-center gap-2 p-3")}>
+          <span className="text-xs font-medium text-[var(--muted)]">Superset</span>
+          <span className="text-[11px] text-[var(--muted-2)]">
+            {supersetPick.length < 2 ? "Select 2+ exercises below, then link" : `${supersetPick.length} selected`}
+          </span>
+          <button
+            type="button"
+            disabled={supersetPick.length < 2}
+            onClick={() => {
+              linkSuperset(supersetPick);
+              setSupersetPick([]);
+              toast({ type: "success", title: "Superset linked" });
+            }}
+            className={cn(ui.btnGhost, "ml-auto text-xs")}
+          >
+            <Link2 className="mr-1 h-3.5 w-3.5" />
+            Link superset
+          </button>
+        </div>
+      )}
+
       {/* Exercises */}
       {activeWorkout.exercises.map((entry) => {
         const exercise = getExerciseById(entry.exerciseId, customExercises);
@@ -141,12 +164,33 @@ export function ActiveWorkoutView() {
         const pr = personalRecords.find((p) => p.exerciseId === entry.exerciseId);
         const vol = exerciseVolume(entry);
 
+        const inSuperset = Boolean(entry.supersetGroupId);
+        const picked = supersetPick.includes(entry.id);
+
         return (
           <motion.div
             key={entry.id}
             layout
-            className={cn(ui.card, "overflow-hidden")}
+            className={cn(ui.card, "overflow-hidden", inSuperset && "border-[var(--protocol)]/40")}
           >
+            <div className="flex items-center gap-2 px-4 pt-3 sm:px-5">
+              <input
+                type="checkbox"
+                checked={picked}
+                onChange={() =>
+                  setSupersetPick((prev) =>
+                    prev.includes(entry.id) ? prev.filter((id) => id !== entry.id) : [...prev, entry.id]
+                  )
+                }
+                className="h-4 w-4 rounded border-[var(--border)]"
+                aria-label={`Select ${exercise.name} for superset`}
+              />
+              {inSuperset && (
+                <span className="rounded-full bg-[var(--protocol-dim)] px-2 py-0.5 text-[10px] font-medium text-[var(--protocol)]">
+                  Superset
+                </span>
+              )}
+            </div>
             <button
               onClick={() => setExpanded((e) => ({ ...e, [entry.id]: !isOpen }))}
               className="flex w-full items-center justify-between px-4 py-3 text-left sm:px-5"

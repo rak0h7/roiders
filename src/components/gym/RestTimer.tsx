@@ -1,21 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, X } from "lucide-react";
 import { useGymStore } from "@/store/gymStore";
 import { cn } from "@/lib/utils";
 
+function requestNotificationPermission() {
+  if (typeof window === "undefined" || !("Notification" in window)) return;
+  if (Notification.permission === "default") {
+    void Notification.requestPermission();
+  }
+}
+
 export function RestTimer() {
   const { restTimer, skipRestTimer, startRestTimer, tickRestTimer, defaultRestSeconds } = useGymStore();
   const [secondsLeft, setSecondsLeft] = useState(0);
+  const notifiedRef = useRef(false);
 
   useEffect(() => {
-    if (!restTimer.active || !restTimer.endsAt) return;
+    requestNotificationPermission();
+  }, []);
+
+  useEffect(() => {
+    if (!restTimer.active || !restTimer.endsAt) {
+      notifiedRef.current = false;
+      return;
+    }
 
     const id = setInterval(() => {
       tickRestTimer();
-      setSecondsLeft(Math.max(0, Math.ceil((restTimer.endsAt! - Date.now()) / 1000)));
+      const left = Math.max(0, Math.ceil((restTimer.endsAt! - Date.now()) / 1000));
+      setSecondsLeft(left);
+
+      if (left === 0 && !notifiedRef.current && typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+        notifiedRef.current = true;
+        new Notification("Rest complete", { body: "Time for your next set.", tag: "rest-timer" });
+      }
     }, 250);
     return () => clearInterval(id);
   }, [restTimer.active, restTimer.endsAt, tickRestTimer]);

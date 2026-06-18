@@ -1,12 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, FileJson, FileSpreadsheet, FileText, RefreshCw, Trash2 } from "lucide-react";
+import { useCallback, useRef } from "react";
+import { Download, FileJson, FileSpreadsheet, FileText, RefreshCw, Trash2, Upload } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/context/ToastContext";
 import { useCycleStore } from "@/store/cycleStore";
-import { exportJSON, exportBloodworkCSV, exportBloodworkPDF } from "@/lib/export";
+import { applyImportBundle, buildExportBundle, exportJSON, exportBloodworkCSV, exportBloodworkPDF, parseImportBundle } from "@/lib/export";
+import { dispatchCloudSyncEvent, rehydratePersistedStores } from "@/lib/storeRehydrate";
 import { AccountSettings } from "./AccountSettings";
 import { AppearanceSettings } from "./AppearanceSettings";
 import { InterfaceSettings } from "./InterfaceSettings";
@@ -18,15 +20,44 @@ export function SettingsView() {
   const { defaultRangeMode, resetSettings } = useSettings();
   const { startDate, compounds, getEffectiveWeeks, clearCycle } = useCycleStore();
   const { toast } = useToast();
+  const importRef = useRef<HTMLInputElement>(null);
+  const openImportPicker = useCallback(() => {
+    importRef.current?.click();
+  }, []);
 
   const handleExportJSON = () => {
-    exportJSON({
-      exportedAt: new Date().toISOString(),
-      version: "1.0",
-      bloodwork: { reports },
-      cycle: { weeks: getEffectiveWeeks(), startDate, compounds },
-    });
-    toast({ type: "success", title: "JSON exported", description: "Full data bundle downloaded." });
+    exportJSON(
+      buildExportBundle({
+        reports,
+        weeks: getEffectiveWeeks(),
+        startDate,
+        compounds,
+      })
+    );
+    toast({ type: "success", title: "JSON exported", description: "Full bundle: labs, cycle, gym, nutrition, settings." });
+  };
+
+  const handleImportJSON = async (file: File) => {
+    const text = await file.text();
+    const { bundle, error } = parseImportBundle(text);
+    if (error || !bundle) {
+      toast({ type: "error", title: "Import failed", description: error ?? "Invalid file" });
+      return;
+    }
+    if (!confirm("Import will overwrite local data for included modules. Continue?")) return;
+    const result = applyImportBundle(bundle);
+    await rehydratePersistedStores();
+    dispatchCloudSyncEvent({ modules: result.imported });
+    if (result.errors.length) {
+      toast({ type: "warning", title: "Partial import", description: result.errors.join("; ") });
+    } else {
+      toast({
+        type: "success",
+        title: "Import complete",
+        description: `Restored: ${result.imported.join(", ") || "nothing"}`,
+      });
+    }
+    window.location.reload();
   };
 
   const handleExportCSV = () => {
@@ -62,8 +93,8 @@ export function SettingsView() {
 
       <div className={`${ui.card} ${ui.cardPad}`}>
         <h3 className={ui.sectionTitle}>Export Data</h3>
-        <p className={ui.sectionSub}>Download your bloodwork reports and cycle configuration.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <p className={ui.sectionSub}>Download or restore your full data bundle (labs, cycle, gym, nutrition, settings).</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { icon: FileJson, label: "JSON", desc: "Full bundle", action: handleExportJSON, accent: ui.statLabs },
             { icon: FileSpreadsheet, label: "CSV", desc: "Bloodwork only", action: handleExportCSV, accent: ui.statLabs },
@@ -79,7 +110,27 @@ export function SettingsView() {
               <span className={ui.overline}>{item.desc}</span>
             </button>
           ))}
+          <button
+            type="button"
+            onClick={openImportPicker}
+            className={cn(ui.cardInner, ui.cardHover, "flex flex-col items-center gap-2 p-4")}
+          >
+            <Upload className={cn("h-5 w-5", ui.statProtocol)} />
+            <span className="text-sm font-medium text-[var(--foreground)]">Import</span>
+            <span className={ui.overline}>Restore JSON</span>
+          </button>
         </div>
+        <input
+          ref={importRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void handleImportJSON(file);
+            e.target.value = "";
+          }}
+        />
       </div>
 
       <div className={`${ui.card} ${ui.cardPad}`}>

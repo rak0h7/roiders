@@ -62,6 +62,7 @@ export function Sidebar() {
   const { isAdmin } = useAuth();
   const { settings } = useSiteConfig();
   const navItems = visibleNavItems(settings);
+  const siteInitial = settings.site_name.trim().charAt(0).toUpperCase() || "R";
 
   return (
     <motion.aside
@@ -74,12 +75,12 @@ export function Sidebar() {
           className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
           style={{ background: "var(--gradient-primary)", boxShadow: "0 4px 16px var(--labs-glow)" }}
         >
-          <span className="font-display text-sm font-bold text-white">M</span>
+          <span className="font-display text-sm font-bold text-white">{siteInitial}</span>
         </div>
         {!sidebarCollapsed && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <p className="font-display text-[15px] font-semibold text-gradient">Roiders Club</p>
-            <p className="text-[11px] text-[var(--muted)]">Labs · Protocol · Training · Nutrition</p>
+            <p className="font-display text-[15px] font-semibold text-gradient">{settings.site_name}</p>
+            <p className="text-[11px] text-[var(--muted)]">{settings.site_tagline}</p>
           </motion.div>
         )}
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
 import { parseCSV, parseLabText } from "@/lib/parser";
 import { extractTextFromPDF } from "@/lib/pdf";
 import { buildReviewFlags } from "@/lib/ranges";
@@ -66,6 +67,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     reports: loadReports(),
   }));
 
+  useEffect(() => {
+    const reload = () => {
+      setState((s) => ({ ...s, reports: loadReports() }));
+    };
+    window.addEventListener(CLOUD_SYNC_EVENT, reload);
+    return () => window.removeEventListener(CLOUD_SYNC_EVENT, reload);
+  }, []);
+
   const setMainTab = useCallback((tab: MainTab) => {
     setState((s) => ({ ...s, mainTab: tab, showComparison: false }));
   }, []);
@@ -79,7 +88,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setCycleMode = useCallback((mode: AppState["cycleMode"]) => {
-    setState((s) => ({ ...s, cycleMode: mode }));
+    setState((s) => ({
+      ...s,
+      cycleMode: mode,
+      rangeMode: mode === "pre-cycle" ? "lab" : mode === "during-cycle" ? "optimized" : s.rangeMode,
+    }));
   }, []);
 
   const setRangeMode = useCallback((mode: RangeMode) => {

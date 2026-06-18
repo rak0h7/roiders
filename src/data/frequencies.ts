@@ -1,3 +1,6 @@
+import type { Compound } from "@/data/compounds";
+import { COMPOUNDS } from "@/data/compounds";
+
 export const FREQUENCY_OPTIONS = [
   { id: "daily", label: "Daily", pattern: "daily" },
   { id: "eod", label: "Every Other Day (EOD)", pattern: "eod" },
@@ -29,6 +32,11 @@ export const DEFAULT_DOSES: Record<string, { doseMg: number; frequency: Frequenc
   "dbol": { doseMg: 30, frequency: "daily" },
   "sdrol": { doseMg: 10, frequency: "daily" },
   "halo": { doseMg: 10, frequency: "pre-workout" },
+  "anavar": { doseMg: 40, frequency: "daily" },
+  "winstrol": { doseMg: 50, frequency: "daily" },
+  "winstrol-inj": { doseMg: 50, frequency: "eod" },
+  "turinabol": { doseMg: 40, frequency: "daily" },
+  "proviron": { doseMg: 50, frequency: "daily" },
   "aromasin": { doseMg: 12.5, frequency: "eod" },
   "arimidex": { doseMg: 0.5, frequency: "eod" },
   "nolvadex": { doseMg: 20, frequency: "daily" },
@@ -41,3 +49,39 @@ export const DEFAULT_DOSES: Record<string, { doseMg: number; frequency: Frequenc
   "gh": { doseMg: 2, frequency: "daily" },
   "bpc157": { doseMg: 0.25, frequency: "daily" },
 };
+
+function inferFrequency(info: string, route: Compound["route"]): FrequencyPattern {
+  const lower = info.toLowerCase();
+  if (lower.includes("eod") || lower.includes("every other day")) return "eod";
+  if (lower.includes("2x/wk") || lower.includes("2x/wk") || lower.includes("twice weekly") || lower.includes("2x weekly")) return "2x-weekly";
+  if (lower.includes("weekly") || lower.includes("/wk")) return "weekly";
+  if (lower.includes("pre-workout") || lower.includes("pre workout")) return "pre-workout";
+  if (lower.includes("/day") || lower.includes("daily") || lower.includes("orally") || route === "oral") return "daily";
+  if (route === "injectable") return "weekly";
+  return "daily";
+}
+
+function parseDoseFromInfo(info: string, unit: Compound["unit"]): number | null {
+  const nums = info.match(/(\d+(?:\.\d+)?)/g)?.map(Number) ?? [];
+  if (!nums.length) return null;
+  const mid = nums.length >= 2 ? (nums[0] + nums[1]) / 2 : nums[0];
+  if (unit === "mcg" && mid >= 50) return mid / 1000;
+  if (unit === "iu") return mid;
+  return mid;
+}
+
+export function inferDefaultDose(compound: Compound): { doseMg: number; frequency: FrequencyPattern } {
+  const explicit = DEFAULT_DOSES[compound.id];
+  if (explicit) return explicit;
+
+  const parsed = parseDoseFromInfo(compound.dosageInfo, compound.unit);
+  const doseMg = parsed ?? (compound.unit === "mcg" ? 0.25 : compound.unit === "iu" ? 250 : 100);
+  return { doseMg, frequency: inferFrequency(compound.dosageInfo, compound.route) };
+}
+
+/** Populate DEFAULT_DOSES entries for OMA compounds missing explicit defaults */
+for (const compound of COMPOUNDS) {
+  if (!DEFAULT_DOSES[compound.id]) {
+    DEFAULT_DOSES[compound.id] = inferDefaultDose(compound);
+  }
+}

@@ -12,7 +12,7 @@ const ITEMS = [
 ];
 
 export function SecondaryNav() {
-  const { secondaryTab, setSecondaryTab, cycleMode, setCycleMode, resetAll } = useApp();
+  const { secondaryTab, setSecondaryTab, cycleMode, setCycleMode, rangeMode, resetAll } = useApp();
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)] p-1.5">
@@ -38,6 +38,11 @@ export function SecondaryNav() {
           </button>
         );
       })}
+      {cycleMode && (
+        <span className="rounded-[var(--radius-sm)] bg-[var(--bg-surface)] px-2 py-1 text-[10px] text-[var(--muted)]">
+          Ranges: {rangeMode === "lab" ? "lab reference" : "optimized"}
+        </span>
+      )}
       <button
         onClick={() => confirm("Reset all lab data?") && resetAll()}
         className="rounded-[var(--radius-sm)] px-3 py-1.5 text-xs font-medium text-[var(--danger)] transition hover:bg-[var(--danger)]/10"

@@ -1,5 +1,8 @@
+import { LOCAL_STORAGE_KEYS, readLocalModule } from "@/lib/cloudSync";
 import type { BloodworkReport } from "@/lib/types";
 import type { CycleCompound } from "@/lib/cycleTypes";
+
+export const EXPORT_VERSION = "2.0";
 
 export interface ExportBundle {
   exportedAt: string;
@@ -10,11 +13,126 @@ export interface ExportBundle {
     startDate: string;
     compounds: CycleCompound[];
   };
+  gym?: unknown;
+  nutrition?: unknown;
+  settings?: unknown;
+}
+
+export function buildExportBundle(partial: {
+  reports: BloodworkReport[];
+  weeks: number;
+  startDate: string;
+  compounds: CycleCompound[];
+}): ExportBundle {
+  return {
+    exportedAt: new Date().toISOString(),
+    version: EXPORT_VERSION,
+    bloodwork: { reports: partial.reports },
+    cycle: {
+      weeks: partial.weeks,
+      startDate: partial.startDate,
+      compounds: partial.compounds,
+    },
+    gym: readLocalModule("gym"),
+    nutrition: readLocalModule("nutrition"),
+    settings: readLocalModule("settings"),
+  };
 }
 
 export function exportJSON(bundle: ExportBundle): void {
   const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `stack-health-export-${dateStamp()}.json`);
+  downloadBlob(blob, `roiders-club-export-${dateStamp()}.json`);
+}
+
+export interface ImportResult {
+  imported: ("bloodwork" | "cycle" | "gym" | "nutrition" | "settings")[];
+  errors: string[];
+}
+
+export function parseImportBundle(raw: string): { bundle: ExportBundle | null; error: string | null } {
+  try {
+    const data = JSON.parse(raw) as Partial<ExportBundle>;
+    if (!data.bloodwork?.reports || !data.cycle) {
+      return { bundle: null, error: "Invalid bundle: missing bloodwork or cycle section" };
+    }
+    return {
+      bundle: {
+        exportedAt: data.exportedAt ?? new Date().toISOString(),
+        version: data.version ?? "1.0",
+        bloodwork: data.bloodwork,
+        cycle: data.cycle,
+        gym: data.gym,
+        nutrition: data.nutrition,
+        settings: data.settings,
+      },
+      error: null,
+    };
+  } catch {
+    return { bundle: null, error: "Could not parse JSON file" };
+  }
+}
+
+export function applyImportBundle(
+  bundle: ExportBundle,
+  options: { bloodwork?: boolean; cycle?: boolean; gym?: boolean; nutrition?: boolean; settings?: boolean } = {}
+): ImportResult {
+  const opts = {
+    bloodwork: true,
+    cycle: true,
+    gym: true,
+    nutrition: true,
+    settings: true,
+    ...options,
+  };
+  const imported: ImportResult["imported"] = [];
+  const errors: string[] = [];
+
+  if (typeof window === "undefined") {
+    return { imported, errors: ["Import only available in browser"] };
+  }
+
+  if (opts.bloodwork && bundle.bloodwork?.reports) {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS.labs, JSON.stringify(bundle.bloodwork.reports));
+      imported.push("bloodwork");
+    } catch {
+      errors.push("Failed to import bloodwork");
+    }
+  }
+
+  if (opts.cycle && bundle.cycle) {
+    try {
+      const existing = readLocalModule("cycle") as { state?: Record<string, unknown> } | null;
+      const state = existing?.state ?? {};
+      localStorage.setItem(
+        LOCAL_STORAGE_KEYS.cycle,
+        JSON.stringify({
+          state: {
+            ...state,
+            weeks: bundle.cycle.weeks,
+            startDate: bundle.cycle.startDate,
+            compounds: bundle.cycle.compounds,
+          },
+          version: 0,
+        })
+      );
+      imported.push("cycle");
+    } catch {
+      errors.push("Failed to import cycle");
+    }
+  }
+
+  for (const mod of ["gym", "nutrition", "settings"] as const) {
+    if (!opts[mod] || bundle[mod] == null) continue;
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEYS[mod], JSON.stringify(bundle[mod]));
+      imported.push(mod);
+    } catch {
+      errors.push(`Failed to import ${mod}`);
+    }
+  }
+
+  return { imported, errors };
 }
 
 export function exportBloodworkCSV(reports: BloodworkReport[]): void {

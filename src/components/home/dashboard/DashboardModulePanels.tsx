@@ -9,6 +9,7 @@ import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import type { AppRoute } from "@/context/NavigationContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { getChartTheme } from "@/lib/charts";
 import { pctOfGoal } from "@/lib/nutritionCalculations";
 import type { DashboardData } from "./useDashboardData";
@@ -68,10 +69,26 @@ export function DashboardModulePanels({
   startEmptyWorkout,
 }: DashboardModulePanelsProps) {
   const chartTheme = getChartTheme();
+  const { moduleEnabled } = useSiteConfig();
+
+  const panels = [
+    moduleEnabled("labs") && "labs",
+    moduleEnabled("cycle") && "cycle",
+    moduleEnabled("gym") && "gym",
+    moduleEnabled("nutrition") && "nutrition",
+  ].filter(Boolean);
+
+  if (!panels.length) return null;
+
+  const gridCols =
+    panels.length === 1 ? "lg:grid-cols-1" :
+    panels.length === 2 ? "lg:grid-cols-2" :
+    panels.length === 3 ? "lg:grid-cols-3" : "xl:grid-cols-4";
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+    <div className={cn("grid gap-4 lg:grid-cols-2", gridCols)}>
       {/* Labs */}
+      {moduleEnabled("labs") && (
       <motion.div custom={0} variants={fade} initial="hidden" animate="show" className={cn(ui.cardLabs, ui.cardPad, "flex flex-col gap-4")}>
         <ModuleHeader
           title="Labs"
@@ -118,8 +135,10 @@ export function DashboardModulePanels({
           </div>
         )}
       </motion.div>
+      )}
 
       {/* Protocol */}
+      {moduleEnabled("cycle") && (
       <motion.div custom={1} variants={fade} initial="hidden" animate="show" className={cn(ui.cardProtocol, ui.cardPad, "flex flex-col gap-4")}>
         <ModuleHeader
           title="Protocol"
@@ -156,8 +175,10 @@ export function DashboardModulePanels({
           </div>
         )}
       </motion.div>
+      )}
 
       {/* Training */}
+      {moduleEnabled("gym") && (
       <motion.div custom={2} variants={fade} initial="hidden" animate="show" className={cn(ui.card, ui.cardPad, "flex flex-col gap-4 border-[var(--protocol)]/20")}>
         <ModuleHeader
           title="Training"
@@ -219,8 +240,10 @@ export function DashboardModulePanels({
           </div>
         )}
       </motion.div>
+      )}
 
       {/* Nutrition */}
+      {moduleEnabled("nutrition") && (
       <motion.div custom={3} variants={fade} initial="hidden" animate="show" className={cn(ui.cardIntel, ui.cardPad, "flex flex-col gap-4")}>
         <ModuleHeader
           title="Nutrition"
@@ -270,6 +293,7 @@ export function DashboardModulePanels({
           </div>
         )}
       </motion.div>
+      )}
     </div>
   );
 }

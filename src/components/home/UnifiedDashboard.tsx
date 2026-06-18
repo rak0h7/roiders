@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useNavigation } from "@/context/NavigationContext";
 import { useGymStore } from "@/store/gymStore";
-import { DashboardSkeleton } from "@/components/ui/Skeleton";
 import { useDashboardData } from "./dashboard/useDashboardData";
 import { DashboardHero } from "./dashboard/DashboardHero";
 import { DashboardMetrics } from "./dashboard/DashboardMetrics";
@@ -11,22 +9,22 @@ import { DashboardModulePanels } from "./dashboard/DashboardModulePanels";
 import { DashboardActivityRow } from "./dashboard/DashboardActivityRow";
 import { DashboardQuickNav } from "./dashboard/DashboardQuickNav";
 import { DashboardHighlights } from "./dashboard/DashboardHighlights";
+import { DashboardOnboarding } from "./dashboard/DashboardOnboarding";
 
 export function UnifiedDashboard() {
   const { setRoute } = useNavigation();
   const { startEmptyWorkout } = useGymStore();
   const data = useDashboardData();
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 350);
-    return () => clearTimeout(t);
-  }, []);
-
-  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-5 sm:space-y-8">
+      <DashboardOnboarding
+        hasReports={data.reports.length > 0}
+        hasCompounds={data.compounds.length > 0}
+        hasWorkouts={data.gymHistory.length > 0}
+        hasNutrition={data.daysLogged > 0}
+        setRoute={setRoute}
+      />
       <DashboardHero
         accountName={data.accountName}
         siteStatus={data.siteStatus}

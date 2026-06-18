@@ -6,6 +6,7 @@ import {
   History, Leaf, Spline, TrendingUp, UtensilsCrossed,
 } from "lucide-react";
 import type { AppRoute } from "@/context/NavigationContext";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 import { fade } from "./shared";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
@@ -14,24 +15,38 @@ type DashboardQuickNavProps = {
   setRoute: (route: AppRoute) => void;
 };
 
+const NAV_ITEMS: {
+  icon: typeof Droplet;
+  label: string;
+  desc: string;
+  route: AppRoute;
+  accent: "labs" | "protocol" | "intel";
+  module: "labs" | "cycle" | "gym" | "nutrition" | null;
+}[] = [
+  { icon: Droplet, label: "Log Labs", desc: "Upload or manual entry", route: "bloodwork-log", accent: "labs", module: "labs" },
+  { icon: History, label: "Lab Archive", desc: "Compare past panels", route: "bloodwork-history", accent: "labs", module: "labs" },
+  { icon: Activity, label: "Lab Analysis", desc: "Scores & flags", route: "bloodwork-insights", accent: "labs", module: "labs" },
+  { icon: Blocks, label: "Cycle Builder", desc: "Compose your stack", route: "cycle-planner", accent: "protocol", module: "cycle" },
+  { icon: BookOpen, label: "Compound Guides", desc: "Injectables & orals reference", route: "cycle-guides", accent: "protocol", module: "cycle" },
+  { icon: Spline, label: "PK Simulation", desc: "Curves & risk radar", route: "cycle-dashboard", accent: "protocol", module: "cycle" },
+  { icon: Dumbbell, label: "Train", desc: "Active workout logging", route: "gym-workout", accent: "protocol", module: "gym" },
+  { icon: ClipboardList, label: "Programs", desc: "Routines & templates", route: "gym-routines", accent: "protocol", module: "gym" },
+  { icon: TrendingUp, label: "Training Stats", desc: "Volume, PRs & charts", route: "gym-progress", accent: "intel", module: "gym" },
+  { icon: UtensilsCrossed, label: "Food Diary", desc: "Daily macro tracking", route: "nutrition-diary", accent: "intel", module: "nutrition" },
+  { icon: Leaf, label: "Micronutrients", desc: "Vitamins & minerals", route: "nutrition-micro", accent: "intel", module: "nutrition" },
+];
+
 export function DashboardQuickNav({ setRoute }: DashboardQuickNavProps) {
+  const { moduleEnabled } = useSiteConfig();
+  const items = NAV_ITEMS.filter((item) => !item.module || moduleEnabled(item.module));
+
+  if (!items.length) return null;
+
   return (
     <div>
       <p className={cn(ui.overline, "mb-3")}>Quick navigation</p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {[
-          { icon: Droplet, label: "Log Labs", desc: "Upload or manual entry", route: "bloodwork-log" as const, accent: "labs" as const },
-          { icon: History, label: "Lab Archive", desc: "Compare past panels", route: "bloodwork-history" as const, accent: "labs" as const },
-          { icon: Activity, label: "Lab Analysis", desc: "Scores & flags", route: "bloodwork-insights" as const, accent: "labs" as const },
-          { icon: Blocks, label: "Cycle Builder", desc: "Compose your stack", route: "cycle-planner" as const, accent: "protocol" as const },
-          { icon: BookOpen, label: "Compound Guides", desc: "Injectables & orals reference", route: "cycle-guides" as const, accent: "protocol" as const },
-          { icon: Spline, label: "PK Simulation", desc: "Curves & risk radar", route: "cycle-dashboard" as const, accent: "protocol" as const },
-          { icon: Dumbbell, label: "Train", desc: "Active workout logging", route: "gym-workout" as const, accent: "protocol" as const },
-          { icon: ClipboardList, label: "Programs", desc: "Routines & templates", route: "gym-routines" as const, accent: "protocol" as const },
-          { icon: TrendingUp, label: "Training Stats", desc: "Volume, PRs & charts", route: "gym-progress" as const, accent: "intel" as const },
-          { icon: UtensilsCrossed, label: "Food Diary", desc: "Daily macro tracking", route: "nutrition-diary" as const, accent: "intel" as const },
-          { icon: Leaf, label: "Micronutrients", desc: "Vitamins & minerals", route: "nutrition-micro" as const, accent: "intel" as const },
-        ].map((action, i) => (
+        {items.map((action, i) => (
           <motion.button
             key={action.label}
             custom={i + 5}

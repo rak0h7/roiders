@@ -1,0 +1,10 @@
+{
+  "name": "Roiders Club",
+  "short_name": "Roiders",
+  "description": "Labs, protocol planning, training, and nutrition tracking.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0b",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary"
+}

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function AccountSettings() {
-  const { configured, user, username, accountName, isAdmin, loading, signOut, syncNow, setUsername } =
+  const { configured, user, username, accountName, isAdmin, loading, signOut, syncNow, syncStatus, setUsername } =
     useAuth();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
@@ -17,9 +17,12 @@ export function AccountSettings() {
   const [busy, setBusy] = useState(false);
 
   const handleSync = async () => {
-    const { error } = await syncNow();
+    const { error, pulled } = await syncNow();
     if (error) toast({ type: "error", title: "Sync failed", description: error });
-    else toast({ type: "success", title: "Cloud backup saved" });
+    else {
+      const restored = pulled?.length ? ` · restored ${pulled.join(", ")}` : "";
+      toast({ type: "success", title: "Synced", description: `Cloud data is up to date${restored}` });
+    }
   };
 
   const handleSignOut = async () => {
@@ -108,10 +111,27 @@ export function AccountSettings() {
               </Link>
             )}
 
+            {(syncStatus.lastSyncAt || syncStatus.lastError) && (
+              <p className="text-[11px] text-[var(--muted)]">
+                {syncStatus.syncing
+                  ? "Syncing…"
+                  : syncStatus.lastError
+                    ? `Last sync failed: ${syncStatus.lastError}`
+                    : syncStatus.lastSyncAt
+                      ? `Last synced ${new Date(syncStatus.lastSyncAt).toLocaleString()}`
+                      : null}
+              </p>
+            )}
+
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={handleSync} className={cn(ui.btnSecondary, "text-xs")}>
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                Sync now
+              <button
+                type="button"
+                disabled={syncStatus.syncing}
+                onClick={handleSync}
+                className={cn(ui.btnSecondary, "text-xs")}
+              >
+                <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", syncStatus.syncing && "animate-spin")} />
+                {syncStatus.syncing ? "Syncing…" : "Sync now"}
               </button>
               <button type="button" onClick={handleSignOut} className={cn(ui.btnGhost, "text-xs text-[var(--danger)]")}>
                 <LogOut className="mr-1.5 h-3.5 w-3.5" />

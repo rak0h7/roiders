@@ -77,7 +77,7 @@ export function InsightsDashboard() {
 
   return (
     <div className="space-y-6">
-      <CrossAlerts alerts={crossAlerts.filter((a) => a.markers && a.markers.length > 0)} />
+      <CrossAlerts alerts={crossAlerts} />
       {(extractionFileName || activeReport) && (
         <Panel variant="labs" className="p-4">
           <div className="flex items-center justify-between">

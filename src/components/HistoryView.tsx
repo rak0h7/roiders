@@ -5,6 +5,7 @@ import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { FileText, Trash2, BarChart3, GitCompare } from "lucide-react";
+import { LabTrendChart } from "@/components/labs/LabTrendChart";
 
 export function HistoryView() {
   const {
@@ -29,6 +30,8 @@ export function HistoryView() {
   return (
     <div className="space-y-4">
       <h2 className={ui.pageTitle}>Uploaded Reports</h2>
+
+      <LabTrendChart reports={reports} />
 
       <div className="space-y-2">
         {reports.map((report) => (

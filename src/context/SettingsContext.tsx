@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
 import type { RangeMode } from "@/lib/types";
 import { LOCAL_STORAGE_KEYS } from "@/lib/cloudSync";
 import {
@@ -59,6 +60,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     applyThemeToDocument(settings.theme);
   }, [settings.theme]);
+
+  useEffect(() => {
+    const reload = () => {
+      const next = readStoredSettings();
+      setSettings(next);
+      applyThemeToDocument(next.theme);
+    };
+    window.addEventListener(CLOUD_SYNC_EVENT, reload);
+    return () => window.removeEventListener(CLOUD_SYNC_EVENT, reload);
+  }, []);
 
   const persist = useCallback((next: AppSettings) => {
     setSettings(next);

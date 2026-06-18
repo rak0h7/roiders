@@ -4,7 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CompoundCategory } from "@/data/compounds";
 import { getCompoundById } from "@/data/compounds";
-import { DEFAULT_DOSES } from "@/data/frequencies";
+import { DEFAULT_DOSES, inferDefaultDose } from "@/data/frequencies";
 import type { CycleCompound } from "@/lib/cycleTypes";
 import { format } from "date-fns";
 
@@ -52,11 +52,11 @@ function todayISO() {
 function makeDefaultCompound(compoundId: string, totalWeeks: number): CycleCompound | null {
   const compound = getCompoundById(compoundId);
   if (!compound) return null;
-  const defaults = DEFAULT_DOSES[compoundId];
+  const defaults = DEFAULT_DOSES[compoundId] ?? inferDefaultDose(compound);
   return {
     compoundId,
-    doseMg: defaults?.doseMg ?? 100,
-    frequency: defaults?.frequency ?? "weekly",
+    doseMg: defaults.doseMg,
+    frequency: defaults.frequency,
     activeWeeks: [1, totalWeeks],
     route: compound.route,
   };
