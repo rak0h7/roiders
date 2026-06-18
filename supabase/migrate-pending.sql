@@ -18,7 +18,7 @@ create table if not exists public.site_settings (
   site_tagline text not null default 'Private performance tracking',
   maintenance_mode boolean not null default false,
   maintenance_message text not null default 'Roiders Club is undergoing maintenance. Please check back soon.',
-  allow_public_signup boolean not null default true,
+  allow_public_signup boolean not null default false,
   announcement_enabled boolean not null default false,
   announcement_message text not null default '',
   announcement_level text not null default 'info' check (announcement_level in ('info', 'warning', 'danger')),
@@ -35,7 +35,7 @@ alter table public.site_settings add column if not exists welcome_message text n
 alter table public.site_settings add column if not exists login_message text not null default '';
 alter table public.site_settings add column if not exists signup_message text not null default '';
 alter table public.site_settings add column if not exists support_url text not null default '';
-alter table public.site_settings add column if not exists max_accounts int not null default 0;
+alter table public.site_settings add column if not exists max_accounts int not null default 50;
 alter table public.site_settings add column if not exists cloud_sync_enabled boolean not null default true;
 alter table public.site_settings add column if not exists debug_panel_enabled boolean not null default false;
 alter table public.site_settings add column if not exists module_labs_enabled boolean not null default true;
@@ -43,6 +43,11 @@ alter table public.site_settings add column if not exists module_cycle_enabled b
 alter table public.site_settings add column if not exists module_gym_enabled boolean not null default true;
 alter table public.site_settings add column if not exists module_nutrition_enabled boolean not null default true;
 alter table public.site_settings add column if not exists announcement_link text not null default '';
+
+-- Sell-access defaults for existing installs still on open signup + unlimited accounts
+update public.site_settings
+set allow_public_signup = false, max_accounts = 50
+where id = 1 and allow_public_signup = true and max_accounts = 0;
 
 -- Refresh PostgREST schema cache (safe to run; no-op if already current)
 notify pgrst, 'reload schema';

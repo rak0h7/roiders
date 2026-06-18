@@ -33,7 +33,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   site_tagline: "Private performance tracking",
   maintenance_mode: false,
   maintenance_message: "Roiders Club is undergoing maintenance. Please check back soon.",
-  allow_public_signup: true,
+  allow_public_signup: false,
   announcement_enabled: false,
   announcement_message: "",
   announcement_level: "info",
@@ -42,7 +42,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   login_message: "",
   signup_message: "",
   support_url: "",
-  max_accounts: 0,
+  max_accounts: 50,
   cloud_sync_enabled: true,
   debug_panel_enabled: false,
   module_labs_enabled: true,
@@ -131,7 +131,9 @@ function normalizeRow(row: Record<string, unknown>): SiteSettings {
         ? row.maintenance_message
         : DEFAULT_SITE_SETTINGS.maintenance_message,
     allow_public_signup:
-      row.allow_public_signup === undefined ? true : Boolean(row.allow_public_signup),
+      row.allow_public_signup === undefined
+        ? DEFAULT_SITE_SETTINGS.allow_public_signup
+        : Boolean(row.allow_public_signup),
     announcement_enabled: Boolean(row.announcement_enabled),
     announcement_message:
       typeof row.announcement_message === "string" ? row.announcement_message : "",

@@ -3,7 +3,6 @@ import type { CloudModule } from "@/lib/cloudSync";
 import { summarizeModuleData } from "@/lib/cloudSync";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { isAdminFingerprint } from "@/lib/adminFingerprint";
 import { loadUserProfile, resolveProfileGate } from "@/lib/profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
@@ -67,43 +66,7 @@ export async function requireAdmin(request: NextRequest) {
   return { user, error: null };
 }
 
-export async function fetchAdminStats() {
-  const admin = createAdminClient();
-
-  let profilesRes = await admin
-    .from("profiles")
-    .select("id, is_admin, key_fingerprint, created_at", { count: "exact" });
-
-  if (profilesRes.error?.message?.includes("does not exist")) {
-    profilesRes = await admin
-      .from("profiles")
-      .select("id, key_fingerprint, created_at", { count: "exact" });
-  }
-
-  const modulesRes = await admin.from("user_modules").select("user_id, module", { count: "exact" });
-
-  if (profilesRes.error) throw profilesRes.error;
-  if (modulesRes.error) throw modulesRes.error;
-
-  const profiles = profilesRes.data ?? [];
-  const modules = modulesRes.data ?? [];
-
-  return {
-    totalAccounts: profilesRes.count ?? profiles.length,
-    adminAccounts: profiles.filter(
-      (p) => Boolean(p.is_admin) || isAdminFingerprint(p.key_fingerprint)
-    ).length,
-    syncedModules: modulesRes.count ?? modules.length,
-    accountsLast7Days: profiles.filter((p) => {
-      const created = new Date(p.created_at).getTime();
-      return Date.now() - created < 7 * 24 * 60 * 60 * 1000;
-    }).length,
-    moduleBreakdown: modules.reduce<Record<string, number>>((acc, row) => {
-      acc[row.module] = (acc[row.module] ?? 0) + 1;
-      return acc;
-    }, {}),
-  };
-}
+export { fetchAdminStats, type AdminStats } from "@/lib/adminStats";
 
 export async function fetchAdminUsers(): Promise<AdminUser[]> {
   const admin = createAdminClient();

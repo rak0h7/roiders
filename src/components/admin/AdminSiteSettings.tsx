@@ -16,6 +16,7 @@ import {
 import { AdminToggleRow } from "@/components/admin/AdminToggleRow";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import type { AnnouncementLevel, SiteSettings } from "@/lib/siteSettings";
+import { RECOMMENDED_MAX_ACCOUNTS, recommendedAccessDefaults } from "@/lib/adminStats";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -243,6 +244,21 @@ export function AdminSiteSettings({ onSaved }: Props) {
                 description="Who can register and use the site."
                 accent="warning"
               />
+              <div className={cn(ui.cardInner, "flex flex-wrap items-center justify-between gap-3 p-3")}>
+                <div>
+                  <p className="text-sm font-medium">Sell-access preset</p>
+                  <p className="text-xs text-[var(--muted)]">
+                    Disable public signup and cap at {RECOMMENDED_MAX_ACCOUNTS} accounts — you issue keys manually.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => patch(recommendedAccessDefaults())}
+                  className={cn(ui.btnSecondary, "text-xs")}
+                >
+                  Apply preset
+                </button>
+              </div>
               <AdminToggleRow
                 label="Public signup"
                 description="Allow visitors to generate their own access key at /auth/signup"
@@ -284,7 +300,7 @@ export function AdminSiteSettings({ onSaved }: Props) {
                   className={cn(ui.input, "mt-1.5 max-w-[10rem]")}
                 />
                 <p className={`${ui.sectionSub} mt-1.5`}>
-                  0 = unlimited. Applies to public signup and admin-generated accounts.
+                  0 = unlimited. Recommended: {RECOMMENDED_MAX_ACCOUNTS} for free-tier hosting. Applies to admin-generated and public signups.
                 </p>
               </div>
             </>
