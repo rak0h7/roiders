@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Plus, RefreshCw, Shield, Trash2, Users } from "lucide-react";
+import { ArrowLeft, Database, ExternalLink, Plus, RefreshCw, Shield, Trash2, Users } from "lucide-react";
+import { AdminUserModules } from "@/components/admin/AdminUserModules";
+import type { AdminUser } from "@/lib/admin";
 import { AccessKeyReveal } from "@/components/auth/AccessKeyReveal";
 import { AdminSiteSettings } from "@/components/admin/AdminSiteSettings";
 import { useAuth } from "@/context/AuthContext";
@@ -17,18 +19,6 @@ type Stats = {
   moduleBreakdown: Record<string, number>;
 };
 
-type AdminUser = {
-  id: string;
-  username: string | null;
-  display_name: string | null;
-  key_fingerprint: string | null;
-  is_admin: boolean;
-  created_at: string;
-  updated_at: string;
-  module_count: number;
-  modules: string[];
-};
-
 export function AdminPanel() {
   const { user, accountName } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
@@ -38,6 +28,7 @@ export function AdminPanel() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [modulesUser, setModulesUser] = useState<AdminUser | null>(null);
 
   const load = useCallback(async (options?: { showLoading?: boolean }) => {
     if (options?.showLoading) setLoading(true);
@@ -312,17 +303,27 @@ export function AdminPanel() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {!row.is_admin && row.id !== user?.id && (
+                      <div className="flex justify-end gap-1">
                         <button
                           type="button"
-                          disabled={busyId === row.id}
-                          onClick={() => void deleteUser(row)}
-                          className={cn(ui.btnGhost, "text-[var(--danger)] hover:bg-[var(--danger)]/10")}
-                          title="Delete account"
+                          onClick={() => setModulesUser(row)}
+                          className={cn(ui.btnGhost, "text-[var(--muted)] hover:text-[var(--foreground)]")}
+                          title="View cloud data"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Database className="h-4 w-4" />
                         </button>
-                      )}
+                        {!row.is_admin && row.id !== user?.id && (
+                          <button
+                            type="button"
+                            disabled={busyId === row.id}
+                            onClick={() => void deleteUser(row)}
+                            className={cn(ui.btnGhost, "text-[var(--danger)] hover:bg-[var(--danger)]/10")}
+                            title="Delete account"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -333,6 +334,14 @@ export function AdminPanel() {
             )}
           </div>
         </div>
+
+        {modulesUser && (
+          <AdminUserModules
+            user={modulesUser}
+            onClose={() => setModulesUser(null)}
+            onReset={() => void load()}
+          />
+        )}
       </div>
     </div>
   );

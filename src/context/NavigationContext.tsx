@@ -1,6 +1,8 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { pathFromRoute, routeFromPathname } from "@/lib/appRoutes";
 
 export type AppRoute =
   | "home"
@@ -67,11 +69,22 @@ interface NavigationContextValue {
 const NavigationContext = createContext<NavigationContextValue | null>(null);
 
 export function NavigationProvider({ children }: { children: React.ReactNode }) {
-  const [route, setRouteState] = useState<AppRoute>("home");
+  const pathname = usePathname();
+  const router = useRouter();
+  const route = useMemo(() => routeFromPathname(pathname) ?? "home", [pathname]);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
 
-  const setRoute = useCallback((r: AppRoute) => setRouteState(r), []);
+  const setRoute = useCallback(
+    (r: AppRoute) => {
+      const path = pathFromRoute(r);
+      if (pathname !== path) {
+        router.push(path, { scroll: false });
+      }
+    },
+    [pathname, router]
+  );
+
   const setSidebarCollapsedState = useCallback((collapsed: boolean) => setSidebarCollapsed(collapsed), []);
   const toggleSidebar = useCallback(() => setSidebarCollapsed((c) => !c), []);
 

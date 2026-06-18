@@ -1,4 +1,6 @@
 import type { User } from "@supabase/supabase-js";
+import type { CloudModule } from "@/lib/cloudSync";
+import { summarizeModuleData } from "@/lib/cloudSync";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isAdminFingerprint } from "@/lib/adminFingerprint";
@@ -14,6 +16,11 @@ export type AdminProfile = {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
+};
+
+export type AdminUser = AdminProfile & {
+  module_count: number;
+  modules: string[];
 };
 
 export function createSessionClient(request: NextRequest, response?: NextResponse) {
@@ -98,9 +105,7 @@ export async function fetchAdminStats() {
   };
 }
 
-export async function fetchAdminUsers(): Promise<
-  (AdminProfile & { module_count: number; modules: string[] })[]
-> {
+export async function fetchAdminUsers(): Promise<AdminUser[]> {
   const admin = createAdminClient();
 
   const fullProfilesRes = await admin
@@ -144,6 +149,46 @@ export async function fetchAdminUsers(): Promise<
       module_count: userModules.length,
     };
   });
+}
+
+export type AdminUserModule = {
+  module: CloudModule;
+  updated_at: string;
+  summary: string;
+  size_bytes: number;
+};
+
+export async function fetchAdminUserModules(userId: string): Promise<AdminUserModule[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("user_modules")
+    .select("module, data, updated_at")
+    .eq("user_id", userId)
+    .order("module");
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const mod = row.module as CloudModule;
+    const serialized = JSON.stringify(row.data ?? {});
+    return {
+      module: mod,
+      updated_at: row.updated_at as string,
+      summary: summarizeModuleData(mod, row.data),
+      size_bytes: serialized.length,
+    };
+  });
+}
+
+export async function resetAdminUserModule(userId: string, module: CloudModule | "all") {
+  const admin = createAdminClient();
+  if (module === "all") {
+    const { error } = await admin.from("user_modules").delete().eq("user_id", userId);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await admin.from("user_modules").delete().eq("user_id", userId).eq("module", module);
+  if (error) throw error;
 }
 
 export async function deleteAdminUser(actor: User, targetId: string) {

@@ -14,10 +14,17 @@ const SYNC_META_KEY = "roiders-club-sync-meta";
 
 type SyncMeta = Partial<Record<CloudModule, string>>;
 
+export interface SyncConflict {
+  module: CloudModule;
+  localUpdatedAt: string;
+  remoteUpdatedAt: string;
+}
+
 export interface SyncResult {
   pulled: CloudModule[];
   pushed: CloudModule[];
   merged: boolean;
+  conflicts: SyncConflict[];
 }
 
 export function readLocalModule(module: CloudModule): unknown | null {
@@ -71,10 +78,51 @@ function shouldTakeRemote(
   return new Date(remoteUpdatedAt).getTime() > new Date(localUpdatedAt).getTime();
 }
 
+function detectConflict(
+  module: CloudModule,
+  local: unknown,
+  remoteUpdatedAt: string
+): SyncConflict | null {
+  if (local == null || isEmptyLocal(module, local)) return null;
+  const localUpdatedAt = getLocalUpdatedAt(module);
+  if (!localUpdatedAt) return null;
+  const localTime = new Date(localUpdatedAt).getTime();
+  const remoteTime = new Date(remoteUpdatedAt).getTime();
+  if (localTime > remoteTime) {
+    return { module, localUpdatedAt, remoteUpdatedAt };
+  }
+  return null;
+}
+
+export function summarizeModuleData(module: CloudModule, data: unknown): string {
+  if (data == null) return "Empty";
+  if (module === "labs" && Array.isArray(data)) {
+    return `${data.length} report${data.length === 1 ? "" : "s"}`;
+  }
+  if (typeof data === "object" && data && "state" in data) {
+    const state = (data as { state: Record<string, unknown> }).state;
+    if (module === "cycle") {
+      const count = (state.compounds as unknown[])?.length ?? 0;
+      return `${count} compound${count === 1 ? "" : "s"}`;
+    }
+    if (module === "gym") {
+      const history = (state.history as unknown[])?.length ?? 0;
+      const routines = (state.routines as unknown[])?.length ?? 0;
+      return `${history} workout${history === 1 ? "" : "s"}, ${routines} program${routines === 1 ? "" : "s"}`;
+    }
+    if (module === "nutrition") {
+      const days = Object.keys(state.logs ?? {}).length;
+      return `${days} day${days === 1 ? "" : "s"} logged`;
+    }
+  }
+  if (module === "settings") return "Preferences";
+  return "Has data";
+}
+
 export async function pullUserData(
   supabase: SupabaseClient,
   userId: string
-): Promise<{ pulled: CloudModule[]; merged: boolean }> {
+): Promise<{ pulled: CloudModule[]; merged: boolean; conflicts: SyncConflict[] }> {
   const { data, error } = await supabase
     .from("user_modules")
     .select("module, data, updated_at")
@@ -83,6 +131,7 @@ export async function pullUserData(
   if (error) throw error;
 
   const pulled: CloudModule[] = [];
+  const conflicts: SyncConflict[] = [];
   let merged = false;
 
   for (const row of data ?? []) {
@@ -92,6 +141,9 @@ export async function pullUserData(
     const remote = row.data;
     const remoteUpdatedAt = row.updated_at as string;
 
+    const conflict = detectConflict(mod, local, remoteUpdatedAt);
+    if (conflict) conflicts.push(conflict);
+
     if (shouldTakeRemote(mod, local, remoteUpdatedAt)) {
       writeLocalModule(mod, remote, remoteUpdatedAt);
       pulled.push(mod);
@@ -99,7 +151,30 @@ export async function pullUserData(
     }
   }
 
-  return { pulled, merged };
+  return { pulled, merged, conflicts };
+}
+
+export async function resolveSyncConflict(
+  supabase: SupabaseClient,
+  userId: string,
+  module: CloudModule,
+  choice: "local" | "remote"
+): Promise<void> {
+  if (choice === "local") {
+    await pushUserData(supabase, userId, [module]);
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("user_modules")
+    .select("data, updated_at")
+    .eq("user_id", userId)
+    .eq("module", module)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return;
+  writeLocalModule(module, data.data, data.updated_at as string);
 }
 
 export async function pushUserData(
@@ -134,7 +209,7 @@ export async function syncUserData(
 ): Promise<SyncResult> {
   const pull = await pullUserData(supabase, userId);
   const pushed = await pushUserData(supabase, userId);
-  return { pulled: pull.pulled, pushed, merged: pull.merged };
+  return { pulled: pull.pulled, pushed, merged: pull.merged, conflicts: pull.conflicts };
 }
 
 function isEmptyLocal(module: CloudModule, data: unknown): boolean {

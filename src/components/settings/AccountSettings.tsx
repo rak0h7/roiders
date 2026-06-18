@@ -9,8 +9,10 @@ import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function AccountSettings() {
-  const { configured, user, username, accountName, isAdmin, loading, signOut, syncNow, syncStatus, setUsername } =
-    useAuth();
+  const {
+    configured, user, username, accountName, isAdmin, loading, signOut, syncNow, syncStatus,
+    syncConflicts, resolveConflict, setUsername,
+  } = useAuth();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
@@ -109,6 +111,47 @@ export function AccountSettings() {
                 <Shield className="mr-1.5 h-3.5 w-3.5" />
                 Site Admin
               </Link>
+            )}
+
+            {syncConflicts.length > 0 && (
+              <div className="space-y-2 rounded-[var(--radius-md)] border border-[var(--warning)]/30 bg-[var(--warning)]/5 p-3">
+                <p className="text-xs font-semibold text-[var(--warning)]">Sync conflicts</p>
+                <p className="text-[11px] text-[var(--muted)]">
+                  Local data is newer than cloud on these modules. Choose which copy to keep.
+                </p>
+                {syncConflicts.map((conflict) => (
+                  <div key={conflict.module} className="flex flex-wrap items-center justify-between gap-2 rounded border border-[var(--border)] bg-[var(--bg-elevated)]/60 px-3 py-2">
+                    <div>
+                      <p className="text-sm font-medium capitalize">{conflict.module}</p>
+                      <p className="text-[10px] text-[var(--muted)]">
+                        Local {new Date(conflict.localUpdatedAt).toLocaleString()} · Cloud {new Date(conflict.remoteUpdatedAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        className={cn(ui.btnGhost, "text-[10px]")}
+                        onClick={() => void resolveConflict(conflict.module, "local").then(({ error }) => {
+                          if (error) toast({ type: "error", title: "Sync", description: error });
+                          else toast({ type: "success", title: "Kept local copy", description: conflict.module });
+                        })}
+                      >
+                        Keep local
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(ui.btnSecondary, "text-[10px]")}
+                        onClick={() => void resolveConflict(conflict.module, "remote").then(({ error }) => {
+                          if (error) toast({ type: "error", title: "Sync", description: error });
+                          else toast({ type: "success", title: "Restored from cloud", description: conflict.module });
+                        })}
+                      >
+                        Use cloud
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
 
             {(syncStatus.lastSyncAt || syncStatus.lastError) && (

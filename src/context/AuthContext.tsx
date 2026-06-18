@@ -4,7 +4,13 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { pullUserData, syncUserData, type CloudModule } from "@/lib/cloudSync";
+import {
+  pullUserData,
+  resolveSyncConflict,
+  syncUserData,
+  type CloudModule,
+  type SyncConflict,
+} from "@/lib/cloudSync";
 import { rehydratePersistedStores } from "@/lib/storeRehydrate";
 import { accountLabel } from "@/lib/accessKey.shared";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -43,6 +49,8 @@ interface AuthContextValue {
     lastPushed: CloudModule[];
     lastError: string | null;
   };
+  syncConflicts: SyncConflict[];
+  resolveConflict: (module: CloudModule, choice: "local" | "remote") => Promise<{ error: string | null }>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -67,6 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     lastPushed: [],
     lastError: null,
   });
+  const [syncConflicts, setSyncConflicts] = useState<SyncConflict[]>([]);
 
   const refreshProfile = useCallback(
     async (nextUser: User | null) => {
@@ -116,6 +125,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await syncUserData(supabase, user.id);
       await rehydratePersistedStores();
       const at = new Date().toISOString();
+      setSyncConflicts(result.conflicts);
       setSyncStatus({
         syncing: false,
         lastSyncAt: at,
@@ -130,6 +140,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: msg };
     }
   }, [supabase, user, siteSettings.cloud_sync_enabled]);
+
+  const resolveConflict = useCallback(
+    async (module: CloudModule, choice: "local" | "remote") => {
+      if (!supabase || !user) return { error: null };
+      try {
+        await resolveSyncConflict(supabase, user.id, module, choice);
+        if (choice === "remote") await rehydratePersistedStores();
+        setSyncConflicts((list) => list.filter((c) => c.module !== module));
+        return { error: null };
+      } catch (e) {
+        return { error: e instanceof Error ? e.message : "Could not resolve conflict" };
+      }
+    },
+    [supabase, user]
+  );
 
   useEffect(() => {
     if (!supabase) return;
@@ -164,6 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (!nextUser) {
         pulledForUser.current = null;
+        setSyncConflicts([]);
         return;
       }
 
@@ -172,8 +198,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (siteSettings.cloud_sync_enabled) {
         try {
-          const { pulled, merged } = await pullUserData(supabase, nextUser.id);
+          const { pulled, merged, conflicts } = await pullUserData(supabase, nextUser.id);
           if (merged) await rehydratePersistedStores();
+          setSyncConflicts(conflicts);
           setSyncStatus((s) => ({
             ...s,
             lastSyncAt: merged ? new Date().toISOString() : s.lastSyncAt,
@@ -195,6 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     syncTimer.current = setInterval(() => {
       void syncUserData(supabase, user.id).then(async (result) => {
         if (result.merged) await rehydratePersistedStores();
+        setSyncConflicts(result.conflicts);
       });
     }, 45_000);
 
@@ -282,6 +310,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut,
         syncNow,
         syncStatus,
+        syncConflicts,
+        resolveConflict,
       }}
     >
       {children}
