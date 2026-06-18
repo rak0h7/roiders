@@ -88,12 +88,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  if (!user && !isAuthRoute(pathname)) {
+  if (!user && !isAuthRoute(pathname) && pathname !== "/") {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
-    if (pathname !== "/") {
-      loginUrl.searchParams.set("next", pathname);
-    }
+    loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
   }
 

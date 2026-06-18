@@ -36,11 +36,17 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  title: "Roiders Club — Labs & Protocol",
+  title: "Roiders Club — Labs, Protocol, Training & Nutrition",
   description:
-    "Professional lab analysis and cycle protocol planning with cross-domain health intelligence.",
+    "Private performance health platform. Track bloodwork, protocol, training, and nutrition in one command center with cross-module intelligence.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Roiders Club" },
+  openGraph: {
+    title: "Roiders Club — Your health command center",
+    description:
+      "Labs, protocol, training, and nutrition trackers in one place. Private access-key auth, optional cloud sync.",
+    type: "website",
+  },
 };
 
 export const viewport = {
