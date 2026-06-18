@@ -20,6 +20,9 @@ export function MarketingPageShell({ siteName, children }: MarketingPageShellPro
               {siteName}
             </Link>
             <nav className="flex items-center gap-4 text-xs text-[var(--muted)] sm:gap-6 sm:text-sm">
+              <Link href="/features" className="hover:text-[var(--foreground)]">
+                Features
+              </Link>
               <Link href="/about" className="hover:text-[var(--foreground)]">
                 About
               </Link>
@@ -44,6 +47,9 @@ export function MarketingPageShell({ siteName, children }: MarketingPageShellPro
             <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-[var(--muted)]">
               <Link href="/" className="hover:text-[var(--foreground)]">
                 Home
+              </Link>
+              <Link href="/features" className="hover:text-[var(--foreground)]">
+                Features
               </Link>
               <Link href="/about" className="hover:text-[var(--foreground)]">
                 About

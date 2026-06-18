@@ -5,6 +5,7 @@ import { getSiteUrl } from "@/lib/siteUrl";
 export const PUBLIC_ALLOW_PATHS = [
   "/",
   "/about",
+  "/features/",
   "/auth/login",
   "/auth/signup",
   "/terms",

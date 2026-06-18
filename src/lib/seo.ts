@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getSiteUrl } from "@/lib/siteUrl";
 
 export const DEFAULT_SITE_DESCRIPTION =
-  "Roiders Club is a free performance health web app at roiders.club — track bloodwork analysis, cycle planning, training, and nutrition in one private dashboard.";
+  "Roiders Club is a free performance health tracker at roiders.club — bloodwork analysis, cycle planning, workout logging, and macro tracking in one private dashboard. Not motorcycle Riders Club sites.";
 
 export const SITE_KEYWORDS = [
   "Roiders Club",

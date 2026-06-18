@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSiteSettings();
   const description = resolveSiteDescription(settings.site_description, settings.site_tagline);
   return buildPageMetadata({
-    title: `${settings.site_name} — Labs, Gear, Training & Nutrition`,
+    title: `${settings.site_name} — Performance Health Tracker for Bloodwork, Cycles & Training`,
     description,
     path: "/",
   });

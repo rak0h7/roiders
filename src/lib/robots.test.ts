@@ -16,6 +16,7 @@ describe("robots", () => {
     expect(wildcard.disallow).toEqual(expect.arrayContaining([...PRIVATE_DISALLOW_PATHS]));
     expect(wildcard.disallow).toContain("/labs/");
     expect(wildcard.disallow).toContain("/api/");
+    expect(wildcard.allow).toContain("/features/");
   });
 
   it("explicitly permits major search and AI crawlers", () => {

@@ -70,22 +70,37 @@ export default async function AboutPage() {
 
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-[var(--foreground)]">What you can track</h2>
+            <p>
+              Each module has a public overview on our{" "}
+              <Link href="/features" className="text-[var(--labs)] hover:underline">
+                features pages
+              </Link>
+              .
+            </p>
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                <strong className="text-[var(--foreground)]">Labs</strong> — bloodwork logging, trend charts,
-                optimized on-cycle ranges, OCR screenshot upload, review flags
+                <Link href="/features/labs" className="text-[var(--labs)] hover:underline">
+                  <strong className="text-[var(--foreground)]">Labs</strong>
+                </Link>{" "}
+                — bloodwork logging, trend charts, optimized on-cycle ranges, OCR screenshot upload, review flags
               </li>
               <li>
-                <strong className="text-[var(--foreground)]">Gear</strong> — cycle builder, PK saturation curves,
-                compound risk, 100+ guides
+                <Link href="/features/gear" className="text-[var(--labs)] hover:underline">
+                  <strong className="text-[var(--foreground)]">Gear</strong>
+                </Link>{" "}
+                — cycle builder, PK saturation curves, compound risk, 100+ guides
               </li>
               <li>
-                <strong className="text-[var(--foreground)]">Training</strong> — workout log, programs, PRs,
-                weekly volume
+                <Link href="/features/training" className="text-[var(--labs)] hover:underline">
+                  <strong className="text-[var(--foreground)]">Training</strong>
+                </Link>{" "}
+                — workout log, programs, PRs, weekly volume
               </li>
               <li>
-                <strong className="text-[var(--foreground)]">Nutrition</strong> — macros, food diary,
-                micronutrients
+                <Link href="/features/nutrition" className="text-[var(--labs)] hover:underline">
+                  <strong className="text-[var(--foreground)]">Nutrition</strong>
+                </Link>{" "}
+                — macros, food diary, micronutrients
               </li>
             </ul>
           </section>
