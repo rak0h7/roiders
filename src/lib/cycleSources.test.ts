@@ -2,9 +2,16 @@ import { describe, expect, it } from "vitest";
 import { CYCLE_SOURCES } from "@/data/cycleSources";
 
 describe("cycleSources", () => {
-  it("lists WWB, PCT.ZONE, and ruo.bio", () => {
+  it("lists all premium sources", () => {
     const ids = CYCLE_SOURCES.map((s) => s.id);
-    expect(ids).toEqual(["wwb", "pct-zone", "ruo-bio"]);
+    expect(ids).toEqual(["wwb", "pct-zone", "ruo-bio", "algorx", "opti-usa", "nexus-pharma"]);
+  });
+
+  it("includes ALGORX, Opti USA, and Nexus Pharma URLs", () => {
+    const urls = CYCLE_SOURCES.flatMap((s) => s.contacts.map((c) => c.href));
+    expect(urls).toContain("https://algorx.ai/");
+    expect(urls).toContain("https://optiusa.io");
+    expect(urls).toContain("https://nexuspharma.to/");
   });
 
   it("includes WWB telegram and verification email", () => {

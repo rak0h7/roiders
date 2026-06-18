@@ -58,4 +58,24 @@ export const CYCLE_SOURCES: CycleSource[] = [
     name: "ruo.bio",
     contacts: [{ kind: "url", label: "Website", value: "ruo.bio", href: "https://ruo.bio" }],
   },
+  {
+    id: "algorx",
+    name: "ALGORX",
+    subtitle: "Online telehealth · bloodwork panels · TRT",
+    contacts: [{ kind: "url", label: "Website", value: "algorx.ai", href: "https://algorx.ai/" }],
+    notes: [
+      "Online telehealth clinic with pre-made bloodwork panels and online TRT.",
+    ],
+  },
+  {
+    id: "opti-usa",
+    name: "Opti USA DOMESTIC",
+    subtitle: "HGH · injectables · tablets · peptides · misc",
+    contacts: [{ kind: "url", label: "Website", value: "optiusa.io", href: "https://optiusa.io" }],
+  },
+  {
+    id: "nexus-pharma",
+    name: "Nexus Pharma",
+    contacts: [{ kind: "url", label: "Website", value: "nexuspharma.to", href: "https://nexuspharma.to/" }],
+  },
 ];

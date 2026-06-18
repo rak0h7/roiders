@@ -1,8 +1,12 @@
 # TikTok / social assets — Roiders Club
 
-**Dimensions:** Primary slides are **1080×1920** (9:16). Profile thumb is **1080×1080** (1:1).
+**Dimensions:** Primary slides are **720×1350** (TikTok upload size). Profile avatars are square (see below).
 
-**Safe zone:** All copy sits in the **top ~60%** with **400px** bottom margin and **148px** right margin so TikTok captions, username, and action buttons don’t cover text.
+**Safe zone:** Copy sits in the **top ~60%** with **281px** bottom margin and **99px** right margin so TikTok captions, username, and action buttons don’t cover text.
+
+**Posting guide:** see `POSTING.md` for carousel order, captions, and video ideas.
+
+**Labs analysis carousel** (red/green theme): `labs-analysis/` — regenerate with `npm run assets:labs-analysis`
 
 ## Branded slides (PNG)
 

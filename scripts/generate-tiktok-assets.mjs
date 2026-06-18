@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Generates TikTok-ready 9:16 PNG assets (1080×1920) for Roiders Club.
+ * Generates TikTok-ready PNG assets (720×1350) for Roiders Club.
  * Run: node scripts/generate-tiktok-assets.mjs
  */
 import { chromium } from "playwright";
@@ -11,10 +11,14 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(__dirname, "..", "assets", "social", "tiktok");
-const WIDTH = 1080;
-const HEIGHT = 1920;
-/** TikTok UI dead zones (px) — caption/username/bottom nav + right action rail */
-const SAFE = { top: 108, right: 148, bottom: 400, left: 56 };
+const WIDTH = 720;
+const HEIGHT = 1350;
+const SX = WIDTH / 1080;
+const SY = HEIGHT / 1920;
+const px = (n) => Math.round(n * SX);
+const py = (n) => Math.round(n * SY);
+/** TikTok UI dead zones — caption/username/bottom nav + right action rail */
+const SAFE = { top: py(108), right: px(148), bottom: py(400), left: px(56) };
 
 const BRAND = {
   bg: "#07080c",
@@ -288,7 +292,7 @@ const HTML = `<!DOCTYPE html>
     background-image:
       linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background-size: ${px(48)}px ${px(48)}px;
     mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black, transparent);
   }
   .content {
@@ -297,20 +301,20 @@ const HTML = `<!DOCTYPE html>
     padding: ${SAFE.top}px ${SAFE.right}px ${SAFE.bottom}px ${SAFE.left}px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: ${py(28)}px;
   }
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: ${px(20)}px;
     flex-shrink: 0;
   }
   .badge {
     flex-shrink: 0;
-    font-size: 20px; font-weight: 600; letter-spacing: 0.12em;
+    font-size: ${px(20)}px; font-weight: 600; letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 10px 18px;
+    padding: ${px(10)}px ${px(18)}px;
     border-radius: 999px;
     border: 1px solid;
   }
@@ -318,12 +322,12 @@ const HTML = `<!DOCTYPE html>
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: ${py(18)}px;
     max-width: 100%;
   }
   h1 {
     font-family: 'Syne', sans-serif;
-    font-size: 80px;
+    font-size: ${px(80)}px;
     font-weight: 800;
     line-height: 0.98;
     letter-spacing: -0.03em;
@@ -332,120 +336,120 @@ const HTML = `<!DOCTYPE html>
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .sub { font-size: 32px; font-weight: 600; color: ${BRAND.muted}; letter-spacing: -0.01em; }
-  .body { font-size: 26px; line-height: 1.42; color: color-mix(in srgb, ${BRAND.fg} 82%, ${BRAND.muted}); max-width: 100%; }
-  .bullets { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
-  .bullets li { font-size: 24px; display: flex; align-items: center; gap: 12px; color: ${BRAND.fg}; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .sub { font-size: ${px(32)}px; font-weight: 600; color: ${BRAND.muted}; letter-spacing: -0.01em; }
+  .body { font-size: ${px(26)}px; line-height: 1.42; color: color-mix(in srgb, ${BRAND.fg} 82%, ${BRAND.muted}); max-width: 100%; }
+  .bullets { list-style: none; display: flex; flex-direction: column; gap: ${py(12)}px; margin-top: 4px; }
+  .bullets li { font-size: ${px(24)}px; display: flex; align-items: center; gap: ${px(12)}px; color: ${BRAND.fg}; }
+  .dot { width: ${px(10)}px; height: ${px(10)}px; border-radius: 50%; flex-shrink: 0; }
   .footer {
     margin-top: 4px;
     font-family: 'Syne', sans-serif;
-    font-size: 34px;
+    font-size: ${px(34)}px;
     font-weight: 700;
   }
   .brand-mark {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 20px; font-weight: 600; color: ${BRAND.muted};
+    display: flex; align-items: center; gap: ${px(12)}px;
+    font-size: ${px(20)}px; font-weight: 600; color: ${BRAND.muted};
     letter-spacing: 0.04em;
   }
   .logo {
-    width: 40px; height: 40px; border-radius: 11px;
+    width: ${px(40)}px; height: ${px(40)}px; border-radius: ${px(11)}px;
     border: 1px solid currentColor;
     display: grid; place-items: center;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: ${px(16)}px;
     background: rgba(255,255,255,0.04);
   }
 
   /* Decorative visuals — middle band only, no readable text */
   .visual-zone {
     flex: 0 0 auto;
-    height: 380px;
+    height: ${py(380)}px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: -40px;
+    margin-right: -${px(40)}px;
     pointer-events: none;
   }
   .visual { position: relative; width: 100%; height: 100%; }
-  .hero .orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.5; }
-  .hero .o1 { width: 200px; height: 200px; top: 10px; left: 20px; }
-  .hero .o2 { width: 160px; height: 160px; top: 60px; right: 30px; }
-  .hero .o3 { width: 120px; height: 120px; top: 50%; left: 45%; transform: translateY(-50%); }
-  .chart { display: flex; align-items: center; justify-content: center; gap: 20px; height: 100%; }
-  .mini-chart { width: 380px; height: auto; }
-  .flag { padding: 12px 20px; border-radius: 12px; border: 1px solid; font-weight: 700; font-size: 24px; }
+  .hero .orb { position: absolute; border-radius: 50%; filter: blur(${px(40)}px); opacity: 0.5; }
+  .hero .o1 { width: ${px(200)}px; height: ${px(200)}px; top: ${py(10)}px; left: ${px(20)}px; }
+  .hero .o2 { width: ${px(160)}px; height: ${px(160)}px; top: ${py(60)}px; right: ${px(30)}px; }
+  .hero .o3 { width: ${px(120)}px; height: ${px(120)}px; top: 50%; left: 45%; transform: translateY(-50%); }
+  .chart { display: flex; align-items: center; justify-content: center; gap: ${px(20)}px; height: 100%; }
+  .mini-chart { width: ${px(380)}px; height: auto; }
+  .flag { padding: ${py(12)}px ${px(20)}px; border-radius: ${px(12)}px; border: 1px solid; font-weight: 700; font-size: ${px(24)}px; }
   .stack { height: 100%; }
   .compound {
     position: absolute; left: 50%; transform: translateX(-50%);
-    padding: 18px 32px; border-radius: 16px; border: 1px solid;
-    font-size: 28px; font-weight: 600;
+    padding: ${py(18)}px ${px(32)}px; border-radius: ${px(16)}px; border: 1px solid;
+    font-size: ${px(28)}px; font-weight: 600;
     background: rgba(255,255,255,0.05);
     backdrop-filter: blur(6px);
   }
-  .compound:nth-child(1) { top: 40px; margin-left: -40px; }
-  .compound:nth-child(2) { top: 120px; margin-left: 0; }
-  .compound:nth-child(3) { top: 200px; margin-left: 40px; }
-  .bars { display: flex; align-items: flex-end; justify-content: center; gap: 18px; height: 100%; max-height: 280px; }
-  .bar { width: 44px; border-radius: 10px 10px 4px 4px; min-height: 20px; }
-  .rings { display: flex; gap: 18px; justify-content: center; align-items: center; height: 100%; }
+  .compound:nth-child(1) { top: ${py(40)}px; margin-left: -${px(40)}px; }
+  .compound:nth-child(2) { top: ${py(120)}px; margin-left: 0; }
+  .compound:nth-child(3) { top: ${py(200)}px; margin-left: ${px(40)}px; }
+  .bars { display: flex; align-items: flex-end; justify-content: center; gap: ${px(18)}px; height: 100%; max-height: ${py(280)}px; }
+  .bar { width: ${px(44)}px; border-radius: ${px(10)}px ${px(10)}px ${px(4)}px ${px(4)}px; min-height: ${py(20)}px; }
+  .rings { display: flex; gap: ${px(18)}px; justify-content: center; align-items: center; height: 100%; }
   .ring {
-    width: 130px; height: 130px; border-radius: 50%; border: 6px solid;
+    width: ${px(130)}px; height: ${px(130)}px; border-radius: 50%; border: ${px(6)}px solid;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     background: rgba(255,255,255,0.03);
   }
-  .ring span { font-size: 16px; color: ${BRAND.muted}; }
-  .ring strong { font-size: 26px; margin-top: 4px; }
-  .nodes { position: relative; height: 100%; max-height: 280px; margin: 0 auto; width: 300px; }
+  .ring span { font-size: ${px(16)}px; color: ${BRAND.muted}; }
+  .ring strong { font-size: ${px(26)}px; margin-top: 4px; }
+  .nodes { position: relative; height: 100%; max-height: ${py(280)}px; margin: 0 auto; width: ${px(300)}px; }
   .node {
-    position: absolute; padding: 12px 22px; border-radius: 999px; border: 1px solid;
-    font-weight: 600; font-size: 22px; background: rgba(255,255,255,0.05);
+    position: absolute; padding: ${py(12)}px ${px(22)}px; border-radius: 999px; border: 1px solid;
+    font-weight: 600; font-size: ${px(22)}px; background: rgba(255,255,255,0.05);
   }
-  .node.center { left: 50%; top: 50%; transform: translate(-50%,-50%); font-family: 'Syne', sans-serif; font-size: 24px; z-index: 2; }
-  .node.n1 { left: 10px; top: 20px; }
-  .node.n2 { right: 10px; top: 20px; }
-  .node.n3 { left: 0; bottom: 20px; }
-  .node.n4 { right: 0; bottom: 20px; }
+  .node.center { left: 50%; top: 50%; transform: translate(-50%,-50%); font-family: 'Syne', sans-serif; font-size: ${px(24)}px; z-index: 2; }
+  .node.n1 { left: ${px(10)}px; top: ${py(20)}px; }
+  .node.n2 { right: ${px(10)}px; top: ${py(20)}px; }
+  .node.n3 { left: 0; bottom: ${py(20)}px; }
+  .node.n4 { right: 0; bottom: ${py(20)}px; }
   .node-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .phone { display: flex; justify-content: center; align-items: center; height: 100%; }
   .phone-frame {
-    width: 200px; height: 340px; border-radius: 28px;
+    width: ${px(200)}px; height: ${py(340)}px; border-radius: ${px(28)}px;
     border: 3px solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.04);
-    padding: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    padding: ${px(16)}px;
+    box-shadow: 0 ${py(20)}px ${px(60)}px rgba(0,0,0,0.4);
   }
-  .screen { height: 100%; border-radius: 16px; background: #0c0e14; padding: 20px 16px; position: relative; overflow: hidden; }
-  .scan-line { position: absolute; left: 0; right: 0; height: 3px; top: 45%; opacity: 0.8; box-shadow: 0 0 20px currentColor; }
-  .ocr-row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 22px; }
+  .screen { height: 100%; border-radius: ${px(16)}px; background: #0c0e14; padding: ${py(20)}px ${px(16)}px; position: relative; overflow: hidden; }
+  .scan-line { position: absolute; left: 0; right: 0; height: 3px; top: 45%; opacity: 0.8; box-shadow: 0 0 ${px(20)}px currentColor; }
+  .ocr-row { display: flex; justify-content: space-between; padding: ${py(14)}px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: ${px(22)}px; }
   .ocr-row b { font-family: 'Syne', sans-serif; }
   .curve { display: flex; justify-content: center; align-items: center; height: 100%; }
-  .pk-curve { width: 400px; }
-  .cards { display: flex; gap: 14px; justify-content: center; align-items: center; height: 100%; flex-wrap: wrap; }
+  .pk-curve { width: ${px(400)}px; }
+  .cards { display: flex; gap: ${px(14)}px; justify-content: center; align-items: center; height: 100%; flex-wrap: wrap; }
   .guide-card {
-    width: 140px; padding: 24px 16px; border-radius: 16px; border: 1px solid;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 28px; text-align: center;
+    width: ${px(140)}px; padding: ${py(24)}px ${px(16)}px; border-radius: ${px(16)}px; border: 1px solid;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: ${px(28)}px; text-align: center;
     background: rgba(255,255,255,0.04);
   }
-  .guide-card small { display: block; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: ${BRAND.muted}; margin-top: 6px; }
-  .check { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; height: 100%; }
-  .check-ring { width: 140px; height: 140px; border-radius: 50%; border: 4px solid; display: grid; place-items: center; background: rgba(255,255,255,0.03); }
-  .price { font-family: 'Syne', sans-serif; font-size: 72px; font-weight: 800; }
+  .guide-card small { display: block; font-family: 'DM Sans', sans-serif; font-size: ${px(14)}px; font-weight: 500; color: ${BRAND.muted}; margin-top: 6px; }
+  .check { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: ${py(20)}px; height: 100%; }
+  .check-ring { width: ${px(140)}px; height: ${px(140)}px; border-radius: 50%; border: 4px solid; display: grid; place-items: center; background: rgba(255,255,255,0.03); }
+  .price { font-family: 'Syne', sans-serif; font-size: ${px(72)}px; font-weight: 800; }
   .cloud { display: flex; justify-content: center; align-items: center; height: 100%; }
   .cloud-shape {
-    width: 200px; height: 120px; border-radius: 60px; border: 2px solid;
+    width: ${px(200)}px; height: ${py(120)}px; border-radius: ${px(60)}px; border: 2px solid;
     position: relative; background: rgba(255,255,255,0.04);
   }
   .cloud-shape::before, .cloud-shape::after {
     content: ''; position: absolute; background: inherit; border: inherit; border-radius: 50%;
   }
-  .cloud-shape::before { width: 80px; height: 80px; top: -30px; left: 30px; }
-  .cloud-shape::after { width: 100px; height: 100px; top: -40px; right: 20px; }
-  .sync-dot { position: absolute; width: 16px; height: 16px; border-radius: 50%; bottom: 40px; left: 50%; transform: translateX(-50%); }
-  .sync-dot.d2 { left: 35%; bottom: 50px; }
-  .sync-dot.d3 { left: 65%; bottom: 50px; }
+  .cloud-shape::before { width: ${px(80)}px; height: ${px(80)}px; top: -${py(30)}px; left: ${px(30)}px; }
+  .cloud-shape::after { width: ${px(100)}px; height: ${px(100)}px; top: -${py(40)}px; right: ${px(20)}px; }
+  .sync-dot { position: absolute; width: ${px(16)}px; height: ${px(16)}px; border-radius: 50%; bottom: ${py(40)}px; left: 50%; transform: translateX(-50%); }
+  .sync-dot.d2 { left: 35%; bottom: ${py(50)}px; }
+  .sync-dot.d3 { left: 65%; bottom: ${py(50)}px; }
   .cta { display: flex; justify-content: center; align-items: center; height: 100%; position: relative; }
-  .cta-arrow { font-size: 64px; font-weight: 700; opacity: 0.35; }
-  .cta-glow { position: absolute; width: 280px; height: 280px; border-radius: 50%; }
+  .cta-arrow { font-size: ${px(64)}px; font-weight: 700; opacity: 0.35; }
+  .cta-glow { position: absolute; width: ${px(280)}px; height: ${px(280)}px; border-radius: 50%; }
 </style>
 </head>
 <body>
@@ -478,7 +482,7 @@ async function main() {
 
   await browser.close();
   await unlink(htmlPath).catch(() => {});
-  console.log(`\n${SLIDES.length} assets → ${OUT_DIR}`);
+  console.log(`\n${SLIDES.length} slides (${WIDTH}×${HEIGHT}) → ${OUT_DIR}`);
 }
 
 main().catch((err) => {
