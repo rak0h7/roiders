@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "create-admin": "node scripts/create-admin-account.mjs",
+    "db:migrate": "node scripts/apply-migrations.mjs",
+    "db:bootstrap": "node scripts/post-migrate-bootstrap.mjs",
     "deploy": "vercel --prod --yes",
     "deploy:preview": "vercel --yes"
   },
@@ -34,6 +36,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "pg": "^8.21.0",
     "playwright": "^1.61.0",
     "tailwindcss": "^4",
     "typescript": "^5",

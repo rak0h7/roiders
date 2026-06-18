@@ -13,11 +13,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const sqlPath = path.join(__dirname, "..", "supabase", "migrate-pending.sql");
 const sql = fs.readFileSync(sqlPath, "utf8");
 
-const databaseUrl = process.env.DATABASE_URL ?? process.env.SUPABASE_DB_URL ?? process.env.POSTGRES_URL;
+const projectRef = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+const password = process.env.SUPABASE_DB_PASSWORD ?? process.env.POSTGRES_PASSWORD;
+const databaseUrl =
+  process.env.DATABASE_URL ??
+  process.env.SUPABASE_DB_URL ??
+  process.env.POSTGRES_URL ??
+  (password && projectRef
+    ? `postgresql://postgres.${projectRef}:${encodeURIComponent(password)}@aws-0-us-east-1.pooler.supabase.com:6543/postgres`
+    : null);
 
 if (!databaseUrl) {
-  console.log("DATABASE_URL is not set. Run this SQL in the Supabase SQL Editor:\n");
+  console.log("No database connection. Run this SQL in the Supabase SQL Editor:\n");
   console.log("https://supabase.com/dashboard/project/tfcplpxcorcqbjqbukem/sql/new\n");
+  console.log("Then: node scripts/post-migrate-bootstrap.mjs\n");
   console.log(sql);
   process.exit(0);
 }
