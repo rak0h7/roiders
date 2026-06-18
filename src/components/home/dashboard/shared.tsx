@@ -29,7 +29,7 @@ export function Stat({
       disabled={!onClick}
       className={cn(
         ui.cardInner,
-        "flex min-h-[4.75rem] flex-col justify-center p-3 text-left transition",
+        "flex min-h-[4.75rem] w-full min-w-0 flex-col justify-center overflow-hidden p-3 text-left transition",
         onClick && "cursor-pointer hover:border-[var(--border-strong)]"
       )}
     >

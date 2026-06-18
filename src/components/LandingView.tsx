@@ -11,7 +11,7 @@ import { Droplet, FileEdit } from "lucide-react";
 import { useRef } from "react";
 
 export function LandingView() {
-  const { setLogView, handleFileUpload, rangeMode, setRangeMode } = useApp();
+  const { setLogView, handleFileUpload, rangeMode, setRangeMode, reports } = useApp();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -37,7 +37,11 @@ export function LandingView() {
     <div className="space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center">
         <h2 className={cn(ui.pageTitle, "text-xl")}>Log Your Bloodwork</h2>
-        <p className={ui.pageSub}>Upload a lab report or enter values manually</p>
+        <p className={ui.pageSub}>
+          {reports.length > 0
+            ? `${reports.length} panel${reports.length > 1 ? "s" : ""} on file — add another or review in Analysis`
+            : "Upload a lab report or enter values manually"}
+        </p>
       </motion.div>
 
       <input ref={fileRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFile} />

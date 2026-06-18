@@ -70,7 +70,7 @@ export function ERCardView() {
                 const compound = getCompoundById(cc.compoundId);
                 if (!compound) return null;
                 return (
-                  <div key={cc.compoundId} className="border-b border-[var(--border)] pb-2 last:border-0">
+                  <div key={cc.id} className="border-b border-[var(--border)] pb-2 last:border-0">
                     <p className="text-sm font-semibold text-white">{compound.name}</p>
                     <p className="text-[10px] text-[var(--muted)]">
                       {formatDose(cc.doseMg, compound.unit)} • {frequencyLabel(cc.frequency)}

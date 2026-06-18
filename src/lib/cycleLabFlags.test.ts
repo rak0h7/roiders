@@ -9,6 +9,7 @@ import type { ReviewFlag } from "@/lib/types";
 
 const decaStack: CycleCompound[] = [
   {
+    id: "deca-1",
     compoundId: "deca",
     doseMg: 200,
     frequency: "weekly",
@@ -19,6 +20,7 @@ const decaStack: CycleCompound[] = [
 
 const testStack: CycleCompound[] = [
   {
+    id: "test-e-1",
     compoundId: "test-e",
     doseMg: 500,
     frequency: "weekly",
@@ -29,6 +31,7 @@ const testStack: CycleCompound[] = [
 
 const anavarStack: CycleCompound[] = [
   {
+    id: "anavar-1",
     compoundId: "anavar",
     doseMg: 50,
     frequency: "daily",

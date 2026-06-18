@@ -73,9 +73,9 @@ export function useDashboardData() {
         id: `lab-${r.id}`,
         module: "labs",
         title: r.name || "Bloodwork panel",
-        subtitle: `${Object.keys(r.values).length} markers`,
+        subtitle: `${r.values.length} markers`,
         at: r.date,
-        route: "bloodwork-history",
+        route: "bloodwork-insights",
       });
     }
     for (const w of gymHistory.slice(0, 4)) {

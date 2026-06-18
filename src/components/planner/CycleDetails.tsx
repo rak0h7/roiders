@@ -40,7 +40,8 @@ export function CycleDetails() {
   const hasAAS = hasAnabolicCompounds(compounds);
 
   const detailItems = [
-    { label: "Avg / Week", value: stats.avgMgPerWeek || "—", sub: "total mg load", accent: ui.statProtocol },
+    { label: "Avg / Week", value: stats.avgMgPerWeek || "—", sub: "mg-equiv load", accent: ui.statProtocol },
+    { label: "Peak / Week", value: stats.peakMgPerWeek || "—", sub: "heaviest week", accent: ui.statWarning },
     { label: "Start", value: formatDate(start), sub: getDayName(start), accent: "text-[var(--foreground)]" },
     { label: "End", value: formatDate(end), sub: getDayName(end), accent: "text-[var(--foreground)]" },
     { label: "PCT Begin", value: pctDate ? formatDate(pctDate) : "—", sub: hasAAS ? "after clearance" : "no AAS", accent: "text-[var(--foreground)]" },
@@ -49,7 +50,7 @@ export function CycleDetails() {
   return (
     <div className={`${ui.cardProtocol} ${ui.cardPad}`}>
       <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {detailItems.map((item) => (
             <div key={item.label} className="flex min-h-[4rem] flex-col justify-center">
               <p className={ui.label}>{item.label}</p>

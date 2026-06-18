@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import {
   Activity, Blocks, BookOpen, ChevronRight, ClipboardList, Dumbbell, Droplet,
-  History, Leaf, Spline, TrendingUp, UtensilsCrossed,
+  Leaf, Spline, TrendingUp, UtensilsCrossed,
 } from "lucide-react";
 import type { AppRoute } from "@/context/NavigationContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -24,8 +24,7 @@ const NAV_ITEMS: {
   module: "labs" | "cycle" | "gym" | "nutrition" | null;
 }[] = [
   { icon: Droplet, label: "Log Labs", desc: "Upload or manual entry", route: "bloodwork-log", accent: "labs", module: "labs" },
-  { icon: History, label: "Lab Archive", desc: "Compare past panels", route: "bloodwork-history", accent: "labs", module: "labs" },
-  { icon: Activity, label: "Lab Analysis", desc: "Scores & flags", route: "bloodwork-insights", accent: "labs", module: "labs" },
+  { icon: Activity, label: "Lab Analysis", desc: "Scores, flags & past logs", route: "bloodwork-insights", accent: "labs", module: "labs" },
   { icon: Blocks, label: "Cycle Builder", desc: "Compose your stack", route: "cycle-planner", accent: "protocol", module: "cycle" },
   { icon: BookOpen, label: "Compound Guides", desc: "Injectables & orals reference", route: "cycle-guides", accent: "protocol", module: "cycle" },
   { icon: Spline, label: "PK Simulation", desc: "Curves & risk radar", route: "cycle-dashboard", accent: "protocol", module: "cycle" },

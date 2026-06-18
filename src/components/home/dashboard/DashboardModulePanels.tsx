@@ -119,10 +119,18 @@ export function DashboardModulePanels({
               </div>
             ))}
           </div>
+        ) : reports.length > 0 ? (
+          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
+            <FlaskConical className="app-icon mb-2 text-[var(--labs)]" />
+            <p className="text-sm text-[var(--muted)]">{reports.length} panel{reports.length > 1 ? "s" : ""} on file</p>
+            <button onClick={() => setRoute("bloodwork-insights")} className={cn(ui.btnPrimary, "mt-4 text-xs")}>
+              View analysis
+            </button>
+          </div>
         ) : (
           <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
             <FlaskConical className="app-icon mb-2 text-[var(--labs)]" />
-            <p className="text-sm text-[var(--muted)]">Upload or enter your first panel</p>
+            <p className="text-sm text-[var(--muted)]">Upload panel</p>
             <button onClick={() => setRoute("bloodwork-log")} className={cn(ui.btnPrimary, "mt-4 text-xs")}>
               Log labs
             </button>

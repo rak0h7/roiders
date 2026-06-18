@@ -4,7 +4,7 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useCycleStore } from "@/store/cycleStore";
 import { getCompoundById } from "@/data/compounds";
 import { frequencyLabel } from "@/data/frequencies";
-import { formatDose } from "@/lib/cycleCalculations";
+import { formatDose, formatWeeklyDose } from "@/lib/cycleCalculations";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
@@ -13,7 +13,7 @@ export function ActiveStack() {
   const {
     compounds,
     setCompoundModalOpen,
-    setConfiguringCompoundId,
+    setConfiguringEntryId,
     removeCompound,
     clearCycle,
   } = useCycleStore();
@@ -53,7 +53,7 @@ export function ActiveStack() {
             if (!compound) return null;
             return (
               <div
-                key={cc.compoundId}
+                key={cc.id}
                 className={cn(ui.cardInner, ui.cardHover, "flex items-center gap-3 p-3 hover:border-[var(--protocol)]/25")}
               >
                 <div
@@ -63,20 +63,20 @@ export function ActiveStack() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-[var(--foreground)]">{compound.name}</p>
                   <p className="text-xs text-[var(--muted)]">
-                    {formatDose(cc.doseMg, compound.unit)} • {frequencyLabel(cc.frequency)} • Wk {cc.activeWeeks[0]}–{cc.activeWeeks[1]}
+                    {formatDose(cc.doseMg, compound.unit)} • {frequencyLabel(cc.frequency)} • {formatWeeklyDose(cc)} • Wk {cc.activeWeeks[0]}–{cc.activeWeeks[1]}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => setConfiguringCompoundId(cc.compoundId)}
+                    onClick={() => setConfiguringEntryId(cc.id)}
                     className={ui.btnIconSm}
                   >
                     <AppIcon icon={Pencil} size="sm" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeCompound(cc.compoundId)}
+                    onClick={() => removeCompound(cc.id)}
                     className={cn(ui.btnIconSm, "hover:text-[var(--danger)]")}
                   >
                     <AppIcon icon={Trash2} size="sm" />

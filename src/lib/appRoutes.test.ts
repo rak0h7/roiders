@@ -15,4 +15,8 @@ describe("appRoutes", () => {
   it("returns null for unknown paths", () => {
     expect(routeFromPathname("/unknown")).toBeNull();
   });
+
+  it("maps legacy archive path to analysis", () => {
+    expect(routeFromPathname("/labs/archive")).toBe("bloodwork-insights");
+  });
 });

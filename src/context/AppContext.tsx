@@ -7,7 +7,7 @@ import { extractTextFromPDF } from "@/lib/pdf";
 import { buildMergedReviewFlags } from "@/lib/cycleLabFlags";
 import { useCycleStore } from "@/store/cycleStore";
 import { calculateCategoryScores, calculateOverallScore } from "@/lib/scoring";
-import { generateId, loadReports, saveReports } from "@/lib/storage";
+import { generateId, hydrateLabsState, loadReports, reportToValuesRecord, saveReports } from "@/lib/storage";
 import type {
   AppState,
   BloodworkReport,
@@ -21,7 +21,6 @@ interface AppContextValue extends AppState {
   setMainTab: (tab: MainTab) => void;
   setLogView: (view: AppState["logView"]) => void;
   setSecondaryTab: (tab: SecondaryTab) => void;
-  setCycleMode: (mode: AppState["cycleMode"]) => void;
   setRangeMode: (mode: RangeMode) => void;
   setMarkerValue: (markerId: string, value: number | null, unit: string) => void;
   setCurrentValues: (values: Record<string, MarkerValue>) => void;
@@ -47,11 +46,16 @@ interface AppContextValue extends AppState {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
+function defaultRangeMode(reports: BloodworkReport[]): RangeMode {
+  if (typeof window === "undefined") return "optimized";
+  const hasStack = useCycleStore.getState().compounds.length > 0;
+  return hasStack || reports.length > 0 ? "optimized" : "lab";
+}
+
 const initialState: AppState = {
   mainTab: "log",
   logView: "landing",
   secondaryTab: null,
-  cycleMode: null,
   rangeMode: "optimized",
   currentValues: {},
   extractedMarkers: [],
@@ -64,14 +68,25 @@ const initialState: AppState = {
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const compounds = useCycleStore((s) => s.compounds);
-  const [state, setState] = useState<AppState>(() => ({
-    ...initialState,
-    reports: loadReports(),
-  }));
+  const [state, setState] = useState<AppState>(() => {
+    const reports = loadReports();
+    const hydrated = hydrateLabsState(reports, null);
+    return {
+      ...initialState,
+      reports,
+      currentValues: hydrated.currentValues,
+      activeReportId: hydrated.activeReportId,
+      rangeMode: defaultRangeMode(reports),
+    };
+  });
 
   useEffect(() => {
     const reload = () => {
-      setState((s) => ({ ...s, reports: loadReports() }));
+      setState((s) => {
+        const reports = loadReports();
+        const hydrated = hydrateLabsState(reports, s.activeReportId);
+        return { ...s, reports, ...hydrated };
+      });
     };
     window.addEventListener(CLOUD_SYNC_EVENT, reload);
     return () => window.removeEventListener(CLOUD_SYNC_EVENT, reload);
@@ -87,14 +102,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setSecondaryTab = useCallback((tab: SecondaryTab) => {
     setState((s) => ({ ...s, secondaryTab: tab }));
-  }, []);
-
-  const setCycleMode = useCallback((mode: AppState["cycleMode"]) => {
-    setState((s) => ({
-      ...s,
-      cycleMode: mode,
-      rangeMode: mode === "pre-cycle" ? "lab" : mode === "during-cycle" ? "optimized" : s.rangeMode,
-    }));
   }, []);
 
   const setRangeMode = useCallback((mode: RangeMode) => {
@@ -245,11 +252,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => {
       const report = s.reports.find((r) => r.id === id);
       if (!report) return s;
-      const currentValues: Record<string, MarkerValue> = {};
-      for (const v of report.values) {
-        currentValues[v.markerId] = v;
-      }
-      return { ...s, currentValues, activeReportId: id, mainTab: "insights" };
+      return {
+        ...s,
+        currentValues: reportToValuesRecord(report),
+        activeReportId: id,
+        mainTab: "insights",
+      };
     });
   }, []);
 
@@ -257,12 +265,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => {
       const reports = s.reports.filter((r) => r.id !== id);
       saveReports(reports);
-      return { ...s, reports, activeReportId: s.activeReportId === id ? null : s.activeReportId };
+      const nextActiveId = s.activeReportId === id ? null : s.activeReportId;
+      const hydrated = hydrateLabsState(reports, nextActiveId);
+      return { ...s, reports, ...hydrated };
     });
   }, []);
 
   const resetAll = useCallback(() => {
-    setState({ ...initialState, reports: loadReports() });
+    const reports = loadReports();
+    const hydrated = hydrateLabsState(reports, null);
+    setState({
+      ...initialState,
+      reports,
+      currentValues: hydrated.currentValues,
+      activeReportId: hydrated.activeReportId,
+    });
   }, []);
 
   const setCompareReports = useCallback((a: string | null, b: string | null) => {
@@ -305,7 +322,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setMainTab,
     setLogView,
     setSecondaryTab,
-    setCycleMode,
     setRangeMode,
     setMarkerValue,
     setCurrentValues,

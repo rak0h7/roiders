@@ -87,12 +87,14 @@ export const COMPOUNDS: Compound[] = [
   ...OMA_COMPOUNDS,
 ];
 
+export type CycleTemplateCompound = Omit<CycleCompound, "id">;
+
 export interface CycleTemplate {
   id: string;
   name: string;
   color: string;
   description: string;
-  compounds: CycleCompound[];
+  compounds: CycleTemplateCompound[];
 }
 
 export const CYCLE_TEMPLATES: CycleTemplate[] = [

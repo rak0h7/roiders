@@ -2,7 +2,7 @@
 
 import { RadarChart, PolarGrid, PolarAngleAxis, Radar, ResponsiveContainer } from "recharts";
 import { useCycleStore } from "@/store/cycleStore";
-import { calculateRiskProfile } from "@/lib/cycleCalculations";
+import { calculateRiskProfile, dosesPerWeek } from "@/lib/cycleCalculations";
 import { getCompoundById } from "@/data/compounds";
 import { ui } from "@/lib/ui";
 
@@ -24,22 +24,42 @@ const GAP_RECS: Record<string, string> = {
   METABOLIC: "Berberine 1500 mg, Omega-3, R-ALA 300 mg",
 };
 
-const DEFENSE_IDS = new Set(["tudca", "nac", "aromasin", "arimidex", "caber", "hcg", "nolvadex"]);
+const DEFENDER_AXES: Record<string, string[]> = {
+  tudca: ["HEPATIC"],
+  nac: ["HEPATIC", "NEURO", "METABOLIC"],
+  udca: ["HEPATIC"],
+  caber: ["ENDOCRINE"],
+  hcg: ["ENDOCRINE"],
+  aromasin: ["ENDOCRINE"],
+  arimidex: ["ENDOCRINE"],
+  nolvadex: ["ENDOCRINE"],
+};
+
+function defenseScoreForAxis(axis: string, compounds: ReturnType<typeof useCycleStore.getState>["compounds"]): number {
+  let score = 0;
+  for (const cc of compounds) {
+    const axes = DEFENDER_AXES[cc.compoundId];
+    if (!axes?.includes(axis)) continue;
+    const compound = getCompoundById(cc.compoundId);
+    if (!compound) continue;
+    const weekly = cc.doseMg * dosesPerWeek(cc.frequency);
+    score += compound.unit === "mg" ? weekly / 100 : weekly / 50;
+  }
+  return score;
+}
 
 export function DefenseCoverageView() {
   const { compounds } = useCycleStore();
   const threats = calculateRiskProfile(compounds);
-  const defenders = compounds.filter((c) => DEFENSE_IDS.has(c.compoundId));
+  const defenders = compounds.filter((c) => DEFENDER_AXES[c.compoundId]);
 
   const radarData = threats.map((t) => {
-    const defScore = defenders.reduce((sum, d) => {
-      const compound = getCompoundById(d.compoundId);
-      return sum + (compound ? d.doseMg * 0.1 : 0);
-    }, 0);
+    const defRaw = defenseScoreForAxis(t.axis, compounds);
+    const defense = Math.min(t.value, Math.round(defRaw * 12));
     return {
       axis: t.axis,
       threat: t.value,
-      defense: Math.min(t.value, defScore * 3),
+      defense,
     };
   });
 

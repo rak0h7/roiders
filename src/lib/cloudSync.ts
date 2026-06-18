@@ -68,12 +68,21 @@ function setLocalUpdatedAt(module: CloudModule, updatedAt: string): void {
   writeSyncMeta({ ...readSyncMeta(), [module]: updatedAt });
 }
 
+function remoteHasMoreData(module: CloudModule, local: unknown, remote: unknown): boolean {
+  if (module === "labs" && Array.isArray(local) && Array.isArray(remote)) {
+    return remote.length > local.length;
+  }
+  return false;
+}
+
 function shouldTakeRemote(
   module: CloudModule,
   local: unknown,
+  remote: unknown,
   remoteUpdatedAt: string
 ): boolean {
-  if (local == null || isEmptyLocal(module, local)) return true;
+  if (local == null || isModuleDataEmpty(module, local)) return true;
+  if (remoteHasMoreData(module, local, remote)) return true;
   const localUpdatedAt = getLocalUpdatedAt(module);
   if (!localUpdatedAt) return false;
   return new Date(remoteUpdatedAt).getTime() > new Date(localUpdatedAt).getTime();
@@ -84,7 +93,7 @@ function detectConflict(
   local: unknown,
   remoteUpdatedAt: string
 ): SyncConflict | null {
-  if (local == null || isEmptyLocal(module, local)) return null;
+  if (local == null || isModuleDataEmpty(module, local)) return null;
   const localUpdatedAt = getLocalUpdatedAt(module);
   if (!localUpdatedAt) return null;
   const localTime = new Date(localUpdatedAt).getTime();
@@ -145,7 +154,7 @@ export async function pullUserData(
     const conflict = detectConflict(mod, local, remoteUpdatedAt);
     if (conflict) conflicts.push(conflict);
 
-    if (shouldTakeRemote(mod, local, remoteUpdatedAt)) {
+    if (shouldTakeRemote(mod, local, remote, remoteUpdatedAt)) {
       writeLocalModule(mod, remote, remoteUpdatedAt);
       pulled.push(mod);
       merged = true;
@@ -189,7 +198,7 @@ export async function pushUserData(
 
   for (const cloudModule of modules) {
     const data = readLocalModule(cloudModule);
-    if (data == null) continue;
+    if (data == null || isModuleDataEmpty(cloudModule, data)) continue;
     rows.push({ user_id: userId, module: cloudModule, data, updated_at: now });
     setLocalUpdatedAt(cloudModule, now);
     pushed.push(cloudModule);
@@ -204,6 +213,7 @@ export async function pushUserData(
   return pushed;
 }
 
+/** Pull remote changes first, then push only non-empty local modules. */
 export async function syncUserData(
   supabase: SupabaseClient,
   userId: string
@@ -235,7 +245,7 @@ export function isNutritionPersistedDataEmpty(data: unknown): boolean {
   return true;
 }
 
-function isEmptyLocal(module: CloudModule, data: unknown): boolean {
+export function isModuleDataEmpty(module: CloudModule, data: unknown): boolean {
   if (module === "labs") return Array.isArray(data) && data.length === 0;
   if (module === "settings") {
     return typeof data === "object" && data !== null && Object.keys(data).length === 0;

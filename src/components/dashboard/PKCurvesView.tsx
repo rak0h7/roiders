@@ -38,15 +38,15 @@ export function PKCurvesView() {
               <YAxis stroke={chart.axis} fontSize={11} tick={{ fill: chart.axis }} width={40} />
               <Tooltip contentStyle={chart.tooltip} />
               <ReferenceLine x={`W${weeks}`} stroke={chart.accent} strokeDasharray="5 5" label={{ value: "Cycle End", fill: chart.accent, fontSize: 10 }} />
-              {compounds.slice(0, 6).map((cc, i) => (
+              {compounds.slice(0, 8).map((cc, i) => (
                 <Line
-                  key={cc.compoundId}
+                  key={cc.id}
                   type="monotone"
-                  dataKey={cc.compoundId}
+                  dataKey={cc.id}
                   stroke={colors[i % colors.length]}
                   strokeWidth={i === 0 ? 2.5 : 1.5}
                   dot={false}
-                  name={getCompoundById(cc.compoundId)?.shortName ?? cc.compoundId}
+                  name={cards.find((c) => c.id === cc.id)?.short ?? getCompoundById(cc.compoundId)?.shortName ?? cc.compoundId}
                 />
               ))}
             </LineChart>

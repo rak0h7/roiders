@@ -81,8 +81,8 @@ function ConfigureForm({
 
 export function CompoundConfigureModal() {
   const {
-    configuringCompoundId,
-    setConfiguringCompoundId,
+    configuringEntryId,
+    setConfiguringEntryId,
     compounds,
     updateCompound,
     removeCompound,
@@ -90,11 +90,11 @@ export function CompoundConfigureModal() {
     openProfile,
   } = useCycleStore();
 
-  const entry = compounds.find((c) => c.compoundId === configuringCompoundId);
-  const compound = configuringCompoundId ? getCompoundById(configuringCompoundId) : null;
-  const profile = configuringCompoundId ? getProfileForCompound(configuringCompoundId) : null;
+  const entry = compounds.find((c) => c.id === configuringEntryId);
+  const compound = entry ? getCompoundById(entry.compoundId) : null;
+  const profile = entry ? getProfileForCompound(entry.compoundId) : null;
 
-  if (!configuringCompoundId || !compound || !entry) return null;
+  if (!configuringEntryId || !compound || !entry) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-base)]/80 p-4 backdrop-blur-sm">
@@ -105,7 +105,7 @@ export function CompoundConfigureModal() {
             <h2 className="text-lg font-bold text-[var(--foreground)]">{compound.name}</h2>
           </div>
           <button
-            onClick={() => setConfiguringCompoundId(null)}
+            onClick={() => setConfiguringEntryId(null)}
             className={ui.btnIcon}
           >
             <X className="h-5 w-5" />
@@ -122,15 +122,15 @@ export function CompoundConfigureModal() {
           </button>
         )}
         <ConfigureForm
-          key={configuringCompoundId}
+          key={configuringEntryId}
           entry={entry}
           compound={compound}
           totalWeeks={getEffectiveWeeks()}
           onSave={(updates) => {
-            updateCompound(configuringCompoundId, updates);
-            setConfiguringCompoundId(null);
+            updateCompound(configuringEntryId, updates);
+            setConfiguringEntryId(null);
           }}
-          onRemove={() => removeCompound(configuringCompoundId)}
+          onRemove={() => removeCompound(configuringEntryId)}
         />
       </div>
     </div>

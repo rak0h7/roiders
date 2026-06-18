@@ -254,14 +254,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await refreshProfile(nextUser);
         if (siteSettings.cloud_sync_enabled) {
           try {
-            const result = await syncUserData(supabase, nextUser.id);
-            await rehydratePersistedStores();
-            setSyncConflicts(result.conflicts);
+            const { pulled, merged, conflicts } = await pullUserData(supabase, nextUser.id);
+            if (merged) await rehydratePersistedStores();
+            setSyncConflicts(conflicts);
             setSyncStatus({
               syncing: false,
               lastSyncAt: new Date().toISOString(),
-              lastPulled: result.pulled,
-              lastPushed: result.pushed,
+              lastPulled: pulled,
+              lastPushed: [],
               lastError: null,
             });
           } catch (e) {

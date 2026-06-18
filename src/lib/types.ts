@@ -99,14 +99,12 @@ export interface BloodworkReport {
 
 export type MainTab = "log" | "history" | "insights";
 export type LogView = "landing" | "entry" | "extraction" | "flags";
-export type SecondaryTab = "pre-cycle" | "during-cycle" | "cheat-sheet" | "reports" | "debug" | null;
-export type CycleMode = "pre-cycle" | "during-cycle" | null;
+export type SecondaryTab = "cheat-sheet" | "debug" | null;
 
 export interface AppState {
   mainTab: MainTab;
   logView: LogView;
   secondaryTab: SecondaryTab;
-  cycleMode: CycleMode;
   rangeMode: RangeMode;
   currentValues: Record<string, MarkerValue>;
   extractedMarkers: ExtractedMarker[];

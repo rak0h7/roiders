@@ -3,7 +3,6 @@ import type { AppRoute } from "@/context/NavigationContext";
 export const ROUTE_TO_PATH: Record<AppRoute, string> = {
   home: "/",
   "bloodwork-log": "/labs/log",
-  "bloodwork-history": "/labs/archive",
   "bloodwork-insights": "/labs/analysis",
   "cycle-planner": "/cycle/builder",
   "cycle-guides": "/cycle/guides",
@@ -25,6 +24,11 @@ const PATH_TO_ROUTE = Object.fromEntries(
   Object.entries(ROUTE_TO_PATH).map(([route, path]) => [path, route as AppRoute])
 ) as Record<string, AppRoute>;
 
+/** Legacy URLs that should resolve to the merged analysis page */
+const LEGACY_PATH_ALIASES: Record<string, AppRoute> = {
+  "/labs/archive": "bloodwork-insights",
+};
+
 export function pathFromRoute(route: AppRoute): string {
   return ROUTE_TO_PATH[route] ?? "/";
 }
@@ -33,5 +37,5 @@ export function routeFromPathname(pathname: string): AppRoute | null {
   const normalized = pathname.endsWith("/") && pathname.length > 1
     ? pathname.slice(0, -1)
     : pathname;
-  return PATH_TO_ROUTE[normalized] ?? null;
+  return LEGACY_PATH_ALIASES[normalized] ?? PATH_TO_ROUTE[normalized] ?? null;
 }

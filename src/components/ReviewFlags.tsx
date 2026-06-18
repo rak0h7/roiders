@@ -7,35 +7,12 @@ import { getCompoundById } from "@/data/compounds";
 import { Panel } from "@/components/ui/Panel";
 import { LabsActionBar } from "@/components/labs/LabsActionBar";
 import { useLabsActions } from "@/components/labs/useLabsActions";
+import { CompoundPills, SeverityBadge } from "@/components/labs/labsUi";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import { ChevronDown, AlertTriangle, FlaskConical } from "lucide-react";
 import { useState } from "react";
-import type { ReviewFlag, Severity } from "@/lib/types";
-
-const SEVERITY_STYLES: Record<Severity, string> = {
-  normal: "border-[var(--success)]/30 bg-[var(--success)]/15 text-[var(--success)]",
-  yellow: "border-[var(--warning)]/30 bg-[var(--warning)]/15 text-[var(--warning)]",
-  high: "border-[var(--danger)]/30 bg-[var(--danger)]/15 text-[var(--danger)]",
-  low: "border-[var(--intel)]/30 bg-[var(--intel-dim)] text-[var(--intel)]",
-  stop: "border-[var(--danger)]/50 bg-[var(--danger)]/20 text-[var(--danger)]",
-};
-
-function CompoundPills({ compoundIds }: { compoundIds?: string[] }) {
-  if (!compoundIds?.length) return null;
-  return (
-    <div className="mt-2 flex flex-wrap gap-1">
-      {compoundIds.map((id) => (
-        <span
-          key={id}
-          className="rounded-full border border-[var(--protocol)]/30 bg-[var(--protocol-dim)] px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--protocol)]"
-        >
-          {getCompoundById(id)?.shortName ?? id}
-        </span>
-      ))}
-    </div>
-  );
-}
+import type { ReviewFlag } from "@/lib/types";
 
 export function ReviewFlags() {
   const { reviewFlags, rangeMode, setRangeMode, extractionFileName, setLogView } = useApp();
@@ -73,14 +50,7 @@ export function ReviewFlags() {
           <div className="flex flex-wrap items-center gap-2">
             <span className="font-display font-semibold text-[var(--foreground)]">{flag.name}</span>
             <span className="text-[10px] text-[var(--muted)]">{flag.date}</span>
-            <span
-              className={cn(
-                "rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase",
-                SEVERITY_STYLES[flag.severity]
-              )}
-            >
-              {flag.severity === "stop" ? "STOP" : flag.severity.toUpperCase()}
-            </span>
+            <SeverityBadge severity={flag.severity} />
             {flag.source === "cycle" && (
               <span className="rounded-full border border-[var(--protocol)]/30 bg-[var(--protocol-dim)] px-2 py-0.5 text-[9px] font-bold uppercase text-[var(--protocol)]">
                 Cycle-linked
@@ -178,7 +148,7 @@ export function ReviewFlags() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {compounds.map((c) => (
                   <span
-                    key={c.compoundId}
+                    key={c.id}
                     className="rounded-full border border-[var(--protocol)]/30 bg-[var(--protocol-dim)] px-2.5 py-1 text-[10px] font-semibold text-[var(--foreground)]"
                   >
                     {getCompoundById(c.compoundId)?.shortName ?? c.compoundId}

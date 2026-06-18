@@ -9,7 +9,7 @@ import { CyclePlannerView } from "@/components/CyclePlannerView";
 import { CycleTabNav } from "@/components/CycleTabNav";
 import { DebugPanel } from "@/components/DebugPanel";
 import { ExtractionReview } from "@/components/ExtractionReview";
-import { HistoryView } from "@/components/HistoryView";
+
 import { InsightsDashboard } from "@/components/InsightsDashboard";
 import { LogEntryView } from "@/components/LogEntryView";
 import { ReviewFlags } from "@/components/ReviewFlags";
@@ -72,7 +72,6 @@ export function AppShell() {
 
   useEffect(() => {
     if (route === "bloodwork-log") setMainTab("log");
-    if (route === "bloodwork-history") setMainTab("history");
     if (route === "bloodwork-insights") setMainTab("insights");
     if (route === "cycle-planner") setView("planner");
     if (route === "cycle-guides") setView("guides");
@@ -97,10 +96,8 @@ export function AppShell() {
         if (logView === "extraction") return <ExtractionReview />;
         if (logView === "flags") return <ReviewFlags />;
         return <LogEntryView />;
-      case "bloodwork-history":
-        return showComparison ? <ComparisonView /> : <HistoryView />;
       case "bloodwork-insights":
-        return <InsightsDashboard />;
+        return showComparison ? <ComparisonView /> : <InsightsDashboard />;
       case "cycle-planner":
       case "cycle-guides":
         return <CyclePlannerShell />;
@@ -140,8 +137,7 @@ export function AppShell() {
     }
   };
 
-  const showBloodworkSecondary =
-    route.startsWith("bloodwork") && route !== "bloodwork-insights";
+  const showBloodworkSecondary = route.startsWith("bloodwork");
 
   return (
     <div className="relative min-h-screen">
@@ -185,16 +181,7 @@ export function AppShell() {
       {secondaryTab === "debug" && settings.debug_panel_enabled && (
         <DebugPanel onClose={() => setSecondaryTab(null)} />
       )}
-      {secondaryTab === "reports" && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-16 backdrop-blur-md">
-          <div className="w-full max-w-3xl">
-            <HistoryView />
-            <button onClick={() => setSecondaryTab(null)} className={`mt-4 w-full ${ui.btnSecondary}`}>
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

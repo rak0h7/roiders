@@ -26,7 +26,7 @@ export function StackedLoadView() {
   return (
     <div className={`${ui.card} ${ui.cardPad}`}>
       <h2 className="font-display text-lg font-bold text-[var(--protocol)]">Stacked Compound Load</h2>
-      <p className={`${ui.sectionSub} mb-4`}>Cumulative daily load over the cycle</p>
+      <p className={`${ui.sectionSub} mb-4`}>Weekly mg-equivalent load by category</p>
       <div className="h-[22rem] w-full sm:h-[24rem]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>

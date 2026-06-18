@@ -1,51 +1,59 @@
 "use client";
 
 import { useApp } from "@/context/AppContext";
+import { useCycleStore } from "@/store/cycleStore";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
-
-const ITEMS = [
-  { id: "pre-cycle" as const, label: "Baseline" },
-  { id: "during-cycle" as const, label: "On-cycle" },
-  { id: "cheat-sheet" as const, label: "Reference" },
-  { id: "reports" as const, label: "Panels" },
-  { id: "debug" as const, label: "Debug" },
-];
+import { BookOpen } from "lucide-react";
+import { AppIcon } from "@/components/ui/AppIcon";
 
 export function SecondaryNav() {
-  const { secondaryTab, setSecondaryTab, cycleMode, setCycleMode, rangeMode, resetAll } = useApp();
+  const { rangeMode, setRangeMode, setSecondaryTab } = useApp();
+  const { compounds } = useCycleStore();
+  const onCycle = compounds.length > 0;
 
   return (
-    <div className={ui.navBar}>
-      {ITEMS.map((item) => {
-        const active = secondaryTab === item.id || cycleMode === item.id;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => {
-              if (item.id === "pre-cycle" || item.id === "during-cycle") {
-                setCycleMode(cycleMode === item.id ? null : item.id);
-              }
-              setSecondaryTab(secondaryTab === item.id ? null : item.id);
-            }}
-            className={cn(ui.navBarBtn, active ? ui.navBarBtnActive : ui.navBarBtnInactive)}
-          >
-            {item.label}
-          </button>
-        );
-      })}
-      {cycleMode && (
-        <span className={cn(ui.tag, "border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--muted)]")}>
-          Ranges: {rangeMode === "lab" ? "lab reference" : "optimized"}
+    <div className={cn(ui.navBar, "flex-wrap gap-2")}>
+      <div className="flex items-center gap-1 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] p-0.5">
+        <button
+          type="button"
+          onClick={() => setRangeMode("lab")}
+          className={cn(
+            "rounded-[calc(var(--radius-md)-2px)] px-3 py-1.5 text-xs font-medium transition-colors",
+            rangeMode === "lab"
+              ? "bg-[var(--labs-dim)] text-[var(--labs)]"
+              : "text-[var(--muted)] hover:text-[var(--foreground)]"
+          )}
+        >
+          Lab ranges
+        </button>
+        <button
+          type="button"
+          onClick={() => setRangeMode("optimized")}
+          className={cn(
+            "rounded-[calc(var(--radius-md)-2px)] px-3 py-1.5 text-xs font-medium transition-colors",
+            rangeMode === "optimized"
+              ? "bg-[var(--labs-dim)] text-[var(--labs)]"
+              : "text-[var(--muted)] hover:text-[var(--foreground)]"
+          )}
+        >
+          On-cycle
+        </button>
+      </div>
+
+      {onCycle && rangeMode === "optimized" && (
+        <span className="text-[10px] text-[var(--muted)]">
+          Performance ranges for your active stack
         </span>
       )}
+
       <button
         type="button"
-        onClick={() => confirm("Reset all lab data?") && resetAll()}
-        className={cn(ui.navBarBtn, "text-[var(--danger)] hover:bg-[var(--danger)]/10")}
+        onClick={() => setSecondaryTab("cheat-sheet")}
+        className={cn(ui.navBarBtn, ui.navBarBtnInactive, "ml-auto")}
       >
-        Reset
+        <AppIcon icon={BookOpen} size="sm" />
+        Reference
       </button>
     </div>
   );

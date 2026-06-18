@@ -51,6 +51,122 @@ const BLOODWORK_CHECKPOINTS = [
   { week: 20, label: "Week 20 — Cycle End", totalT: 950, freeT: 24, e2: 32.5, prolactin: 13.5, hct: 52, hgb: 15.9, hdl: 32, ldl: 160, alt: 32, ast: 30, hscrp: 1.4 },
 ];
 
+function round1(n) {
+  return Math.round(n * 10) / 10;
+}
+
+function round0(n) {
+  return Math.round(n);
+}
+
+/** Full on-cycle panel derived from core checkpoint values + realistic supporting markers. */
+function buildFullPanelValues(cp) {
+  const w = cp.week;
+  const onTren = w >= 7;
+  const peak = w >= 11 && w <= 18;
+  const taper = w >= 19;
+
+  const shbg = w === 0 ? 38 : Math.max(11, round1(38 - w * 1.15));
+  const lh = w === 0 ? 4.2 : w <= 2 ? 2.4 : w <= 4 ? 1.1 : w <= 6 ? 0.6 : 0.3;
+  const fsh = w === 0 ? 5.0 : w <= 2 ? 2.6 : w <= 4 ? 1.4 : w <= 6 ? 0.7 : 0.4;
+  const igf1 = w === 0 ? 185 : round0(185 + w * 4 + (peak ? 25 : onTren ? 12 : 0));
+
+  const rbc = round1(4.55 + (cp.hct - 44) * 0.075);
+  const mcv = round0(88 + (cp.hct - 44) * 0.4);
+  const mch = round1(29.5 + (cp.hgb - 14.5) * 0.3);
+  const mchc = round1(33.8 + (cp.hgb - 14.5) * 0.15);
+  const rdw = round1(12.4 + (onTren ? 0.4 : 0));
+  const wbc = round1(6.1 + (onTren ? 0.6 : 0) + (peak ? 0.3 : 0));
+  const platelets = round0(245 + w * 2 + (peak ? 15 : 0));
+  const neutrophils = round1(3.6 + (onTren ? 0.5 : 0));
+  const lymphocytes = round1(2.0 - (onTren ? 0.15 : 0));
+  const ferritin = round0(95 + w * 3 + (peak ? 20 : 0));
+
+  const triglycerides = round0(
+    w < 7 ? 82 + w * 2 : onTren && !taper ? 95 + (w - 7) * 7 : taper ? 110 : 100,
+  );
+  const totalChol = round0(cp.hdl + cp.ldl + triglycerides * 0.22);
+  const nonHdl = round0(totalChol - cp.hdl);
+  const apob = round0(cp.ldl * 0.72 + (onTren ? 8 : 0));
+
+  const ggt = round0(18 + (onTren ? (w - 6) * 2.5 : 0) + (peak ? 8 : 0));
+  const alp = round0(68 + w * 0.8 + (peak ? 6 : 0));
+  const bilirubin = round1(0.7 + (cp.alt > 38 ? 0.15 : 0));
+  const albumin = round1(4.5 - (peak ? 0.1 : 0));
+  const totalProtein = round1(7.1 + (w > 10 ? 0.15 : 0));
+  const globulin = round1(totalProtein - albumin);
+
+  const creatinine = round1(1.02 + (w > 12 ? 0.06 : w * 0.002));
+  const egfr = round0(108 - w * 0.35 - (peak ? 4 : 0));
+  const urea = round0(14 + w * 0.35 + (peak ? 3 : 0));
+  const uricAcid = round1(5.2 + (onTren ? 0.35 : 0) + (peak ? 0.25 : 0));
+
+  const glucose = round0(88 + (onTren ? 4 : 0) + (peak ? 3 : 0));
+  const hba1c = round1(5.1 + (peak ? 0.15 : onTren ? 0.05 : 0));
+  const insulin = round1(6.5 + (onTren ? 1.2 : 0) + (peak ? 0.8 : 0));
+
+  const ck = round0(165 + w * 8 + (peak ? 45 : onTren ? 20 : 0));
+  const ldh = round0(175 + w * 3 + (peak ? 20 : 0));
+
+  return [
+    mv("total-testosterone", cp.totalT, "ng/dL"),
+    mv("free-testosterone", cp.freeT, "pg/mL"),
+    mv("shbg", shbg, "nmol/L"),
+    mv("estradiol", cp.e2, "pg/mL"),
+    mv("lh", lh, "mIU/mL"),
+    mv("fsh", fsh, "mIU/mL"),
+    mv("prolactin", cp.prolactin, "ng/mL"),
+    mv("igf1", igf1, "ng/mL"),
+    mv("hematocrit", cp.hct, "%"),
+    mv("hemoglobin", cp.hgb, "g/dL"),
+    mv("rbc", rbc, "M/µL"),
+    mv("wbc", wbc, "K/µL"),
+    mv("platelets", platelets, "K/µL"),
+    mv("mcv", mcv, "fL"),
+    mv("mch", mch, "pg"),
+    mv("mchc", mchc, "g/dL"),
+    mv("rdw", rdw, "%"),
+    mv("neutrophils", neutrophils, "K/µL"),
+    mv("lymphocytes", lymphocytes, "K/µL"),
+    mv("ferritin", ferritin, "ng/mL"),
+    mv("hdl", cp.hdl, "mg/dL"),
+    mv("ldl", cp.ldl, "mg/dL"),
+    mv("triglycerides", triglycerides, "mg/dL"),
+    mv("total-cholesterol", totalChol, "mg/dL"),
+    mv("non-hdl", nonHdl, "mg/dL"),
+    mv("apob", apob, "mg/dL"),
+    mv("hscrp", cp.hscrp, "mg/L"),
+    mv("alt", cp.alt, "U/L"),
+    mv("ast", cp.ast, "U/L"),
+    mv("ggt", ggt, "U/L"),
+    mv("alp", alp, "U/L"),
+    mv("bilirubin-total", bilirubin, "mg/dL"),
+    mv("albumin", albumin, "g/dL"),
+    mv("total-protein", totalProtein, "g/dL"),
+    mv("globulin", globulin, "g/dL"),
+    mv("creatinine", creatinine, "mg/dL"),
+    mv("egfr", egfr, "mL/min/1.73m²"),
+    mv("urea", urea, "mg/dL"),
+    mv("uric-acid", uricAcid, "mg/dL"),
+    mv("sodium", 141, "mmol/L"),
+    mv("potassium", round1(4.2 + (peak ? 0.15 : 0)), "mmol/L"),
+    mv("chloride", 102, "mmol/L"),
+    mv("calcium", round1(9.6 + (peak ? 0.1 : 0)), "mg/dL"),
+    mv("fasting-glucose", glucose, "mg/dL"),
+    mv("hba1c", hba1c, "%"),
+    mv("insulin", insulin, "µIU/mL"),
+    mv("tsh", round1(1.7 - (onTren ? 0.15 : 0)), "mIU/L"),
+    mv("free-t4", round1(1.28 - (peak ? 0.05 : 0)), "ng/dL"),
+    mv("free-t3", round1(3.15 + (onTren ? 0.08 : 0)), "pg/mL"),
+    mv("ck", ck, "U/L"),
+    mv("ldh", ldh, "U/L"),
+    mv("vitamin-d", round0(44 + w * 0.5), "ng/mL"),
+    mv("b12", round0(520 + w * 5), "pg/mL"),
+    mv("folate", round1(11.5 + w * 0.08), "ng/mL"),
+    mv("iron", round0(95 + w * 1.5), "µg/dL"),
+  ];
+}
+
 export function buildLabsReports() {
   const now = new Date().toISOString();
   return BLOODWORK_CHECKPOINTS.map((cp) => {
@@ -61,19 +177,7 @@ export function buildLabsReports() {
       date,
       createdAt: now,
       source: "manual",
-      values: [
-        mv("total-testosterone", cp.totalT, "ng/dL"),
-        mv("free-testosterone", cp.freeT, "pg/mL"),
-        mv("estradiol", cp.e2, "pg/mL"),
-        mv("prolactin", cp.prolactin, "ng/mL"),
-        mv("hematocrit", cp.hct, "%"),
-        mv("hemoglobin", cp.hgb, "g/dL"),
-        mv("hdl", cp.hdl, "mg/dL"),
-        mv("ldl", cp.ldl, "mg/dL"),
-        mv("alt", cp.alt, "U/L"),
-        mv("ast", cp.ast, "U/L"),
-        mv("hscrp", cp.hscrp, "mg/L"),
-      ],
+      values: buildFullPanelValues(cp),
     };
   });
 }
@@ -84,79 +188,19 @@ export function buildCycleState() {
     customWeeks: "",
     startDate: isoDate(CYCLE_START),
     compounds: [
-      {
-        compoundId: "test-e",
-        doseMg: 36,
-        frequency: "daily",
-        activeWeeks: [1, 20],
-        route: "injectable",
-      },
-      {
-        compoundId: "tren-a",
-        doseMg: 50,
-        frequency: "eod",
-        activeWeeks: [7, 8],
-        route: "injectable",
-      },
-      {
-        compoundId: "tren-a",
-        doseMg: 100,
-        frequency: "eod",
-        activeWeeks: [9, 10],
-        route: "injectable",
-      },
-      {
-        compoundId: "tren-a",
-        doseMg: 150,
-        frequency: "eod",
-        activeWeeks: [11, 18],
-        route: "injectable",
-      },
-      {
-        compoundId: "tren-a",
-        doseMg: 75,
-        frequency: "eod",
-        activeWeeks: [19, 19],
-        route: "injectable",
-      },
-      {
-        compoundId: "tren-a",
-        doseMg: 50,
-        frequency: "eod",
-        activeWeeks: [20, 20],
-        route: "injectable",
-      },
-      {
-        compoundId: "caber",
-        doseMg: 0.25,
-        frequency: "2x-weekly",
-        activeWeeks: [9, 18],
-        route: "oral",
-      },
-      {
-        compoundId: "tudca",
-        doseMg: 500,
-        frequency: "daily",
-        activeWeeks: [1, 20],
-        route: "oral",
-      },
-      {
-        compoundId: "nac",
-        doseMg: 600,
-        frequency: "daily",
-        activeWeeks: [1, 20],
-        route: "oral",
-      },
-      {
-        compoundId: "hcg",
-        doseMg: 250,
-        frequency: "2x-weekly",
-        activeWeeks: [19, 20],
-        route: "injectable",
-      },
+      { id: "ac-test-e", compoundId: "test-e", doseMg: 36, frequency: "daily", activeWeeks: [1, 20], route: "injectable" },
+      { id: "ac-tren-w7-8", compoundId: "tren-a", doseMg: 50, frequency: "eod", activeWeeks: [7, 8], route: "injectable" },
+      { id: "ac-tren-w9-10", compoundId: "tren-a", doseMg: 100, frequency: "eod", activeWeeks: [9, 10], route: "injectable" },
+      { id: "ac-tren-w11-18", compoundId: "tren-a", doseMg: 150, frequency: "eod", activeWeeks: [11, 18], route: "injectable" },
+      { id: "ac-tren-w19", compoundId: "tren-a", doseMg: 75, frequency: "eod", activeWeeks: [19, 19], route: "injectable" },
+      { id: "ac-tren-w20", compoundId: "tren-a", doseMg: 50, frequency: "eod", activeWeeks: [20, 20], route: "injectable" },
+      { id: "ac-caber", compoundId: "caber", doseMg: 0.25, frequency: "2x-weekly", activeWeeks: [9, 18], route: "oral" },
+      { id: "ac-tudca", compoundId: "tudca", doseMg: 500, frequency: "daily", activeWeeks: [1, 20], route: "oral" },
+      { id: "ac-nac", compoundId: "nac", doseMg: 600, frequency: "daily", activeWeeks: [1, 20], route: "oral" },
+      { id: "ac-hcg", compoundId: "hcg", doseMg: 250, frequency: "2x-weekly", activeWeeks: [19, 20], route: "injectable" },
     ],
     compoundModalOpen: false,
-    configuringCompoundId: null,
+    configuringEntryId: null,
     compoundCategory: "anabolics",
     compoundSearch: "",
     dashboardTab: "calendar",

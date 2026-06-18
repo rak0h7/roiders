@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  isModuleDataEmpty,
   isNutritionPersistedDataEmpty,
   LOCAL_STORAGE_KEYS,
   readLocalModule,
@@ -35,6 +36,11 @@ describe("cloudSync", () => {
     writeLocalModule("cycle", { state: { compounds: [] } }, "2026-06-01T12:00:00.000Z");
     const meta = JSON.parse(localStorage.getItem("roiders-club-sync-meta") ?? "{}");
     expect(meta.cycle).toBe("2026-06-01T12:00:00.000Z");
+  });
+
+  it("treats empty labs array as empty module data", () => {
+    expect(isModuleDataEmpty("labs", [])).toBe(true);
+    expect(isModuleDataEmpty("labs", [{ id: "r1", name: "Panel", date: "2026-01-01", values: [] }])).toBe(false);
   });
 
   it("treats nutrition with onboarding or custom goals as non-empty", () => {

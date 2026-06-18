@@ -7,7 +7,6 @@ import { pathFromRoute, routeFromPathname } from "@/lib/appRoutes";
 export type AppRoute =
   | "home"
   | "bloodwork-log"
-  | "bloodwork-history"
   | "bloodwork-insights"
   | "cycle-planner"
   | "cycle-guides"
@@ -38,8 +37,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { id: "home", label: "Dashboard", group: "overview", icon: "compass", description: "Site-wide command center", accent: "intel" },
   { id: "bloodwork-log", label: "Log Labs", group: "labs", icon: "flask", description: "Upload or enter results", accent: "labs" },
-  { id: "bloodwork-history", label: "Archive", group: "labs", icon: "archive", description: "Past panels & compare", accent: "labs" },
-  { id: "bloodwork-insights", label: "Analysis", group: "labs", icon: "chart", description: "Scores & flags", accent: "labs" },
+  { id: "bloodwork-insights", label: "Analysis", group: "labs", icon: "chart", description: "Scores, flags & past logs", accent: "labs" },
   { id: "cycle-planner", label: "Builder", group: "protocol", icon: "blocks", description: "Compose your stack", accent: "protocol" },
   { id: "cycle-guides", label: "Guides", group: "protocol", icon: "book", description: "Compound profiles & reference", accent: "protocol" },
   { id: "cycle-dashboard", label: "Simulation", group: "protocol", icon: "waveform", description: "PK curves & risk", accent: "protocol" },

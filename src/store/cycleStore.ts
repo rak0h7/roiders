@@ -16,7 +16,7 @@ interface CycleState {
   startDate: string;
   compounds: CycleCompound[];
   compoundModalOpen: boolean;
-  configuringCompoundId: string | null;
+  configuringEntryId: string | null;
   compoundCategory: CompoundCategory;
   compoundSearch: string;
   dashboardTab: string;
@@ -28,10 +28,10 @@ interface CycleState {
   setCustomWeeks: (val: string) => void;
   setStartDate: (date: string) => void;
   addAndConfigure: (compoundId: string) => void;
-  updateCompound: (compoundId: string, updates: Partial<CycleCompound>) => void;
-  removeCompound: (compoundId: string) => void;
+  updateCompound: (entryId: string, updates: Partial<CycleCompound>) => void;
+  removeCompound: (entryId: string) => void;
   setCompoundModalOpen: (open: boolean) => void;
-  setConfiguringCompoundId: (id: string | null) => void;
+  setConfiguringEntryId: (id: string | null) => void;
   setCompoundCategory: (cat: CompoundCategory) => void;
   setCompoundSearch: (search: string) => void;
   setDashboardTab: (tab: string) => void;
@@ -40,7 +40,7 @@ interface CycleState {
   setProfileModalId: (id: string | null) => void;
   openProfile: (profileId: string) => void;
   openGuidesAt: (profileId: string) => void;
-  loadTemplate: (compounds: CycleCompound[], weeks?: number) => void;
+  loadTemplate: (compounds: Omit<CycleCompound, "id">[], weeks?: number) => void;
   clearCycle: () => void;
   getEffectiveWeeks: () => number;
 }
@@ -49,11 +49,23 @@ function todayISO() {
   return format(new Date(), "yyyy-MM-dd");
 }
 
+function newEntryId(compoundId: string) {
+  return `${compoundId}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+export function ensureCompoundIds(compounds: CycleCompound[]): CycleCompound[] {
+  return compounds.map((c, i) => ({
+    ...c,
+    id: c.id || `${c.compoundId}-${i}-w${c.activeWeeks[0]}-${c.activeWeeks[1]}`,
+  }));
+}
+
 function makeDefaultCompound(compoundId: string, totalWeeks: number): CycleCompound | null {
   const compound = getCompoundById(compoundId);
   if (!compound) return null;
   const defaults = DEFAULT_DOSES[compoundId] ?? inferDefaultDose(compound);
   return {
+    id: newEntryId(compoundId),
     compoundId,
     doseMg: defaults.doseMg,
     frequency: defaults.frequency,
@@ -70,7 +82,7 @@ export const useCycleStore = create<CycleState>()(
       startDate: todayISO(),
       compounds: [],
       compoundModalOpen: false,
-      configuringCompoundId: null,
+      configuringEntryId: null,
       compoundCategory: "anabolics",
       compoundSearch: "",
       dashboardTab: "calendar",
@@ -82,34 +94,29 @@ export const useCycleStore = create<CycleState>()(
       setCustomWeeks: (val) => set({ customWeeks: val }),
       setStartDate: (date) => set({ startDate: date }),
       addAndConfigure: (compoundId) => {
-        const existing = get().compounds.find((c) => c.compoundId === compoundId);
-        if (existing) {
-          set({ configuringCompoundId: compoundId, compoundModalOpen: false });
-          return;
-        }
         const entry = makeDefaultCompound(compoundId, get().getEffectiveWeeks());
         if (!entry) return;
         set({
           compounds: [...get().compounds, entry],
-          configuringCompoundId: compoundId,
+          configuringEntryId: entry.id,
           compoundModalOpen: false,
         });
       },
-      updateCompound: (compoundId, updates) =>
+      updateCompound: (entryId, updates) =>
         set({
           compounds: get().compounds.map((c) =>
-            c.compoundId === compoundId ? { ...c, ...updates } : c
+            c.id === entryId ? { ...c, ...updates } : c
           ),
         }),
-      removeCompound: (compoundId) =>
+      removeCompound: (entryId) =>
         set({
-          compounds: get().compounds.filter((c) => c.compoundId !== compoundId),
-          configuringCompoundId:
-            get().configuringCompoundId === compoundId ? null : get().configuringCompoundId,
+          compounds: get().compounds.filter((c) => c.id !== entryId),
+          configuringEntryId:
+            get().configuringEntryId === entryId ? null : get().configuringEntryId,
         }),
       setCompoundModalOpen: (open) =>
         set({ compoundModalOpen: open, compoundSearch: open ? get().compoundSearch : "" }),
-      setConfiguringCompoundId: (id) => set({ configuringCompoundId: id }),
+      setConfiguringEntryId: (id) => set({ configuringEntryId: id }),
       setCompoundCategory: (cat) => set({ compoundCategory: cat }),
       setCompoundSearch: (search) => set({ compoundSearch: search }),
       setDashboardTab: (tab) => set({ dashboardTab: tab }),
@@ -120,14 +127,30 @@ export const useCycleStore = create<CycleState>()(
       openGuidesAt: (profileId) =>
         set({ view: "guides", selectedGuideId: profileId, profileModalId: null }),
       loadTemplate: (compounds, weeks) =>
-        set({ compounds, weeks: weeks ?? get().weeks, customWeeks: "" }),
-      clearCycle: () => set({ compounds: [], configuringCompoundId: null }),
+        set({
+          compounds: ensureCompoundIds(compounds as CycleCompound[]),
+          weeks: weeks ?? get().weeks,
+          customWeeks: "",
+        }),
+      clearCycle: () => set({ compounds: [], configuringEntryId: null }),
       getEffectiveWeeks: () => {
         const { weeks, customWeeks } = get();
         const custom = parseInt(customWeeks, 10);
         return custom > 0 ? custom : weeks;
       },
     }),
-    { name: "cycle-planner-store-v2" }
+    {
+      name: "cycle-planner-store-v2",
+      merge: (persisted, current) => {
+        const p = persisted as Partial<CycleState> | undefined;
+        const compounds = ensureCompoundIds(p?.compounds ?? current.compounds);
+        return {
+          ...current,
+          ...p,
+          compounds,
+          configuringEntryId: p?.configuringEntryId ?? null,
+        };
+      },
+    }
   )
 );
