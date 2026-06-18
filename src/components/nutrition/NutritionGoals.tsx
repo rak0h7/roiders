@@ -2,6 +2,7 @@
 
 import { DEFAULT_GOALS } from "@/lib/nutritionTypes";
 import { NUTRIENT_DEFINITIONS } from "@/data/nutrients";
+import { GOAL_OPTIONS, ACTIVITY_OPTIONS } from "@/lib/nutritionProfile";
 import { useNutritionStore } from "@/store/nutritionStore";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
@@ -13,7 +14,7 @@ const GOAL_KEYS = [
 ] as const;
 
 export function NutritionGoals() {
-  const { goals, setGoal, resetGoals } = useNutritionStore();
+  const { goals, profile, setGoal, resetGoals, restartOnboarding } = useNutritionStore();
 
   return (
     <div className="space-y-5">
@@ -22,10 +23,24 @@ export function NutritionGoals() {
           <h2 className={ui.pageTitle}>Daily targets</h2>
           <p className={ui.pageSub}>Set macro and micronutrient goals for progress tracking.</p>
         </div>
-        <button type="button" onClick={resetGoals} className={cn(ui.btnSecondary, "text-xs")}>
-          Reset defaults
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={restartOnboarding} className={cn(ui.btnSecondary, "text-xs")}>
+            Recalculate from stats
+          </button>
+          <button type="button" onClick={resetGoals} className={cn(ui.btnGhost, "text-xs")}>
+            Reset defaults
+          </button>
+        </div>
       </div>
+
+      {profile && (
+        <div className={cn(ui.cardInner, "flex flex-wrap gap-x-4 gap-y-1 px-4 py-3 text-xs text-[var(--muted)]")}>
+          <span>{profile.age}y · {profile.sex}</span>
+          <span>{Math.round(profile.weightKg * (profile.weightUnit === "lb" ? 2.20462 : 1))} {profile.weightUnit}</span>
+          <span>{ACTIVITY_OPTIONS.find((a) => a.id === profile.activity)?.label}</span>
+          <span>Goal: {GOAL_OPTIONS.find((g) => g.id === profile.goal)?.label}</span>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {GOAL_KEYS.map((key) => {

@@ -34,7 +34,7 @@ export function useDashboardData() {
     history: gymHistory, personalRecords, activeWorkout, customExercises,
     routines: gymRoutines, weightUnit,
   } = useGymStore();
-  const { logs, goals, getLog } = useNutritionStore();
+  const { logs, goals, getLog, onboardingComplete: nutritionOnboardingComplete } = useNutritionStore();
 
   const [thirtyDayCutoff] = useState(() => Date.now() - 30 * 86_400_000);
 
@@ -162,6 +162,7 @@ export function useDashboardData() {
     todayLog,
     todayMacros,
     daysLogged,
+    nutritionOnboardingComplete,
     goals,
     crossAlerts,
     activity,

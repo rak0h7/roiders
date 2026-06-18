@@ -22,7 +22,8 @@ export function UnifiedDashboard() {
         hasReports={data.reports.length > 0}
         hasCompounds={data.compounds.length > 0}
         hasWorkouts={data.gymHistory.length > 0}
-        hasNutrition={data.daysLogged > 0}
+        nutritionOnboardingComplete={data.nutritionOnboardingComplete}
+        hasNutritionLogs={data.daysLogged > 0}
         setRoute={setRoute}
       />
       <DashboardHero

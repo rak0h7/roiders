@@ -4,12 +4,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DEFAULT_GOALS, type DayJournal, type FoodItem, type FoodLogEntry, type MealSlot } from "@/lib/nutritionTypes";
 import { entryFromFood, todayStr, uid } from "@/lib/nutritionCalculations";
+import { calcMacroGoals, type NutritionProfile } from "@/lib/nutritionProfile";
 
 export type NutritionView = "diary" | "search" | "micro" | "goals" | "foods";
 
 interface NutritionState {
   logs: Record<string, FoodLogEntry[]>;
   goals: Record<string, number>;
+  profile: NutritionProfile | null;
+  onboardingComplete: boolean;
   customFoods: FoodItem[];
   favorites: string[];
   recentFoodIds: string[];
@@ -23,6 +26,8 @@ interface NutritionState {
   setAddMealSlot: (meal: MealSlot | null) => void;
   setGoal: (key: string, value: number) => void;
   resetGoals: () => void;
+  completeOnboarding: (profile: NutritionProfile) => void;
+  restartOnboarding: () => void;
 
   addEntry: (date: string, entry: Omit<FoodLogEntry, "id">) => void;
   updateEntry: (date: string, id: string, patch: Partial<FoodLogEntry>) => void;
@@ -43,6 +48,8 @@ export const useNutritionStore = create<NutritionState>()(
     (set, get) => ({
       logs: {},
       goals: { ...DEFAULT_GOALS },
+      profile: null,
+      onboardingComplete: false,
       customFoods: [],
       favorites: [],
       recentFoodIds: [],
@@ -56,6 +63,15 @@ export const useNutritionStore = create<NutritionState>()(
       setAddMealSlot: (meal) => set({ addMealSlot: meal }),
       setGoal: (key, value) => set({ goals: { ...get().goals, [key]: value } }),
       resetGoals: () => set({ goals: { ...DEFAULT_GOALS } }),
+
+      completeOnboarding: (profile) =>
+        set({
+          profile,
+          goals: calcMacroGoals(profile),
+          onboardingComplete: true,
+        }),
+
+      restartOnboarding: () => set({ onboardingComplete: false }),
 
       addEntry: (date, entry) => {
         const logs = { ...get().logs };
@@ -114,7 +130,22 @@ export const useNutritionStore = create<NutritionState>()(
         set({ journal });
       },
     }),
-    { name: "roiders-club-nutrition-store-v1" }
+    {
+      name: "roiders-club-nutrition-store-v1",
+      version: 2,
+      migrate: (persisted, version) => {
+        const state = persisted as Partial<NutritionState>;
+        if (version < 2) {
+          const hasLogs = Boolean(state.logs && Object.keys(state.logs).length > 0);
+          return {
+            ...state,
+            profile: state.profile ?? null,
+            onboardingComplete: state.onboardingComplete ?? hasLogs,
+          };
+        }
+        return state as NutritionState;
+      },
+    }
   )
 );
 

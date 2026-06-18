@@ -6,10 +6,15 @@ import { FoodSearch } from "@/components/nutrition/FoodSearch";
 import { NutritionMicro } from "@/components/nutrition/NutritionMicro";
 import { NutritionGoals } from "@/components/nutrition/NutritionGoals";
 import { CustomFoods } from "@/components/nutrition/CustomFoods";
+import { NutritionOnboarding } from "@/components/nutrition/NutritionOnboarding";
 import { useNutritionStore } from "@/store/nutritionStore";
 
 export function NutritionView() {
-  const { nutritionView } = useNutritionStore();
+  const { nutritionView, onboardingComplete } = useNutritionStore();
+
+  if (!onboardingComplete) {
+    return <NutritionOnboarding />;
+  }
 
   const content = () => {
     switch (nutritionView) {
