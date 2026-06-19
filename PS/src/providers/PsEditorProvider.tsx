@@ -23,7 +23,7 @@ interface PsEditorContextValue {
   selectedBlockId: string | null;
   selectedBlock: TextBlock | null;
   setCanvasSizeId: (id: CanvasSizeId) => void;
-  applyLayoutPreset: (id: LayoutPresetId, force?: boolean) => boolean;
+  applyLayoutPreset: (id: LayoutPresetId) => void;
   selectBlock: (id: string | null) => void;
   addBlock: () => void;
   updateBlock: (id: string, patch: Partial<TextBlock>) => void;
@@ -82,9 +82,10 @@ function loadDraft(): EditorDraft {
 
   if (blocks.length === 0) {
     return {
-      ...defaults,
+      blocks: blocksFromPreset(layoutPresetId, canvasSizeId),
       canvasSizeId,
       layoutPresetId,
+      selectedBlockId: null,
     };
   }
 
@@ -103,9 +104,12 @@ function loadDraft(): EditorDraft {
 export function PsEditorProvider({ children }: { children: React.ReactNode }) {
   const [draft, setDraft] = useState<EditorDraft>(loadDraft);
 
-  const persist = useCallback((next: EditorDraft) => {
-    setDraft(next);
-    writeDraft(next);
+  const persist = useCallback((updater: EditorDraft | ((prev: EditorDraft) => EditorDraft)) => {
+    setDraft((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      writeDraft(next);
+      return next;
+    });
   }, []);
 
   const canvasSize = useMemo(() => getCanvasSize(draft.canvasSizeId), [draft.canvasSizeId]);
@@ -117,86 +121,87 @@ export function PsEditorProvider({ children }: { children: React.ReactNode }) {
 
   const setCanvasSizeId = useCallback(
     (id: CanvasSizeId) => {
-      if (id === draft.canvasSizeId) return;
-      persist({
-        ...draft,
-        canvasSizeId: id,
-        blocks: repositionBlocksForCanvas(draft.blocks, draft.layoutPresetId, id),
-        selectedBlockId: draft.selectedBlockId,
+      persist((prev) => {
+        if (id === prev.canvasSizeId) return prev;
+        return {
+          ...prev,
+          canvasSizeId: id,
+          blocks: repositionBlocksForCanvas(prev.blocks, prev.layoutPresetId, id),
+        };
       });
     },
-    [draft, persist],
+    [persist],
   );
 
   const applyLayoutPreset = useCallback(
-    (id: LayoutPresetId, force = false) => {
-      const hasContent = draft.blocks.some((b) => b.text.trim().length > 0 && b.text !== "Your text here");
-      if (hasContent && !force) {
-        const ok = window.confirm("Replace current text blocks with this layout preset?");
-        if (!ok) return false;
-      }
-      const preset = LAYOUT_PRESETS.find((p) => p.id === id);
-      const canvasSizeId = preset?.defaultCanvasSizeId ?? draft.canvasSizeId;
-      persist({
-        ...draft,
-        layoutPresetId: id,
-        canvasSizeId,
-        blocks: blocksFromPreset(id, canvasSizeId),
-        selectedBlockId: null,
+    (id: LayoutPresetId) => {
+      persist((prev) => {
+        if (id === prev.layoutPresetId) return prev;
+
+        const preset = LAYOUT_PRESETS.find((p) => p.id === id);
+        const canvasSizeId = preset?.defaultCanvasSizeId ?? prev.canvasSizeId;
+
+        return {
+          layoutPresetId: id,
+          canvasSizeId,
+          blocks: blocksFromPreset(id, canvasSizeId),
+          selectedBlockId: null,
+        };
       });
-      return true;
     },
-    [draft, persist],
+    [persist],
   );
 
   const selectBlock = useCallback(
-    (id: string | null) => persist({ ...draft, selectedBlockId: id }),
-    [draft, persist],
+    (id: string | null) => persist((prev) => ({ ...prev, selectedBlockId: id })),
+    [persist],
   );
 
   const addBlock = useCallback(() => {
-    const block: TextBlock = {
-      id: createBlockId(),
-      x: 15,
-      y: 20,
-      width: 70,
-      text: "New text",
-      role: "body",
-      align: "left",
-    };
-    persist({
-      ...draft,
-      blocks: [...draft.blocks, block],
-      selectedBlockId: block.id,
+    persist((prev) => {
+      const block: TextBlock = {
+        id: createBlockId(),
+        x: 15,
+        y: 20,
+        width: 70,
+        text: "New text",
+        role: "body",
+        align: "left",
+      };
+      return {
+        ...prev,
+        blocks: [...prev.blocks, block],
+        selectedBlockId: block.id,
+      };
     });
-  }, [draft, persist]);
+  }, [persist]);
 
   const updateBlock = useCallback(
     (id: string, patch: Partial<TextBlock>) => {
-      persist({
-        ...draft,
-        blocks: draft.blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)),
-      });
+      persist((prev) => ({
+        ...prev,
+        blocks: prev.blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)),
+      }));
     },
-    [draft, persist],
+    [persist],
   );
 
   const deleteBlock = useCallback(
     (id: string) => {
-      persist({
-        ...draft,
-        blocks: draft.blocks.filter((b) => b.id !== id),
-        selectedBlockId: draft.selectedBlockId === id ? null : draft.selectedBlockId,
-      });
+      persist((prev) => ({
+        ...prev,
+        blocks: prev.blocks.filter((b) => b.id !== id),
+        selectedBlockId: prev.selectedBlockId === id ? null : prev.selectedBlockId,
+      }));
     },
-    [draft, persist],
+    [persist],
   );
 
   const moveBlock = useCallback(
     (id: string, x: number, y: number) => {
-      persist({
-        ...draft,
-        blocks: draft.blocks.map((b) =>
+      persist((prev) => ({
+        ...prev,
+        blocks: prev.blocks.map((b) =>
           b.id === id
             ? {
                 ...b,
@@ -205,9 +210,9 @@ export function PsEditorProvider({ children }: { children: React.ReactNode }) {
               }
             : b,
         ),
-      });
+      }));
     },
-    [draft, persist],
+    [persist],
   );
 
   return (

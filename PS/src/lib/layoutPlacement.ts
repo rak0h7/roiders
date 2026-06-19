@@ -206,9 +206,17 @@ export function repositionBlocksForCanvas(
   canvasSizeId: CanvasSizeId,
 ): TextBlock[] {
   const templates = getLayoutBlockTemplates(presetId, canvasSizeId);
-  return blocks.map((block, index) => {
-    const template = templates[index] ?? templates.find((t) => t.role === block.role);
-    if (!template) return block;
+  const used = new Set<number>();
+
+  return blocks.map((block) => {
+    let templateIndex = templates.findIndex((t, i) => !used.has(i) && t.role === block.role);
+    if (templateIndex < 0) {
+      templateIndex = templates.findIndex((_, i) => !used.has(i));
+    }
+    if (templateIndex < 0) return block;
+
+    used.add(templateIndex);
+    const template = templates[templateIndex];
     return {
       ...block,
       x: template.x,
