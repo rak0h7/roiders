@@ -80,7 +80,7 @@ export const COMPOUNDS: Compound[] = [
   { id: "hcg", name: "HCG", shortName: "HCG", category: "peptides", route: "injectable", tags: ["SC", "IM"], dosageInfo: "250–500 iu 2x/wk", color: "#22c55e", halfLife: 1.5, pkMultiplier: 0.1, unit: "iu" },
   { id: "bpc157", name: "BPC-157", shortName: "BPC-157", category: "peptides", route: "injectable", tags: ["SC", "Peptide"], dosageInfo: "250–500 mcg/day", color: "#3b82f6", halfLife: 0.2, pkMultiplier: 0.05, unit: "mcg" },
   { id: "gh", name: "Growth Hormone", shortName: "GH", category: "peptides", route: "injectable", tags: ["SC"], dosageInfo: "2–4 iu/day", color: "#22c55e", halfLife: 0.2, pkMultiplier: 0.2, unit: "iu" },
-  { id: "tudca", name: "TUDCA", shortName: "TUDCA", category: "peptides", route: "oral", tags: ["Liver Support"], dosageInfo: "500–1000 mg/day", color: "#22c55e", halfLife: 0.5, pkMultiplier: 0.05, unit: "mg" },
+  { id: "tudca", name: "TUDCA", shortName: "TUDCA", category: "support", route: "oral", tags: ["Liver Support"], dosageInfo: "500–1000 mg/day", color: "#22c55e", halfLife: 0.5, pkMultiplier: 0.05, unit: "mg" },
   { id: "nac", name: "NACET", shortName: "NACET", category: "peptides", route: "oral", tags: ["Liver Support"], dosageInfo: "600–1200 mg/day", color: "#22c55e", halfLife: 0.3, pkMultiplier: 0.05, unit: "mg" },
   ...OMA_COMPOUNDS,
 ];

@@ -62,4 +62,36 @@ describe("guideCatalog", () => {
     expect(cleanText("  hello   world  ")).toBe("hello world");
     expect(cleanText(": leading colon")).toBe("leading colon");
   });
+
+  const NEW_GUIDE_IDS = [
+    "epa-dha-omega-3",
+    "citrus-bergamot",
+    "coq10",
+    "taurine",
+    "tudca",
+    "ketoconazole-shampoo",
+    "ru58841",
+  ] as const;
+
+  it("includes newly added support and hair guide entries", () => {
+    const catalog = buildGuideCatalog();
+    const ids = new Set(catalog.map((e) => e.profile.id));
+    for (const id of NEW_GUIDE_IDS) {
+      expect(ids.has(id), `missing guide ${id}`).toBe(true);
+      expect(getDisplayProfileById(id)).toBeDefined();
+    }
+  });
+
+  it("places TUDCA in support section, not peptides", () => {
+    const catalog = buildGuideCatalog();
+    const tudca = catalog.find((e) => e.profile.id === "tudca");
+    expect(tudca?.sectionId).toBe("support");
+  });
+
+  it("matches omega-3 search aliases", () => {
+    const omega = getDisplayProfileById("epa-dha-omega-3");
+    expect(omega).toBeDefined();
+    expect(matchesGuideQuery(omega!, "fish oil")).toBe(true);
+    expect(matchesGuideQuery(omega!, "epa")).toBe(true);
+  });
 });

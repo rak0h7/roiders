@@ -106,4 +106,10 @@ export const OMA_COMPOUNDS: Compound[] = [
   { id: "eplerenone-25mg", name: "Eplerenone (25mg)", shortName: "Eplerenone", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `25–50mg daily. Often 25mg is sufficient alongside telmisartan.`, color: "#22c55e", unit: "mg" },
   { id: "isotretinoin-accutane", name: "Isotretinoin (Accutane)", shortName: "Isotretinoin", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `Typically 0.5–1mg/kg/day. Many AAS users run lower doses (20–40mg/day) as a…`, color: "#22c55e", unit: "mg" },
   { id: "raloxifene", name: "Raloxifene", shortName: "Raloxifene", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `60mg daily for gyno treatment.`, color: "#22c55e", unit: "mg" },
+  { id: "epa-dha-omega-3", name: "EPA/DHA (Omega-3)", shortName: "Omega-3", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `2–4 g combined EPA+DHA daily (often 1–2 g EPA).`, color: "#22c55e", unit: "mg" },
+  { id: "citrus-bergamot", name: "Citrus Bergamot", shortName: "Bergamot", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `500–1500 mg extract daily with meals.`, color: "#22c55e", unit: "mg" },
+  { id: "coq10", name: "CoQ10", shortName: "CoQ10", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `100–300 mg daily (ubiquinol preferred).`, color: "#22c55e", unit: "mg" },
+  { id: "taurine", name: "Taurine", shortName: "Taurine", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `2–6 g daily.`, color: "#22c55e", unit: "mg" },
+  { id: "ketoconazole-shampoo", name: "Ketoconazole Shampoo", shortName: "Keto Shampoo", category: "hair", route: "topical", tags: ["Guide"], dosageInfo: `2% shampoo, 3–5 min contact 2–3×/week.`, color: "#14b8a6", unit: "mg" },
+  { id: "ru58841", name: "RU58841", shortName: "RU58841", category: "hair", route: "topical", tags: ["Guide"], dosageInfo: `50–100 mg/day in ethanol/PG carrier.`, color: "#14b8a6", unit: "mg" },
 ];
