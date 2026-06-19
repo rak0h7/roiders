@@ -153,6 +153,20 @@ export const CANVAS_SIZE_GROUPS: CanvasSizeGroup[] = [
 
 export const CANVAS_SIZES: CanvasSize[] = CANVAS_SIZE_GROUPS.flatMap((g) => g.sizes);
 
-export function getCanvasSize(id: CanvasSizeId): CanvasSize {
-  return CANVAS_SIZES.find((s) => s.id === id) ?? CANVAS_SIZES[0];
+const CANVAS_SIZE_IDS = new Set<string>(CANVAS_SIZES.map((s) => s.id));
+
+export const DEFAULT_CANVAS_SIZE_ID: CanvasSizeId = "9:16";
+
+export function isCanvasSizeId(id: string): id is CanvasSizeId {
+  return CANVAS_SIZE_IDS.has(id);
+}
+
+export function normalizeCanvasSizeId(id: string | undefined | null): CanvasSizeId {
+  if (id && isCanvasSizeId(id)) return id;
+  return DEFAULT_CANVAS_SIZE_ID;
+}
+
+export function getCanvasSize(id: CanvasSizeId | string | undefined | null): CanvasSize {
+  const normalized = normalizeCanvasSizeId(id ?? undefined);
+  return CANVAS_SIZES.find((s) => s.id === normalized) ?? CANVAS_SIZES[0];
 }

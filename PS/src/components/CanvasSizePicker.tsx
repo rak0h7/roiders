@@ -43,7 +43,7 @@ export function CanvasSizePicker() {
         />
       </div>
 
-      <div className="max-h-56 space-y-2 overflow-y-auto pr-0.5">
+      <div className="max-h-44 space-y-2 overflow-y-auto pr-0.5 lg:max-h-52">
         {groups.map((group) => {
           const expanded = query.length > 0 || openGroup === group.id;
           return (
