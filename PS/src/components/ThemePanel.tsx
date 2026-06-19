@@ -4,12 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { Palette, RotateCcw, Upload } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/context/ToastContext";
-import {
-  DEFAULT_THEME,
-  FONT_FAMILY_OPTIONS,
-  THEME_PRESETS,
-  hexToHsl,
-} from "@/lib/themes";
+import { DEFAULT_THEME, THEME_PRESETS, hexToHsl } from "@/lib/themes";
 import { ThemePresetGrid } from "@ps/components/theme/ThemePresetGrid";
 import { ThemePreviewCard } from "@ps/components/theme/ThemePreviewCard";
 import {
@@ -55,7 +50,6 @@ export function ThemePanel() {
 
   const accentSummary = `${theme.accentPrimary} · ${theme.accentSecondary}`;
   const surfaceSummary = `${theme.baseColor} base`;
-  const typeSummary = `${FONT_FAMILY_OPTIONS.find((f) => f.id === theme.fontFamily)?.label ?? "Syne"} · ${theme.fontScale}%`;
   const glassSummary = `${theme.gradientIntensity}% gradient · ${theme.glassBlur}px blur`;
   const bgSummary = theme.showAmbientBackground
     ? `${theme.backgroundPattern === "none" ? "ambient" : theme.backgroundPattern}`
@@ -69,8 +63,8 @@ export function ThemePanel() {
           <Palette className="h-4 w-4 text-[var(--accent)]" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-[var(--foreground)]">Theme</p>
-          <p className="text-[10px] text-[var(--muted)]">Applies to canvas & editor</p>
+          <p className="text-sm font-semibold text-[var(--foreground)]">Canvas theme</p>
+          <p className="text-[10px] text-[var(--muted)]">Colors & background for your post</p>
         </div>
         <button
           type="button"
@@ -132,27 +126,6 @@ export function ThemePanel() {
                 }}
               />
             ))}
-          </div>
-        </ThemeSection>
-
-        <ThemeSection title="Typography" summary={typeSummary} open={openSection === "type"} onToggle={() => toggle("type")}>
-          <div className="space-y-3">
-            <label className="block">
-              <span className="text-[10px] font-medium text-[var(--muted)]">Font</span>
-              <select
-                value={theme.fontFamily}
-                onChange={(e) => updateTheme({ fontFamily: e.target.value as typeof theme.fontFamily })}
-                className={cn(ui.inputCompact, "mt-1 w-full")}
-              >
-                {FONT_FAMILY_OPTIONS.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <CompactSlider label="Scale" value={theme.fontScale} onChange={(v) => updateTheme({ fontScale: v })} min={85} max={115} unit="%" />
-            <CompactSlider label="Weight" value={theme.fontWeight} onChange={(v) => updateTheme({ fontWeight: v })} min={400} max={800} step={100} />
           </div>
         </ThemeSection>
 

@@ -1,10 +1,9 @@
-import type { CanvasSizeId } from "./canvasSizes";
 import { getCanvasSize } from "./canvasSizes";
 
 /** Layout block templates are keyed by these aspect families. */
 export type PlacementKey = "1:1" | "4:5" | "9:16" | "16:9";
 
-export function resolvePlacementKey(canvasSizeId: CanvasSizeId): PlacementKey {
+export function resolvePlacementKey(canvasSizeId: string): PlacementKey {
   const { width, height } = getCanvasSize(canvasSizeId);
   const ratio = width / height;
 

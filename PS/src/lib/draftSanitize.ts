@@ -1,6 +1,6 @@
 import { blocksFromPreset, LAYOUT_PRESETS } from "./contentPresets";
 import { layoutBlocksForCanvas } from "./layoutPlacement";
-import { normalizeCanvasSizeId } from "./canvasSizes";
+import { isCustomCanvasSizeId, isCanvasSizeId, normalizeCanvasSizeId } from "./canvasSizes";
 import { spaceBlocksVertically } from "./blockSpacing";
 import type { EditorDraft, LayoutPresetId, TextBlock } from "./canvasTypes";
 
@@ -57,7 +57,11 @@ export function validateDraft(
 ): EditorDraft {
   if (!stored) return initializedDraft(defaults.layoutPresetId, defaults.canvasSizeId);
 
-  const canvasSizeId = normalizeCanvasSizeId(stored.canvasSizeId ?? defaults.canvasSizeId);
+  const rawSizeId = stored.canvasSizeId ?? defaults.canvasSizeId;
+  const canvasSizeId =
+    typeof rawSizeId === "string" && (isCanvasSizeId(rawSizeId) || isCustomCanvasSizeId(rawSizeId))
+      ? rawSizeId
+      : normalizeCanvasSizeId(rawSizeId);
   const rawLayoutId = stored.layoutPresetId ?? "";
   const layoutPresetId: LayoutPresetId = isLayoutPresetId(rawLayoutId)
     ? rawLayoutId

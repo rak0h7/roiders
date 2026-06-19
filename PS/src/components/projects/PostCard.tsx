@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@ps/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 import { LAYOUT_PRESETS } from "@ps/lib/contentPresets";
+import { useSettings } from "@/context/SettingsContext";
 import { getCanvasSize } from "@ps/lib/canvasSizes";
 import type { Post } from "@ps/lib/projectTypes";
 
@@ -20,12 +21,13 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, onOpen, onDuplicate, onRename, onDelete }: PostCardProps) {
+  const { customCanvasSizes } = useSettings();
   const [renaming, setRenaming] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [name, setName] = useState(post.name);
 
   const layout = LAYOUT_PRESETS.find((p) => p.id === post.draft.layoutPresetId);
-  const canvas = getCanvasSize(post.draft.canvasSizeId);
+  const canvas = getCanvasSize(post.draft.canvasSizeId, customCanvasSizes);
   const aspect = canvas.width / canvas.height;
   const updated = formatRelativeTime(post.updatedAt);
 

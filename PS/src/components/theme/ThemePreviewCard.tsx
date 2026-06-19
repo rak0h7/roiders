@@ -1,12 +1,10 @@
 "use client";
 
-import { FONT_FAMILY_OPTIONS, type ThemeConfig } from "@/lib/themes";
+import type { ThemeConfig } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function ThemePreviewCard({ theme, name }: { theme: ThemeConfig; name: string }) {
-  const fontLabel = FONT_FAMILY_OPTIONS.find((f) => f.id === theme.fontFamily)?.label ?? "Syne";
-
   return (
     <div className="relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)]/50 p-3">
       <div
@@ -26,7 +24,7 @@ export function ThemePreviewCard({ theme, name }: { theme: ThemeConfig; name: st
       <p className={cn(ui.overline, "relative")}>Active theme</p>
       <p className="relative mt-1 truncate text-sm font-semibold text-[var(--foreground)]">{name}</p>
       <p className="relative mt-0.5 text-[10px] text-[var(--muted)]">
-        {fontLabel} · {theme.backgroundPattern !== "none" ? theme.backgroundPattern : "clean"} bg
+        {theme.backgroundPattern !== "none" ? theme.backgroundPattern : "Clean"} background
       </p>
       <div className="relative mt-2.5 flex gap-1">
         {[theme.accentPrimary, theme.accentSecondary, theme.accentTertiary].map((c, i) => (

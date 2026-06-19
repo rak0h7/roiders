@@ -15,6 +15,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["../src/*"],
+      "@/context/SettingsContext": ["./src/providers/PsSettingsProvider.tsx"],
       "@ps/*": ["./src/*"]
     }
   },

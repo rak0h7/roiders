@@ -11,13 +11,13 @@ import React, {
 } from "react";
 import { blocksFromPreset, LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { layoutBlocksForCanvas } from "@ps/lib/layoutPlacement";
+import { useSettings } from "@/context/SettingsContext";
 import { getCanvasSize } from "@ps/lib/canvasSizes";
 import { spaceBlocksVertically } from "@ps/lib/blockSpacing";
 import { CURRENT_SPACING_VERSION, prepareDraftForEditor } from "@ps/lib/draftSanitize";
 import { createDefaultDraft } from "@ps/lib/projectTypes";
 import {
   createBlockId,
-  type CanvasSizeId,
   type EditorDraft,
   type LayoutPresetId,
   type TextBlock,
@@ -29,12 +29,12 @@ const SPACING_ROLES = new Set<TextBlockRole>(["headline", "subhead", "body"]);
 
 interface PsEditorContextValue {
   blocks: TextBlock[];
-  canvasSizeId: CanvasSizeId;
+  canvasSizeId: string;
   canvasSize: ReturnType<typeof getCanvasSize>;
   layoutPresetId: LayoutPresetId;
   selectedBlockId: string | null;
   selectedBlock: TextBlock | null;
-  setCanvasSizeId: (id: CanvasSizeId) => void;
+  setCanvasSizeId: (id: string) => void;
   applyLayoutPreset: (id: LayoutPresetId) => void;
   selectBlock: (id: string | null) => void;
   addBlock: () => void;
@@ -52,6 +52,7 @@ interface PsEditorProviderProps {
 }
 
 export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEditorProviderProps) {
+  const { customCanvasSizes } = useSettings();
   const defaults = useMemo(() => createDefaultDraft(), []);
   const [draft, setDraft] = useState<EditorDraft>(() => prepareDraftForEditor(postDraft, defaults));
   const onDraftChangeRef = useRef(onDraftChange);
@@ -83,7 +84,10 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
     }, 300);
   }, [persist]);
 
-  const canvasSize = useMemo(() => getCanvasSize(draft.canvasSizeId), [draft.canvasSizeId]);
+  const canvasSize = useMemo(
+    () => getCanvasSize(draft.canvasSizeId, customCanvasSizes),
+    [draft.canvasSizeId, customCanvasSizes],
+  );
 
   const selectedBlock = useMemo(
     () => draft.blocks.find((b) => b.id === draft.selectedBlockId) ?? null,
@@ -91,7 +95,7 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
   );
 
   const setCanvasSizeId = useCallback(
-    (id: CanvasSizeId) => {
+    (id: string) => {
       persist((prev) => {
         if (id === prev.canvasSizeId) return prev;
         return {

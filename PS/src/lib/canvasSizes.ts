@@ -1,4 +1,23 @@
+export interface CustomCanvasSize {
+  id: string;
+  label: string;
+  width: number;
+  height: number;
+}
+
+export const QUICK_ASPECT_RATIOS = [
+  { w: 1, h: 1, label: "1:1" },
+  { w: 4, h: 5, label: "4:5" },
+  { w: 9, h: 16, label: "9:16" },
+  { w: 16, h: 9, label: "16:9" },
+  { w: 2, h: 3, label: "2:3" },
+  { w: 3, h: 4, label: "3:4" },
+  { w: 3, h: 2, label: "3:2" },
+  { w: 4, h: 3, label: "4:3" },
+] as const;
+
 export type CanvasSizeId =
+  | "roiders-guide"
   | "1:1"
   | "4:5"
   | "9:16"
@@ -36,11 +55,12 @@ export type CanvasSizeId =
   | "twitch-offline";
 
 export interface CanvasSize {
-  id: CanvasSizeId;
+  id: string;
   label: string;
   shortLabel: string;
   width: number;
   height: number;
+  custom?: boolean;
 }
 
 export interface CanvasSizeGroup {
@@ -60,6 +80,13 @@ function size(
 }
 
 export const CANVAS_SIZE_GROUPS: CanvasSizeGroup[] = [
+  {
+    id: "templates",
+    label: "Template sizes",
+    sizes: [
+      size("roiders-guide", "Roiders guide", "Guide", 600, 800),
+    ],
+  },
   {
     id: "standard",
     label: "Standard ratios",
@@ -157,16 +184,89 @@ const CANVAS_SIZE_IDS = new Set<string>(CANVAS_SIZES.map((s) => s.id));
 
 export const DEFAULT_CANVAS_SIZE_ID: CanvasSizeId = "9:16";
 
+export function isCustomCanvasSizeId(id: string): boolean {
+  return id.startsWith("custom-");
+}
+
 export function isCanvasSizeId(id: string): id is CanvasSizeId {
   return CANVAS_SIZE_IDS.has(id);
 }
 
-export function normalizeCanvasSizeId(id: string | undefined | null): CanvasSizeId {
+export function createCustomCanvasSizeId(): string {
+  return `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+}
+
+export function formatAspectRatio(width: number, height: number): string {
+  const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+  const g = gcd(width, height);
+  return `${width / g}:${height / g}`;
+}
+
+export function createCustomCanvasSize(width: number, height: number, label: string): CustomCanvasSize {
+  return {
+    id: createCustomCanvasSizeId(),
+    label,
+    width,
+    height,
+  };
+}
+
+export function normalizeCanvasSizeId(id: string | undefined | null): string {
   if (id && isCanvasSizeId(id)) return id;
+  if (id && isCustomCanvasSizeId(id)) return id;
   return DEFAULT_CANVAS_SIZE_ID;
 }
 
-export function getCanvasSize(id: CanvasSizeId | string | undefined | null): CanvasSize {
+export function getCanvasSize(
+  id: string | undefined | null,
+  customSizes: CustomCanvasSize[] = [],
+): CanvasSize {
   const normalized = normalizeCanvasSizeId(id ?? undefined);
-  return CANVAS_SIZES.find((s) => s.id === normalized) ?? CANVAS_SIZES[0];
+  const preset = CANVAS_SIZES.find((s) => s.id === normalized);
+  if (preset) return preset;
+
+  const custom = customSizes.find((s) => s.id === normalized);
+  if (custom) {
+    const ratio = formatAspectRatio(custom.width, custom.height);
+    return {
+      id: custom.id,
+      label: custom.label,
+      shortLabel: ratio,
+      width: custom.width,
+      height: custom.height,
+      custom: true,
+    };
+  }
+
+  if (isCustomCanvasSizeId(normalized)) {
+    return {
+      id: normalized,
+      label: "Custom size",
+      shortLabel: "Custom",
+      width: 1080,
+      height: 1920,
+      custom: true,
+    };
+  }
+
+  return CANVAS_SIZES.find((s) => s.id === DEFAULT_CANVAS_SIZE_ID) ?? CANVAS_SIZES[0];
+}
+
+export function buildCanvasSizeGroups(customSizes: CustomCanvasSize[]): CanvasSizeGroup[] {
+  if (customSizes.length === 0) return CANVAS_SIZE_GROUPS;
+  return [
+    {
+      id: "custom",
+      label: "Custom sizes",
+      sizes: customSizes.map((custom) => ({
+        id: custom.id,
+        label: custom.label,
+        shortLabel: formatAspectRatio(custom.width, custom.height),
+        width: custom.width,
+        height: custom.height,
+        custom: true,
+      })),
+    },
+    ...CANVAS_SIZE_GROUPS,
+  ];
 }

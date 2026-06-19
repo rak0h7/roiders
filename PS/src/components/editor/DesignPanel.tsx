@@ -2,6 +2,7 @@
 
 import { CanvasSizePicker } from "@ps/components/CanvasSizePicker";
 import { LayoutPresetPicker } from "@ps/components/LayoutPresetPicker";
+import { CustomCanvasForm } from "./CustomCanvasForm";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -12,6 +13,9 @@ export function DesignPanel() {
         <p className={cn(ui.overline, "mb-2")}>Canvas size</p>
         <p className="mb-2.5 text-xs text-[var(--muted)]">Pick a platform format for export.</p>
         <CanvasSizePicker />
+        <div className="mt-3">
+          <CustomCanvasForm />
+        </div>
       </div>
       <div>
         <p className={cn(ui.overline, "mb-2")}>Layout template</p>

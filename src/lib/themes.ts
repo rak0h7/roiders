@@ -218,78 +218,80 @@ export function hexToHsl(hex: string): { h: number; s: number; l: number } {
   return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) };
 }
 
-export function applyThemeToDocument(theme: ThemeConfig): void {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
+/** Apply theme CSS variables to a specific element (e.g. canvas artboard). */
+export function applyThemeToElement(element: HTMLElement, theme: ThemeConfig): void {
   const intensity = theme.gradientIntensity / 100;
   const scale = theme.radiusScale;
 
   const { accentPrimary: p, accentSecondary: s, accentTertiary: t } = theme;
   const contrast = resolveThemeContrast(theme);
 
-  root.style.setProperty("--bg-base", theme.baseColor);
-  root.style.setProperty("--bg-elevated", theme.elevatedColor);
-  root.style.setProperty("--bg-surface", theme.surfaceColor);
-  root.style.setProperty("--bg-hover", lighten(theme.elevatedColor, 0.18));
+  element.style.setProperty("--bg-base", theme.baseColor);
+  element.style.setProperty("--bg-elevated", theme.elevatedColor);
+  element.style.setProperty("--bg-surface", theme.surfaceColor);
+  element.style.setProperty("--bg-hover", lighten(theme.elevatedColor, 0.18));
 
-  root.style.setProperty("--foreground", contrast.foreground);
-  root.style.setProperty("--muted", contrast.muted);
-  root.style.setProperty("--muted-2", contrast.muted2);
-  root.style.setProperty("--border", contrast.border);
-  root.style.setProperty("--border-strong", contrast.borderStrong);
-  root.style.setProperty("--text-on-labs", contrast.textOnLabs);
-  root.style.setProperty("--text-on-protocol", contrast.textOnProtocol);
-  root.style.setProperty("--text-on-intel", contrast.textOnIntel);
-  root.style.setProperty("--text-on-warning", contrast.textOnWarning);
-  root.style.setProperty("--text-on-success", contrast.textOnSuccess);
+  element.style.setProperty("--foreground", contrast.foreground);
+  element.style.setProperty("--muted", contrast.muted);
+  element.style.setProperty("--muted-2", contrast.muted2);
+  element.style.setProperty("--border", contrast.border);
+  element.style.setProperty("--border-strong", contrast.borderStrong);
+  element.style.setProperty("--text-on-labs", contrast.textOnLabs);
+  element.style.setProperty("--text-on-protocol", contrast.textOnProtocol);
+  element.style.setProperty("--text-on-intel", contrast.textOnIntel);
+  element.style.setProperty("--text-on-warning", contrast.textOnWarning);
+  element.style.setProperty("--text-on-success", contrast.textOnSuccess);
 
-  root.style.setProperty("--accent", contrast.accent);
-  root.style.setProperty("--accent-soft", contrast.accentSoft);
-  root.style.setProperty("--accent-tertiary", contrast.accentTertiary);
+  element.style.setProperty("--accent", contrast.accent);
+  element.style.setProperty("--accent-soft", contrast.accentSoft);
+  element.style.setProperty("--accent-tertiary", contrast.accentTertiary);
 
-  root.style.setProperty("--labs", contrast.labs);
-  root.style.setProperty("--labs-dim", rgba(p, 0.1 + intensity * 0.06));
-  root.style.setProperty("--labs-glow", rgba(p, 0.15 + intensity * 0.25));
+  element.style.setProperty("--labs", contrast.labs);
+  element.style.setProperty("--labs-dim", rgba(p, 0.1 + intensity * 0.06));
+  element.style.setProperty("--labs-glow", rgba(p, 0.15 + intensity * 0.25));
 
-  root.style.setProperty("--protocol", contrast.protocol);
-  root.style.setProperty("--protocol-dim", rgba(s, 0.1 + intensity * 0.05));
-  root.style.setProperty("--protocol-glow", rgba(s, 0.12 + intensity * 0.2));
+  element.style.setProperty("--protocol", contrast.protocol);
+  element.style.setProperty("--protocol-dim", rgba(s, 0.1 + intensity * 0.05));
+  element.style.setProperty("--protocol-glow", rgba(s, 0.12 + intensity * 0.2));
 
-  root.style.setProperty("--intel", contrast.intel);
-  root.style.setProperty("--intel-dim", rgba(t, 0.1 + intensity * 0.05));
-  root.style.setProperty("--intel-glow", rgba(t, 0.12 + intensity * 0.18));
+  element.style.setProperty("--intel", contrast.intel);
+  element.style.setProperty("--intel-dim", rgba(t, 0.1 + intensity * 0.05));
+  element.style.setProperty("--intel-glow", rgba(t, 0.12 + intensity * 0.18));
 
-  root.style.setProperty(
+  element.style.setProperty(
     "--gradient-primary",
     `linear-gradient(${theme.gradientAngle}deg, ${p} 0%, ${s} 50%, ${p} 100%)`,
   );
-  root.style.setProperty("--gradient-ambient", buildAmbientGradient(p, s, t, intensity));
-  root.style.setProperty("--gradient-glass", `linear-gradient(145deg, ${rgba(p, 0.08)} 0%, ${rgba(s, 0.04)} 40%, transparent 100%)`);
+  element.style.setProperty("--gradient-ambient", buildAmbientGradient(p, s, t, intensity));
+  element.style.setProperty(
+    "--gradient-glass",
+    `linear-gradient(145deg, ${rgba(p, 0.08)} 0%, ${rgba(s, 0.04)} 40%, transparent 100%)`,
+  );
 
-  root.style.setProperty("--glass-blur", `${theme.glassBlur}px`);
-  root.style.setProperty("--glass-bg", rgba("#ffffff", theme.glassOpacity / 100));
-  root.style.setProperty("--glass-border", theme.borderGlow ? rgba(p, 0.18) : "rgba(255,255,255,0.07)");
+  element.style.setProperty("--glass-blur", `${theme.glassBlur}px`);
+  element.style.setProperty("--glass-bg", rgba("#ffffff", theme.glassOpacity / 100));
+  element.style.setProperty("--glass-border", theme.borderGlow ? rgba(p, 0.18) : "rgba(255,255,255,0.07)");
 
-  root.style.setProperty("--radius-sm", `${Math.round(8 * scale)}px`);
-  root.style.setProperty("--radius-md", `${Math.round(14 * scale)}px`);
-  root.style.setProperty("--radius-lg", `${Math.round(20 * scale)}px`);
-  root.style.setProperty("--radius-xl", `${Math.round(28 * scale)}px`);
+  element.style.setProperty("--radius-sm", `${Math.round(8 * scale)}px`);
+  element.style.setProperty("--radius-md", `${Math.round(14 * scale)}px`);
+  element.style.setProperty("--radius-lg", `${Math.round(20 * scale)}px`);
+  element.style.setProperty("--radius-xl", `${Math.round(28 * scale)}px`);
 
   const densityScale = theme.density === "compact" ? 0.88 : 1;
-  root.style.setProperty("--space-unit", theme.density === "compact" ? "0.85" : "1");
-  root.style.setProperty("--control-height", `${Math.round(40 * densityScale)}px`);
-  root.style.setProperty("--control-height-sm", `${Math.round(36 * densityScale)}px`);
-  root.style.setProperty("--control-height-xs", `${Math.round(32 * densityScale)}px`);
-  root.style.setProperty("--control-height-icon", `${Math.round(36 * densityScale)}px`);
-  root.style.setProperty("--control-height-micro", `${Math.round(28 * densityScale)}px`);
-  root.style.setProperty("--font-scale", String(theme.fontScale / 100));
-  root.style.setProperty("--shadow-depth", String(theme.shadowDepth / 100));
-  root.style.setProperty("--letter-spacing", `${theme.letterSpacing / 100}em`);
-  root.style.setProperty("--line-height", String(theme.lineHeight));
-  root.style.setProperty("--icon-size", `${theme.iconSize}px`);
-  root.style.setProperty("--btn-hover-intensity", String(theme.buttonHoverIntensity / 100));
-  root.style.setProperty("--page-transition-speed", String(theme.pageTransitionSpeed / 100));
-  root.style.setProperty("--parallax-strength", String(theme.parallaxStrength / 100));
+  element.style.setProperty("--space-unit", theme.density === "compact" ? "0.85" : "1");
+  element.style.setProperty("--control-height", `${Math.round(40 * densityScale)}px`);
+  element.style.setProperty("--control-height-sm", `${Math.round(36 * densityScale)}px`);
+  element.style.setProperty("--control-height-xs", `${Math.round(32 * densityScale)}px`);
+  element.style.setProperty("--control-height-icon", `${Math.round(36 * densityScale)}px`);
+  element.style.setProperty("--control-height-micro", `${Math.round(28 * densityScale)}px`);
+  element.style.setProperty("--font-scale", String(theme.fontScale / 100));
+  element.style.setProperty("--shadow-depth", String(theme.shadowDepth / 100));
+  element.style.setProperty("--letter-spacing", `${theme.letterSpacing / 100}em`);
+  element.style.setProperty("--line-height", String(theme.lineHeight));
+  element.style.setProperty("--icon-size", `${theme.iconSize}px`);
+  element.style.setProperty("--btn-hover-intensity", String(theme.buttonHoverIntensity / 100));
+  element.style.setProperty("--page-transition-speed", String(theme.pageTransitionSpeed / 100));
+  element.style.setProperty("--parallax-strength", String(theme.parallaxStrength / 100));
 
   const fontStack =
     FONT_FAMILY_OPTIONS.find((f) => f.id === theme.fontFamily)?.stack ??
@@ -298,9 +300,24 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
     theme.fontFamily === "orbitron" || theme.fontFamily === "jetbrains"
       ? fontStack
       : "var(--font-syne), system-ui, sans-serif";
-  root.style.setProperty("--font-sans-active", fontStack);
-  root.style.setProperty("--font-display-active", displayStack);
-  root.style.fontWeight = String(theme.fontWeight);
+  element.style.setProperty("--font-sans-active", fontStack);
+  element.style.setProperty("--font-display-active", displayStack);
+  element.style.fontWeight = String(theme.fontWeight);
+
+  if (theme.backgroundImage) {
+    element.style.setProperty(
+      "--bg-custom-image",
+      `url("${theme.backgroundImage.replace(/"/g, "%22")}")`,
+    );
+  } else {
+    element.style.removeProperty("--bg-custom-image");
+  }
+}
+
+export function applyThemeToDocument(theme: ThemeConfig): void {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  applyThemeToElement(root, theme);
 
   root.dataset.density = theme.density;
   root.dataset.animatedBg = theme.animatedBackground ? "true" : "false";
@@ -312,15 +329,6 @@ export function applyThemeToDocument(theme: ThemeConfig): void {
   root.dataset.particles = theme.particleEffects ? "true" : "false";
   root.dataset.layoutPreset = theme.layoutPreset;
   root.dataset.customBg = theme.backgroundImage ? "true" : "false";
-
-  if (theme.backgroundImage) {
-    root.style.setProperty(
-      "--bg-custom-image",
-      `url("${theme.backgroundImage.replace(/"/g, "%22")}")`,
-    );
-  } else {
-    root.style.removeProperty("--bg-custom-image");
-  }
 }
 
 export function buildSwatchesFromAccents(

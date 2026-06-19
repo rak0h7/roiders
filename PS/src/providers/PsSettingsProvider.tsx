@@ -11,13 +11,23 @@ import {
   presetToTheme,
   THEME_PRESETS,
 } from "@/lib/themes";
+import type { CustomCanvasSize } from "@ps/lib/canvasSizes";
 import { PS_SETTINGS_KEY, readJson, writeJson } from "@ps/lib/psStorage";
+
+/** Fixed look for PS editor chrome — project theme applies to canvas only. */
+const PS_EDITOR_CHROME_THEME: ThemeConfig = {
+  ...DEFAULT_THEME,
+  showAmbientBackground: false,
+  animatedBackground: false,
+  particleEffects: false,
+};
 
 export interface AppSettings {
   defaultRangeMode: RangeMode;
   reducedMotion: boolean;
   compactSidebar: boolean;
   theme: ThemeConfig;
+  customCanvasSizes: CustomCanvasSize[];
 }
 
 const DEFAULTS: AppSettings = {
@@ -25,12 +35,15 @@ const DEFAULTS: AppSettings = {
   reducedMotion: false,
   compactSidebar: false,
   theme: DEFAULT_THEME,
+  customCanvasSizes: [],
 };
 
 interface SettingsContextValue extends AppSettings {
   updateSettings: (patch: Partial<AppSettings>) => void;
   updateTheme: (patch: Partial<ThemeConfig>) => void;
   applyPreset: (presetId: ThemePresetId) => void;
+  addCustomCanvasSize: (size: CustomCanvasSize) => void;
+  removeCustomCanvasSize: (id: string) => void;
   resetSettings: () => void;
 }
 
@@ -41,6 +54,7 @@ function mergeSettings(raw: Partial<AppSettings>): AppSettings {
     ...DEFAULTS,
     ...raw,
     theme: normalizeTheme(raw.theme),
+    customCanvasSizes: Array.isArray(raw.customCanvasSizes) ? raw.customCanvasSizes : [],
   };
 }
 
@@ -52,8 +66,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<AppSettings>(readStoredSettings);
 
   useEffect(() => {
-    applyThemeToDocument(settings.theme);
-  }, [settings.theme]);
+    applyThemeToDocument(PS_EDITOR_CHROME_THEME);
+  }, []);
 
   const persist = useCallback((next: AppSettings) => {
     setSettings(next);
@@ -99,14 +113,45 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     [settings, persist],
   );
 
+  const addCustomCanvasSize = useCallback(
+    (size: CustomCanvasSize) => {
+      persist({
+        ...settings,
+        customCanvasSizes: [
+          size,
+          ...settings.customCanvasSizes.filter((s) => s.id !== size.id),
+        ].slice(0, 24),
+      });
+    },
+    [settings, persist],
+  );
+
+  const removeCustomCanvasSize = useCallback(
+    (id: string) => {
+      persist({
+        ...settings,
+        customCanvasSizes: settings.customCanvasSizes.filter((s) => s.id !== id),
+      });
+    },
+    [settings, persist],
+  );
+
   const resetSettings = useCallback(() => {
     persist(DEFAULTS);
-    applyThemeToDocument(DEFAULT_THEME);
+    applyThemeToDocument(PS_EDITOR_CHROME_THEME);
   }, [persist]);
 
   return (
     <SettingsContext.Provider
-      value={{ ...settings, updateSettings, updateTheme, applyPreset, resetSettings }}
+      value={{
+        ...settings,
+        updateSettings,
+        updateTheme,
+        applyPreset,
+        addCustomCanvasSize,
+        removeCustomCanvasSize,
+        resetSettings,
+      }}
     >
       {children}
     </SettingsContext.Provider>

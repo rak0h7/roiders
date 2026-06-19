@@ -1,12 +1,14 @@
 "use client";
 
 import { FilePlus } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 import { usePsProjects } from "@ps/providers/PsProjectsProvider";
 import { getCanvasSize } from "@ps/lib/canvasSizes";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function PostFilmstrip() {
+  const { customCanvasSizes } = useSettings();
   const { activeProject, activePost, openEditor, createPost } = usePsProjects();
 
   if (!activeProject) return null;
@@ -19,7 +21,7 @@ export function PostFilmstrip() {
         </span>
         {activeProject.posts.map((post) => {
           const active = activePost?.id === post.id;
-          const canvas = getCanvasSize(post.draft.canvasSizeId);
+          const canvas = getCanvasSize(post.draft.canvasSizeId, customCanvasSizes);
           const aspect = canvas.width / canvas.height;
           return (
             <button

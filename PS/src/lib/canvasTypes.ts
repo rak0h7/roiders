@@ -10,6 +10,7 @@ export type LayoutPresetId =
   | "stat"
   | "title-card"
   | "roiders-club"
+  | "roiders-guide"
   | "tip-card"
   | "product-drop"
   | "testimonial"
@@ -38,7 +39,7 @@ export interface TextBlock {
 
 export interface EditorDraft {
   blocks: TextBlock[];
-  canvasSizeId: import("./canvasSizes").CanvasSizeId;
+  canvasSizeId: string;
   layoutPresetId: LayoutPresetId;
   selectedBlockId: string | null;
   /** Bumped when vertical auto-spacing has been applied to this draft. */

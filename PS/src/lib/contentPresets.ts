@@ -1,5 +1,6 @@
 import { createBlockId, type CanvasSizeId, type LayoutPresetId, type TextBlock } from "./canvasTypes";
 import { getLayoutBlockTemplates } from "./layoutPlacement";
+import { ROIDERS_GUIDE_TEMPLATE } from "./templateAssets";
 
 export interface LayoutPreset {
   id: LayoutPresetId;
@@ -7,6 +8,9 @@ export interface LayoutPreset {
   description: string;
   defaultCanvasSizeId?: CanvasSizeId;
   branded?: boolean;
+  referenceImage?: string;
+  exportWidth?: number;
+  exportHeight?: number;
 }
 
 export const LAYOUT_PRESETS: LayoutPreset[] = [
@@ -16,6 +20,16 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     description: "Branded slide — badge, headline, body, footer",
     defaultCanvasSizeId: "9:16",
     branded: true,
+  },
+  {
+    id: "roiders-guide",
+    label: "Roiders guide",
+    description: `How-to hero — exports at ${ROIDERS_GUIDE_TEMPLATE.exportWidth}×${ROIDERS_GUIDE_TEMPLATE.exportHeight}px`,
+    defaultCanvasSizeId: "roiders-guide",
+    branded: true,
+    referenceImage: ROIDERS_GUIDE_TEMPLATE.referenceImage,
+    exportWidth: ROIDERS_GUIDE_TEMPLATE.exportWidth,
+    exportHeight: ROIDERS_GUIDE_TEMPLATE.exportHeight,
   },
   {
     id: "announcement",
@@ -117,7 +131,7 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
   },
 ];
 
-export function blocksFromPreset(presetId: LayoutPresetId, canvasSizeId: CanvasSizeId = "1:1"): TextBlock[] {
+export function blocksFromPreset(presetId: LayoutPresetId, canvasSizeId: string = "1:1"): TextBlock[] {
   const templates = getLayoutBlockTemplates(presetId, canvasSizeId);
   return templates.map((block) => ({ ...block, id: createBlockId() }));
 }

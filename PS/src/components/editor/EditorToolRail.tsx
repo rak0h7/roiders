@@ -5,6 +5,7 @@ import { ContentPanel } from "@ps/components/ContentPanel";
 import { ThemePanel } from "@ps/components/ThemePanel";
 import { DesignPanel } from "./DesignPanel";
 import { BlockListPanel } from "./BlockListPanel";
+import { TypographyPanel } from "./TypographyPanel";
 import { cn } from "@/lib/utils";
 
 export type EditorPanel = "design" | "text" | "theme";
@@ -12,7 +13,7 @@ export type EditorPanel = "design" | "text" | "theme";
 const PANELS: { id: EditorPanel; label: string; icon: typeof Type }[] = [
   { id: "design", label: "Design", icon: LayoutTemplate },
   { id: "text", label: "Text", icon: Type },
-  { id: "theme", label: "Theme", icon: Palette },
+  { id: "theme", label: "Canvas", icon: Palette },
 ];
 
 interface EditorToolRailProps {
@@ -47,6 +48,7 @@ export function EditorToolRail({ active, onChange }: EditorToolRailProps) {
         {active === "design" && <DesignPanel />}
         {active === "text" && (
           <div className="space-y-5">
+            <TypographyPanel />
             <BlockListPanel />
             <ContentPanel />
           </div>

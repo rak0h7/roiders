@@ -6,6 +6,7 @@ import { usePsEditor } from "@ps/providers/PsEditorProvider";
 import { TextBlockLayer } from "./TextBlockLayer";
 import { RoidersClubChrome } from "./RoidersClubChrome";
 import { CanvasThemeBackground } from "@ps/components/theme/CanvasThemeBackground";
+import { CanvasThemeScope } from "@ps/components/theme/CanvasThemeScope";
 import { LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { canvasContentInset } from "@ps/lib/brandedLayout";
 
@@ -17,10 +18,10 @@ export const CanvasStage = forwardRef<HTMLDivElement>(function CanvasStage(_, re
   const inset = canvasContentInset(branded);
 
   return (
-    <div
+    <CanvasThemeScope
       ref={ref}
       data-canvas-stage
-      className="relative shrink-0 overflow-hidden bg-[var(--bg-base)]"
+      className="shrink-0 overflow-hidden bg-[var(--bg-base)]"
       style={{
         width: canvasSize.width,
         height: canvasSize.height,
@@ -37,6 +38,6 @@ export const CanvasStage = forwardRef<HTMLDivElement>(function CanvasStage(_, re
       <div className="@container absolute z-10" style={inset}>
         <TextBlockLayer branded={branded} />
       </div>
-    </div>
+    </CanvasThemeScope>
   );
 });

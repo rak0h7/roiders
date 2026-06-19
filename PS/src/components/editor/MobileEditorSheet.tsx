@@ -6,12 +6,13 @@ import { ThemePanel } from "@ps/components/ThemePanel";
 import type { EditorPanel } from "./EditorToolRail";
 import { DesignPanel } from "./DesignPanel";
 import { BlockListPanel } from "./BlockListPanel";
+import { TypographyPanel } from "./TypographyPanel";
 import { ui } from "@/lib/ui";
 
 const TITLES: Record<EditorPanel, string> = {
   design: "Design",
   text: "Text",
-  theme: "Theme",
+  theme: "Canvas theme",
 };
 
 interface MobileEditorSheetProps {
@@ -32,6 +33,7 @@ export function MobileEditorSheet({ panel, onClose }: MobileEditorSheetProps) {
         {panel === "design" && <DesignPanel />}
         {panel === "text" && (
           <div className="space-y-5">
+            <TypographyPanel />
             <BlockListPanel />
             <ContentPanel />
           </div>

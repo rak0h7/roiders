@@ -1,5 +1,4 @@
 import type { LayoutPresetId, TextBlock, TextAlign, TextBlockRole } from "./canvasTypes";
-import type { CanvasSizeId } from "./canvasSizes";
 import { resolvePlacementKey, type PlacementKey } from "./canvasPlacement";
 import { spaceBlocksVertically } from "./blockSpacing";
 
@@ -124,6 +123,113 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
     "16:9": [
       block({ x: 0, y: 34, width: 100, text: "Roiders Club", role: "headline", align: "center" }),
       block({ x: 0, y: 52, width: 100, text: "Track. Optimize. Ascend.", role: "subhead", align: "center" }),
+    ],
+  },
+  "roiders-guide": {
+    default: [
+      block({ x: 0, y: 2, width: 100, text: "Roiders.Club", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 12,
+        width: 100,
+        text: "ONE PRIVATE COMMAND CENTER FOR EVERYTHING YOU TRACK ON CYCLE.",
+        role: "label",
+        align: "center",
+      }),
+      block({ x: 0, y: 22, width: 100, text: "HOW TO RUN TREN", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 32,
+        width: 92,
+        text: "Your guide content goes here.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 78, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+    ],
+    "4:5": [
+      block({ x: 0, y: 2, width: 100, text: "Roiders.Club", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 12,
+        width: 100,
+        text: "ONE PRIVATE COMMAND CENTER FOR EVERYTHING YOU TRACK ON CYCLE.",
+        role: "label",
+        align: "center",
+      }),
+      block({ x: 0, y: 22, width: 100, text: "HOW TO RUN TREN", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 32,
+        width: 92,
+        text: "Your guide content goes here.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 78, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+    ],
+    "9:16": [
+      block({ x: 0, y: 6, width: 100, text: "Roiders.Club", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 16,
+        width: 100,
+        text: "ONE PRIVATE COMMAND CENTER FOR EVERYTHING YOU TRACK ON CYCLE.",
+        role: "label",
+        align: "center",
+      }),
+      block({ x: 0, y: 28, width: 100, text: "HOW TO RUN TREN", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 40,
+        width: 92,
+        text: "Your guide content goes here.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 82, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+    ],
+    "1:1": [
+      block({ x: 0, y: 4, width: 100, text: "Roiders.Club", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 14,
+        width: 100,
+        text: "ONE PRIVATE COMMAND CENTER FOR EVERYTHING YOU TRACK ON CYCLE.",
+        role: "label",
+        align: "center",
+      }),
+      block({ x: 0, y: 24, width: 100, text: "HOW TO RUN TREN", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 34,
+        width: 92,
+        text: "Your guide content goes here.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 72, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+    ],
+    "16:9": [
+      block({ x: 0, y: 8, width: 100, text: "Roiders.Club", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 22,
+        width: 100,
+        text: "ONE PRIVATE COMMAND CENTER FOR EVERYTHING YOU TRACK ON CYCLE.",
+        role: "label",
+        align: "center",
+      }),
+      block({ x: 0, y: 34, width: 100, text: "HOW TO RUN TREN", role: "headline", align: "center" }),
+      block({
+        x: 0,
+        y: 46,
+        width: 70,
+        text: "Your guide content goes here.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 72, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
   },
   "roiders-club": {
@@ -502,7 +608,7 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
 
 export function getLayoutBlockTemplates(
   presetId: LayoutPresetId,
-  canvasSizeId: CanvasSizeId,
+  canvasSizeId: string,
 ): BlockTemplate[] {
   const map = PLACEMENTS[presetId] ?? PLACEMENTS.blank;
   const key = resolvePlacementKey(canvasSizeId);
@@ -512,7 +618,7 @@ export function getLayoutBlockTemplates(
 export function repositionBlocksForCanvas(
   blocks: TextBlock[],
   presetId: LayoutPresetId,
-  canvasSizeId: CanvasSizeId,
+  canvasSizeId: string,
 ): TextBlock[] {
   const templates = getLayoutBlockTemplates(presetId, canvasSizeId);
   const used = new Set<number>();
@@ -540,7 +646,7 @@ export function repositionBlocksForCanvas(
 export function layoutBlocksForCanvas(
   blocks: TextBlock[],
   presetId: LayoutPresetId,
-  canvasSizeId: CanvasSizeId,
+  canvasSizeId: string,
 ): TextBlock[] {
   return spaceBlocksVertically(repositionBlocksForCanvas(blocks, presetId, canvasSizeId));
 }

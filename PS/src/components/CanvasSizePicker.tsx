@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { Check, Search } from "lucide-react";
 import { usePsEditor } from "@ps/providers/PsEditorProvider";
-import { CANVAS_SIZE_GROUPS, type CanvasSize } from "@ps/lib/canvasSizes";
+import { useSettings } from "@/context/SettingsContext";
+import { buildCanvasSizeGroups, type CanvasSize } from "@ps/lib/canvasSizes";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -12,14 +13,22 @@ function aspectHint(size: CanvasSize): string {
 }
 
 export function CanvasSizePicker() {
+  const { customCanvasSizes } = useSettings();
   const { canvasSizeId, setCanvasSizeId } = usePsEditor();
   const [query, setQuery] = useState("");
-  const [openGroup, setOpenGroup] = useState<string | null>("standard");
+  const [openGroup, setOpenGroup] = useState<string | null>(
+    customCanvasSizes.length > 0 ? "custom" : "standard",
+  );
+
+  const allGroups = useMemo(
+    () => buildCanvasSizeGroups(customCanvasSizes),
+    [customCanvasSizes],
+  );
 
   const groups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return CANVAS_SIZE_GROUPS;
-    return CANVAS_SIZE_GROUPS.map((group) => ({
+    if (!q) return allGroups;
+    return allGroups.map((group) => ({
       ...group,
       sizes: group.sizes.filter(
         (s) =>
@@ -28,7 +37,7 @@ export function CanvasSizePicker() {
           s.id.toLowerCase().includes(q),
       ),
     })).filter((g) => g.sizes.length > 0);
-  }, [query]);
+  }, [query, allGroups]);
 
   return (
     <div className="space-y-2.5">
