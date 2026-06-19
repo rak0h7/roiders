@@ -1,12 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { allowsAnonymousAccess, updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
   try {
     return await updateSession(request);
   } catch (error) {
     console.error("Middleware session update failed:", error);
-    return NextResponse.next({ request });
+    const { pathname } = request.nextUrl;
+    if (allowsAnonymousAccess(pathname) || pathname.startsWith("/api/")) {
+      return NextResponse.next({ request });
+    }
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/auth/login";
+    loginUrl.search = "";
+    return NextResponse.redirect(loginUrl);
   }
 }
 

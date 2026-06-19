@@ -5,6 +5,7 @@ import {
   isNutritionPersistedDataEmpty,
   LEGACY_LOCAL_EPOCH,
   LOCAL_STORAGE_KEYS,
+  SYNC_META_KEY,
   readLocalModule,
   shouldPushModule,
   shouldTakeRemote,
@@ -38,7 +39,7 @@ describe("cloudSync", () => {
 
   it("stores sync metadata on write", () => {
     writeLocalModule("cycle", { state: { compounds: [] } }, "2026-06-01T12:00:00.000Z");
-    const meta = JSON.parse(localStorage.getItem("roiders-club-sync-meta") ?? "{}");
+    const meta = JSON.parse(localStorage.getItem(SYNC_META_KEY) ?? "{}");
     expect(meta.cycle).toBe("2026-06-01T12:00:00.000Z");
   });
 
@@ -82,7 +83,7 @@ describe("cloudSync", () => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.labs, JSON.stringify(data));
 
     ensureModuleSyncMeta("labs");
-    const meta = JSON.parse(localStorage.getItem("roiders-club-sync-meta") ?? "{}");
+    const meta = JSON.parse(localStorage.getItem(SYNC_META_KEY) ?? "{}");
     expect(meta.labs).toBe(LEGACY_LOCAL_EPOCH);
 
     expect(shouldTakeRemote("labs", data, data, "2026-06-01T00:00:00.000Z")).toBe(true);

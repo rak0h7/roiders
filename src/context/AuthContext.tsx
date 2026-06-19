@@ -264,26 +264,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const enabled = await schemaPromise;
         setUsernamesSchemaKnown(enabled);
         setUsernamesEnabled(enabled);
-
-        const { data } = await supabase.auth.getSession();
-        const nextUser = data.session?.user ?? null;
-        if (nextUser) await ensureAccountStorageScope(nextUser.id);
-        setUser(nextUser);
-        await refreshProfile(nextUser);
-
-        if (nextUser) {
-          try {
-            const result = await pullOnce(nextUser.id);
-            if (result) applyPullResult(result);
-          } catch {
-            /* local-only fallback */
-          }
-        }
       } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        /* schema defaults to enabled via .catch(() => true) */
       }
+
+      const { data } = await supabase.auth.getSession();
+      const nextUser = data.session?.user ?? null;
+      setUser(nextUser);
+
+      try {
+        await refreshProfile(nextUser);
+      } catch (error) {
+        console.error("Profile refresh failed during bootstrap:", error);
+      }
+
+      if (nextUser) {
+        try {
+          const result = await pullOnce(nextUser.id);
+          if (result) applyPullResult(result);
+        } catch {
+          /* local-only fallback */
+        }
+      }
+
+      setLoading(false);
     };
 
     void bootstrap();
@@ -377,7 +381,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const nextUser = session.user;
-      await ensureAccountStorageScope(nextUser.id);
       setUser(nextUser);
       pullState.current = { userId: null, promise: null };
 
@@ -421,7 +424,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: session.error ?? "Account created but session was not established" };
     }
 
-    await ensureAccountStorageScope(session.user.id);
     setUser(session.user);
     await refreshProfile(session.user);
 
@@ -457,7 +459,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
     await supabase.auth.signOut();
-    await resetAccountLocalState();
     setUser(null);
     setUsernameState(null);
     setDisplayNameState(null);

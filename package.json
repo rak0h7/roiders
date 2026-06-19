@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 1337",
+    "dev:ps": "npm run dev --prefix PS",
     "build": "next build",
+    "build:ps": "npm run build --prefix PS",
+    "build:all": "npm run build && npm run build:ps",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",

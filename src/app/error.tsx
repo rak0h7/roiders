@@ -1,19 +1,32 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { resetAccountLocalState } from "@/lib/accountStorage";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
-export default function GlobalError({
+export default function Error({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [clearing, setClearing] = useState(false);
+
   useEffect(() => {
     console.error("App error boundary:", error);
   }, [error]);
+
+  const handleClearLocalData = async () => {
+    setClearing(true);
+    try {
+      await resetAccountLocalState();
+      reset();
+    } finally {
+      setClearing(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
@@ -25,6 +38,14 @@ export default function GlobalError({
         </p>
         <button type="button" onClick={() => reset()} className={cn(ui.btnPrimary, "w-full")}>
           Try again
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleClearLocalData()}
+          disabled={clearing}
+          className={cn(ui.btnSecondary, "w-full")}
+        >
+          {clearing ? "Clearing…" : "Clear local data"}
         </button>
         <button
           type="button"

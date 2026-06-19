@@ -35,6 +35,15 @@ function isPublicSiteApi(pathname: string) {
   return pathname === "/api/site/settings";
 }
 
+export function allowsAnonymousAccess(pathname: string): boolean {
+  return (
+    pathname === "/" ||
+    isAuthRoute(pathname) ||
+    isPublicRoute(pathname) ||
+    isPublicSiteApi(pathname)
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) {
     return NextResponse.next({ request });

@@ -1,0 +1,24 @@
+@import "../../src/app/globals.css";
+
+@source "../src/components/settings";
+@source "../src/components/ui";
+@source "../src/components/Background.tsx";
+@source "./";
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-exporting="true"] [data-editor-only] {
+  display: none !important;
+}
+
+[data-exporting="true"] [data-text-block] {
+  outline: none !important;
+  cursor: default !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { STORAGE_QUOTA_EVENT } from "@/lib/safeLocalStorage";
 import { AnimatePresence, motion } from "framer-motion";
 import { CheckCircle2, AlertTriangle, Info, X, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,25 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 
   const dismiss = useCallback((id: string) => setToasts((t) => t.filter((x) => x.id !== id)), []);
+  const quotaToastShown = useRef(false);
+
+  useEffect(() => {
+    const onQuotaExceeded = () => {
+      if (quotaToastShown.current) return;
+      quotaToastShown.current = true;
+      toast({
+        type: "warning",
+        title: "Storage full",
+        description: "Could not save locally. Free up browser storage or clear local data.",
+      });
+      setTimeout(() => {
+        quotaToastShown.current = false;
+      }, 10_000);
+    };
+
+    window.addEventListener(STORAGE_QUOTA_EVENT, onQuotaExceeded);
+    return () => window.removeEventListener(STORAGE_QUOTA_EVENT, onQuotaExceeded);
+  }, [toast]);
 
   return (
     <ToastContext.Provider value={{ toast }}>

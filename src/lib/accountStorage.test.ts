@@ -3,9 +3,11 @@ import {
   clearAccountLocalData,
   ensureAccountStorageScope,
   getActiveAccountUserId,
+  resetAccountLocalState,
   setActiveAccountUserId,
 } from "./accountStorage";
-import { LOCAL_STORAGE_KEYS } from "./cloudSync";
+import { LOCAL_STORAGE_KEYS, SYNC_META_KEY } from "./cloudSync";
+import { rehydratePersistedStores } from "./storeRehydrate";
 
 vi.mock("./storeRehydrate", () => ({
   rehydratePersistedStores: vi.fn(async () => undefined),
@@ -38,13 +40,13 @@ describe("accountStorage", () => {
 
   it("clears module keys and active user marker", () => {
     localStorage.setItem(LOCAL_STORAGE_KEYS.labs, "[]");
-    localStorage.setItem("roiders-club-sync-meta", "{}");
+    localStorage.setItem(SYNC_META_KEY, "{}");
     setActiveAccountUserId("user-a");
 
     clearAccountLocalData();
 
     expect(localStorage.getItem(LOCAL_STORAGE_KEYS.labs)).toBeNull();
-    expect(localStorage.getItem("roiders-club-sync-meta")).toBeNull();
+    expect(localStorage.getItem(SYNC_META_KEY)).toBeNull();
     expect(getActiveAccountUserId()).toBeNull();
   });
 
@@ -57,6 +59,7 @@ describe("accountStorage", () => {
     expect(switched).toBe(true);
     expect(getActiveAccountUserId()).toBe("user-b");
     expect(localStorage.getItem(LOCAL_STORAGE_KEYS.cycle)).toBeNull();
+    expect(rehydratePersistedStores).toHaveBeenCalledTimes(1);
   });
 
   it("keeps storage when the same account signs in again", async () => {
@@ -67,5 +70,19 @@ describe("accountStorage", () => {
 
     expect(switched).toBe(false);
     expect(localStorage.getItem(LOCAL_STORAGE_KEYS.labs)).toBe("[]");
+    expect(rehydratePersistedStores).not.toHaveBeenCalled();
+  });
+
+  it("resetAccountLocalState clears keys and rehydrates stores", async () => {
+    setActiveAccountUserId("user-a");
+    localStorage.setItem(LOCAL_STORAGE_KEYS.labs, "[]");
+    localStorage.setItem(SYNC_META_KEY, "{}");
+
+    await resetAccountLocalState();
+
+    expect(localStorage.getItem(LOCAL_STORAGE_KEYS.labs)).toBeNull();
+    expect(localStorage.getItem(SYNC_META_KEY)).toBeNull();
+    expect(getActiveAccountUserId()).toBeNull();
+    expect(rehydratePersistedStores).toHaveBeenCalledTimes(1);
   });
 });

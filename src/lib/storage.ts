@@ -1,19 +1,17 @@
 import type { BloodworkReport, MarkerValue } from "./types";
-import { LEGACY_LOCAL_EPOCH, LOCAL_STORAGE_KEYS, writeLocalModule } from "./cloudSync";
-
-const LEGACY_STORAGE_KEY = "bloodwork-logger-reports";
+import { LEGACY_LABS_STORAGE_KEY, LEGACY_LOCAL_EPOCH, LOCAL_STORAGE_KEYS, writeLocalModule } from "./cloudSync";
 
 function migrateLabsStorage(): void {
   if (typeof window === "undefined") return;
   if (localStorage.getItem(LOCAL_STORAGE_KEYS.labs)) return;
-  const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+  const legacy = localStorage.getItem(LEGACY_LABS_STORAGE_KEY);
   if (!legacy) return;
   try {
     writeLocalModule("labs", JSON.parse(legacy), LEGACY_LOCAL_EPOCH, { touchLocal: false });
   } catch {
     return;
   }
-  localStorage.removeItem(LEGACY_STORAGE_KEY);
+  localStorage.removeItem(LEGACY_LABS_STORAGE_KEY);
 }
 
 export function loadReports(): BloodworkReport[] {

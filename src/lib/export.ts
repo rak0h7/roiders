@@ -1,4 +1,5 @@
 import { LOCAL_STORAGE_KEYS, readLocalModule } from "@/lib/cloudSync";
+import { safeSetLocalStorage } from "@/lib/safeLocalStorage";
 import type { BloodworkReport } from "@/lib/types";
 import type { CycleCompound } from "@/lib/cycleTypes";
 
@@ -93,7 +94,7 @@ export function applyImportBundle(
 
   if (opts.bloodwork && bundle.bloodwork?.reports) {
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS.labs, JSON.stringify(bundle.bloodwork.reports));
+      safeSetLocalStorage(LOCAL_STORAGE_KEYS.labs, JSON.stringify(bundle.bloodwork.reports));
       imported.push("bloodwork");
     } catch {
       errors.push("Failed to import bloodwork");
@@ -104,7 +105,7 @@ export function applyImportBundle(
     try {
       const existing = readLocalModule("cycle") as { state?: Record<string, unknown> } | null;
       const state = existing?.state ?? {};
-      localStorage.setItem(
+      safeSetLocalStorage(
         LOCAL_STORAGE_KEYS.cycle,
         JSON.stringify({
           state: {
@@ -125,7 +126,7 @@ export function applyImportBundle(
   for (const mod of ["gym", "nutrition", "settings"] as const) {
     if (!opts[mod] || bundle[mod] == null) continue;
     try {
-      localStorage.setItem(LOCAL_STORAGE_KEYS[mod], JSON.stringify(bundle[mod]));
+      safeSetLocalStorage(LOCAL_STORAGE_KEYS[mod], JSON.stringify(bundle[mod]));
       imported.push(mod);
     } catch {
       errors.push(`Failed to import ${mod}`);

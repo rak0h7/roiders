@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEFAULT_GOALS } from "@/lib/nutritionTypes";
+import { safeSetLocalStorage } from "@/lib/safeLocalStorage";
 
 export type CloudModule = "labs" | "cycle" | "gym" | "nutrition" | "settings";
 
@@ -11,7 +12,16 @@ export const LOCAL_STORAGE_KEYS: Record<CloudModule, string> = {
   settings: "roiders-club-settings-v2",
 };
 
-const SYNC_META_KEY = "roiders-club-sync-meta";
+export const SYNC_META_KEY = "roiders-club-sync-meta";
+export const LEGACY_LABS_STORAGE_KEY = "bloodwork-logger-reports";
+export const ACTIVE_USER_STORAGE_KEY = "roiders-club-active-user-id";
+
+export const ACCOUNT_SCOPED_STORAGE_KEYS = [
+  ...Object.values(LOCAL_STORAGE_KEYS),
+  SYNC_META_KEY,
+  LEGACY_LABS_STORAGE_KEY,
+  ACTIVE_USER_STORAGE_KEY,
+] as const;
 
 /** Unknown-age local data (legacy writes) defers to remote when timestamps are compared. */
 export const LEGACY_LOCAL_EPOCH = "1970-01-01T00:00:00.000Z";
@@ -42,11 +52,7 @@ export function writeLocalModule(
   options?: { touchLocal?: boolean }
 ): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(LOCAL_STORAGE_KEYS[module], JSON.stringify(data));
-  } catch {
-    return;
-  }
+  if (!safeSetLocalStorage(LOCAL_STORAGE_KEYS[module], JSON.stringify(data))) return;
   if (updatedAt) {
     setLocalUpdatedAt(module, updatedAt);
   } else if (options?.touchLocal !== false) {
@@ -66,11 +72,7 @@ function readSyncMeta(): SyncMeta {
 
 function writeSyncMeta(meta: SyncMeta): void {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta));
-  } catch {
-    return;
-  }
+  safeSetLocalStorage(SYNC_META_KEY, JSON.stringify(meta));
 }
 
 function getLocalUpdatedAt(module: CloudModule): string | null {
