@@ -23,8 +23,9 @@ loadEnv();
 const rotateKey = process.argv.includes("--rotate-key");
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+const serviceKey = (
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY
+)?.trim();
 
 if (!url) {
   console.error("Missing NEXT_PUBLIC_SUPABASE_URL");
@@ -69,6 +70,7 @@ async function createViaApi({ keyFingerprint, accessKeyHash, sessionSecret, user
       profilePatch.access_key_hash = accessKeyHash;
       const { error: pwError } = await admin.auth.admin.updateUserById(existing.id, {
         password: sessionSecret,
+        user_metadata: { auth_type: "access_key", key_fingerprint: keyFingerprint },
       });
       if (pwError) throw new Error(pwError.message);
       await admin.from("auth_secrets").upsert({
@@ -148,9 +150,12 @@ async function createViaPg(client, { keyFingerprint, accessKeyHash, sessionSecre
     if (rotateKey) {
       await client.query(
         `update auth.users
-         set encrypted_password = crypt($2, gen_salt('bf')), updated_at = now()
+         set encrypted_password = crypt($2, gen_salt('bf')),
+             raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb)
+               || jsonb_build_object('auth_type', 'access_key', 'key_fingerprint', $3::text),
+             updated_at = now()
          where id = $1`,
-        [existingId, sessionSecret],
+        [existingId, sessionSecret, keyFingerprint],
       );
       await client.query(
         `update public.profiles

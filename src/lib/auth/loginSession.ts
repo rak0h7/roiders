@@ -11,12 +11,28 @@ export function generateSessionSecret(): string {
   return randomBytes(32).toString("base64url");
 }
 
+async function loadProfileFingerprint(profileId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("profiles")
+    .select("key_fingerprint")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  return typeof data?.key_fingerprint === "string" ? data.key_fingerprint : null;
+}
+
 export async function repairAccountCredentials(profileId: string): Promise<string> {
   const admin = createAdminClient();
   const sessionSecret = generateSessionSecret();
+  const keyFingerprint = await loadProfileFingerprint(profileId);
 
   const { error: updateError } = await admin.auth.admin.updateUserById(profileId, {
     password: sessionSecret,
+    ...(keyFingerprint
+      ? { user_metadata: { auth_type: "access_key", key_fingerprint: keyFingerprint } }
+      : {}),
   });
   if (updateError) throw new Error(updateError.message);
 
