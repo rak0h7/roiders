@@ -21,7 +21,9 @@ describe("seo", () => {
     expect(meta.alternates?.canonical).toBe("https://roiders.club/about");
   });
 
-  it("includes vendor disambiguation in public FAQ", () => {
-    expect(PUBLIC_FAQ.some((item) => item.question.includes("steroid shop"))).toBe(true);
+  it("keeps public FAQ focused on product questions", () => {
+    expect(PUBLIC_FAQ.length).toBeGreaterThan(0);
+    expect(PUBLIC_FAQ.some((item) => item.question.toLowerCase().includes("riders club"))).toBe(false);
+    expect(PUBLIC_FAQ.some((item) => item.question.toLowerCase().includes("steroid shop"))).toBe(false);
   });
 });

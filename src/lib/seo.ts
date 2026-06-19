@@ -100,22 +100,12 @@ export type FaqItem = { question: string; answer: string };
 
 export const PUBLIC_FAQ: FaqItem[] = [
   {
-    question: "What is Roiders Club?",
+    question: "What is roiders.club?",
     answer:
-      "Roiders Club (roiders.club) is a free performance health web app for tracking bloodwork analysis, cycle planning, training, and nutrition in one private dashboard.",
+      "A free performance health web app for bloodwork analysis, cycle planning, training, and nutrition — all in one private dashboard.",
   },
   {
-    question: "Is roiders.club the same as Riders Club or motorcycle communities?",
-    answer:
-      "No. Roiders Club is not Riders Club, Royal Enfield riders groups, or cycling marathon sites. It is a performance health tracking app at roiders.club.",
-  },
-  {
-    question: "Is Roiders Club a steroid shop or vendor?",
-    answer:
-      "No. Roiders Club does not sell compounds or operate as an e-commerce steroid site. It is a free harm-reduction-adjacent tracking tool for bloodwork, protocol planning, training, and nutrition — not a supplier.",
-  },
-  {
-    question: "Is Roiders Club free?",
+    question: "Is it free?",
     answer:
       "Yes. Labs, gear, training, and nutrition trackers are free. Optional premium adds cloud sync and is available on request.",
   },
