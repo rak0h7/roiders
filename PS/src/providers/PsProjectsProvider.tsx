@@ -24,7 +24,12 @@ import {
   savePostDraft,
   updateProject,
 } from "@ps/lib/projectStorage";
-import type { Post, Project, PsView } from "@ps/lib/projectTypes";
+import type { Post, Project, ProjectsStore, PsView } from "@ps/lib/projectTypes";
+
+interface AppState {
+  store: ProjectsStore;
+  view: PsView;
+}
 
 interface PsProjectsContextValue {
   view: PsView;
@@ -47,109 +52,133 @@ interface PsProjectsContextValue {
 
 const PsProjectsContext = createContext<PsProjectsContextValue | null>(null);
 
-function getInitialState(): { store: ReturnType<typeof loadProjectsStore>; view: PsView } {
+function getInitialState(): AppState {
   const store = loadProjectsStore();
   const view = resolveView(store, store.lastView ?? { type: "projects" });
   return { store, view };
 }
 
 export function PsProjectsProvider({ children }: { children: React.ReactNode }) {
-  const initial = useMemo(getInitialState, []);
-  const [store, setStore] = useState(initial.store);
-  const [view, setView] = useState<PsView>(initial.view);
+  const [state, setState] = useState<AppState>(getInitialState);
 
-  const commit = useCallback((nextStore: typeof store, nextView?: PsView) => {
-    const resolvedView = nextView ? resolveView(nextStore, nextView) : view;
-    const persisted = persistStore(nextStore, resolvedView);
-    setStore(persisted);
-    setView(resolvedView);
-  }, [view]);
+  const commit = useCallback((recipe: (prev: AppState) => AppState) => {
+    setState((prev) => {
+      const next = recipe(prev);
+      const resolvedView = resolveView(next.store, next.view);
+      const persisted = persistStore(next.store, resolvedView);
+      return { store: persisted, view: resolvedView };
+    });
+  }, []);
 
   const goToProjects = useCallback(() => {
-    commit(store, { type: "projects" });
-  }, [commit, store]);
+    commit((prev) => ({ ...prev, view: { type: "projects" } }));
+  }, [commit]);
 
   const openProject = useCallback(
     (projectId: string) => {
-      commit(store, { type: "project", projectId });
+      commit((prev) => ({ ...prev, view: { type: "project", projectId } }));
     },
-    [commit, store],
+    [commit],
   );
 
   const openEditor = useCallback(
     (projectId: string, postId: string) => {
-      commit(store, { type: "editor", projectId, postId });
+      commit((prev) => ({ ...prev, view: { type: "editor", projectId, postId } }));
     },
-    [commit, store],
+    [commit],
   );
 
   const handleCreateProject = useCallback(
     (name: string) => {
-      const next = createProject(store, name);
-      commit(next, next.lastView);
+      commit((prev) => {
+        const store = createProject(prev.store, name);
+        return { store, view: store.lastView ?? { type: "projects" } };
+      });
     },
-    [commit, store],
+    [commit],
   );
 
   const handleUpdateProjectName = useCallback(
     (projectId: string, name: string) => {
-      commit(updateProject(store, projectId, { name }));
+      commit((prev) => ({
+        ...prev,
+        store: updateProject(prev.store, projectId, { name }),
+      }));
     },
-    [commit, store],
+    [commit],
   );
 
   const handleUpdateProjectTheme = useCallback(
     (projectId: string, theme: ThemeConfig) => {
-      commit(updateProject(store, projectId, { theme }));
+      commit((prev) => ({
+        ...prev,
+        store: updateProject(prev.store, projectId, { theme }),
+      }));
     },
-    [commit, store],
+    [commit],
   );
 
   const handleDeleteProject = useCallback(
     (projectId: string) => {
-      const next = deleteProject(store, projectId);
-      commit(next, next.lastView);
+      commit((prev) => {
+        const store = deleteProject(prev.store, projectId);
+        return { store, view: store.lastView ?? { type: "projects" } };
+      });
     },
-    [commit, store],
+    [commit],
   );
 
   const handleCreatePost = useCallback(
     (projectId: string, name?: string) => {
-      const next = createPost(store, projectId, name);
-      commit(next, next.lastView);
+      commit((prev) => {
+        const store = createPost(prev.store, projectId, name);
+        return { store, view: store.lastView ?? prev.view };
+      });
     },
-    [commit, store],
+    [commit],
   );
 
   const handleDuplicatePost = useCallback(
     (projectId: string, postId: string) => {
-      const next = duplicatePost(store, projectId, postId);
-      commit(next, next.lastView);
+      commit((prev) => {
+        const store = duplicatePost(prev.store, projectId, postId);
+        return { store, view: store.lastView ?? prev.view };
+      });
     },
-    [commit, store],
+    [commit],
   );
 
   const handleRenamePost = useCallback(
     (projectId: string, postId: string, name: string) => {
-      commit(renamePost(store, projectId, postId, name));
+      commit((prev) => ({
+        ...prev,
+        store: renamePost(prev.store, projectId, postId, name),
+      }));
     },
-    [commit, store],
+    [commit],
   );
 
   const handleDeletePost = useCallback(
     (projectId: string, postId: string) => {
-      const next = deletePost(store, projectId, postId);
-      commit(next, next.lastView);
+      commit((prev) => {
+        const store = deletePost(prev.store, projectId, postId);
+        return { store, view: store.lastView ?? prev.view };
+      });
     },
-    [commit, store],
+    [commit],
   );
 
   const handleSavePostDraft = useCallback(
     (projectId: string, postId: string, draft: EditorDraft) => {
-      commit(savePostDraft(store, projectId, postId, draft));
+      commit((prev) => ({
+        ...prev,
+        store: savePostDraft(prev.store, projectId, postId, draft),
+      }));
     },
-    [commit, store],
+    [commit],
   );
+
+  const { store, view } = state;
 
   const activeProject = useMemo(() => {
     if (view.type === "projects") return null;

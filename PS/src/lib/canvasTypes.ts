@@ -41,6 +41,8 @@ export interface EditorDraft {
   canvasSizeId: import("./canvasSizes").CanvasSizeId;
   layoutPresetId: LayoutPresetId;
   selectedBlockId: string | null;
+  /** Bumped when vertical auto-spacing has been applied to this draft. */
+  spacingVersion?: number;
 }
 
 export function createBlockId(): string {

@@ -4,6 +4,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -11,7 +12,8 @@ import React, {
 import { blocksFromPreset, LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { layoutBlocksForCanvas } from "@ps/lib/layoutPlacement";
 import { getCanvasSize } from "@ps/lib/canvasSizes";
-import { sanitizeDraft } from "@ps/lib/draftSanitize";
+import { spaceBlocksVertically } from "@ps/lib/blockSpacing";
+import { CURRENT_SPACING_VERSION, prepareDraftForEditor } from "@ps/lib/draftSanitize";
 import { createDefaultDraft } from "@ps/lib/projectTypes";
 import {
   createBlockId,
@@ -22,6 +24,8 @@ import {
   type TextBlockRole,
   type TextAlign,
 } from "@ps/lib/canvasTypes";
+
+const SPACING_ROLES = new Set<TextBlockRole>(["headline", "subhead", "body"]);
 
 interface PsEditorContextValue {
   blocks: TextBlock[];
@@ -49,9 +53,16 @@ interface PsEditorProviderProps {
 
 export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEditorProviderProps) {
   const defaults = useMemo(() => createDefaultDraft(), []);
-  const [draft, setDraft] = useState<EditorDraft>(() => sanitizeDraft(postDraft, defaults));
+  const [draft, setDraft] = useState<EditorDraft>(() => prepareDraftForEditor(postDraft, defaults));
   const onDraftChangeRef = useRef(onDraftChange);
+  const spacingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   onDraftChangeRef.current = onDraftChange;
+
+  useEffect(() => {
+    return () => {
+      if (spacingTimerRef.current) clearTimeout(spacingTimerRef.current);
+    };
+  }, []);
 
   const persist = useCallback((updater: EditorDraft | ((prev: EditorDraft) => EditorDraft)) => {
     setDraft((prev) => {
@@ -60,6 +71,17 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
       return next;
     });
   }, []);
+
+  const scheduleSpacing = useCallback(() => {
+    if (spacingTimerRef.current) clearTimeout(spacingTimerRef.current);
+    spacingTimerRef.current = setTimeout(() => {
+      persist((prev) => ({
+        ...prev,
+        blocks: spaceBlocksVertically(prev.blocks),
+        spacingVersion: CURRENT_SPACING_VERSION,
+      }));
+    }, 300);
+  }, [persist]);
 
   const canvasSize = useMemo(() => getCanvasSize(draft.canvasSizeId), [draft.canvasSizeId]);
 
@@ -76,6 +98,7 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
           ...prev,
           canvasSizeId: id,
           blocks: layoutBlocksForCanvas(prev.blocks, prev.layoutPresetId, id),
+          spacingVersion: CURRENT_SPACING_VERSION,
         };
       });
     },
@@ -93,8 +116,13 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
         return {
           layoutPresetId: id,
           canvasSizeId,
-          blocks: blocksFromPreset(id, canvasSizeId),
+          blocks: layoutBlocksForCanvas(
+            blocksFromPreset(id, canvasSizeId),
+            id,
+            canvasSizeId,
+          ),
           selectedBlockId: null,
+          spacingVersion: CURRENT_SPACING_VERSION,
         };
       });
     },
@@ -127,12 +155,16 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
 
   const updateBlock = useCallback(
     (id: string, patch: Partial<TextBlock>) => {
-      persist((prev) => ({
-        ...prev,
-        blocks: prev.blocks.map((b) => (b.id === id ? { ...b, ...patch } : b)),
-      }));
+      persist((prev) => {
+        const blocks = prev.blocks.map((b) => (b.id === id ? { ...b, ...patch } : b));
+        const updated = blocks.find((b) => b.id === id);
+        if (patch.text !== undefined && updated && SPACING_ROLES.has(updated.role)) {
+          scheduleSpacing();
+        }
+        return { ...prev, blocks };
+      });
     },
-    [persist],
+    [persist, scheduleSpacing],
   );
 
   const deleteBlock = useCallback(

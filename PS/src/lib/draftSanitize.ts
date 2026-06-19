@@ -1,7 +1,10 @@
 import { blocksFromPreset, LAYOUT_PRESETS } from "./contentPresets";
 import { layoutBlocksForCanvas } from "./layoutPlacement";
 import { normalizeCanvasSizeId } from "./canvasSizes";
+import { spaceBlocksVertically } from "./blockSpacing";
 import type { EditorDraft, LayoutPresetId, TextBlock } from "./canvasTypes";
+
+export const CURRENT_SPACING_VERSION = 1;
 
 const LAYOUT_IDS = new Set<string>(LAYOUT_PRESETS.map((p) => p.id));
 
@@ -10,7 +13,7 @@ function isLayoutPresetId(id: string): id is LayoutPresetId {
 }
 
 function sanitizeBlocks(blocks: unknown): TextBlock[] {
-  if (!Array.isArray(blocks) || blocks.length === 0) return [];
+  if (!Array.isArray(blocks)) return [];
   return blocks
     .filter((b): b is TextBlock => {
       if (!b || typeof b !== "object") return false;
@@ -30,31 +33,44 @@ function sanitizeBlocks(blocks: unknown): TextBlock[] {
     }));
 }
 
-export function sanitizeDraft(stored: Partial<EditorDraft> | null | undefined, defaults: EditorDraft): EditorDraft {
-  if (!stored) return defaults;
+function initializedDraft(
+  layoutPresetId: LayoutPresetId,
+  canvasSizeId: EditorDraft["canvasSizeId"],
+): EditorDraft {
+  return {
+    blocks: layoutBlocksForCanvas(
+      blocksFromPreset(layoutPresetId, canvasSizeId),
+      layoutPresetId,
+      canvasSizeId,
+    ),
+    canvasSizeId,
+    layoutPresetId,
+    selectedBlockId: null,
+    spacingVersion: CURRENT_SPACING_VERSION,
+  };
+}
+
+/** Validate shape and IDs only — preserve block positions and text. */
+export function validateDraft(
+  stored: Partial<EditorDraft> | null | undefined,
+  defaults: EditorDraft,
+): EditorDraft {
+  if (!stored) return initializedDraft(defaults.layoutPresetId, defaults.canvasSizeId);
 
   const canvasSizeId = normalizeCanvasSizeId(stored.canvasSizeId ?? defaults.canvasSizeId);
   const rawLayoutId = stored.layoutPresetId ?? "";
   const layoutPresetId: LayoutPresetId = isLayoutPresetId(rawLayoutId)
     ? rawLayoutId
     : defaults.layoutPresetId;
-  const blocks = sanitizeBlocks(stored.blocks);
 
-  if (blocks.length === 0) {
-    return {
-      blocks: layoutBlocksForCanvas(
-        blocksFromPreset(layoutPresetId, canvasSizeId),
-        layoutPresetId,
-        canvasSizeId,
-      ),
-      canvasSizeId,
-      layoutPresetId,
-      selectedBlockId: null,
-    };
+  if (!Array.isArray(stored.blocks)) {
+    return initializedDraft(layoutPresetId, canvasSizeId);
   }
 
+  const blocks = sanitizeBlocks(stored.blocks);
+
   return {
-    blocks: layoutBlocksForCanvas(blocks, layoutPresetId, canvasSizeId),
+    blocks,
     canvasSizeId,
     layoutPresetId,
     selectedBlockId:
@@ -62,5 +78,36 @@ export function sanitizeDraft(stored: Partial<EditorDraft> | null | undefined, d
       blocks.some((b) => b.id === stored.selectedBlockId)
         ? stored.selectedBlockId
         : null,
+    spacingVersion:
+      typeof stored.spacingVersion === "number" ? stored.spacingVersion : 0,
   };
+}
+
+/** One-time vertical spacing pass for existing posts (no template reposition). */
+export function migrateDraftSpacing(draft: EditorDraft): EditorDraft {
+  if ((draft.spacingVersion ?? 0) >= CURRENT_SPACING_VERSION) return draft;
+  if (draft.blocks.length === 0) {
+    return { ...draft, spacingVersion: CURRENT_SPACING_VERSION };
+  }
+  return {
+    ...draft,
+    blocks: spaceBlocksVertically(draft.blocks),
+    spacingVersion: CURRENT_SPACING_VERSION,
+  };
+}
+
+/** Load path: validate shape, then apply spacing migration if needed. */
+export function prepareDraftForEditor(
+  stored: Partial<EditorDraft> | null | undefined,
+  defaults: EditorDraft,
+): EditorDraft {
+  return migrateDraftSpacing(validateDraft(stored, defaults));
+}
+
+/** @deprecated Use validateDraft or prepareDraftForEditor */
+export function sanitizeDraft(
+  stored: Partial<EditorDraft> | null | undefined,
+  defaults: EditorDraft,
+): EditorDraft {
+  return prepareDraftForEditor(stored, defaults);
 }

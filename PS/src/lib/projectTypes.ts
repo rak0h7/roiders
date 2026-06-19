@@ -1,6 +1,8 @@
 import type { ThemeConfig } from "@/lib/themes";
 import { DEFAULT_THEME } from "@/lib/themes";
 import type { EditorDraft } from "./canvasTypes";
+import { CURRENT_SPACING_VERSION } from "./draftSanitize";
+import { layoutBlocksForCanvas } from "./layoutPlacement";
 import { blocksFromPreset } from "./contentPresets";
 
 export type PsView =
@@ -40,11 +42,18 @@ export function createPostId(): string {
 }
 
 export function createDefaultDraft(): EditorDraft {
+  const layoutPresetId = "roiders-club" as const;
+  const canvasSizeId = "9:16" as const;
   return {
-    blocks: blocksFromPreset("roiders-club", "9:16"),
-    canvasSizeId: "9:16",
-    layoutPresetId: "roiders-club",
+    blocks: layoutBlocksForCanvas(
+      blocksFromPreset(layoutPresetId, canvasSizeId),
+      layoutPresetId,
+      canvasSizeId,
+    ),
+    canvasSizeId,
+    layoutPresetId,
     selectedBlockId: null,
+    spacingVersion: CURRENT_SPACING_VERSION,
   };
 }
 

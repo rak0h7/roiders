@@ -17,6 +17,7 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
   const isPortrait = aspect < 1;
   const branded = LAYOUT_PRESETS.find((p) => p.id === layoutPresetId)?.branded ?? false;
   const inset = canvasContentInset(branded);
+  const maxCanvasHeight = "calc(100dvh - 11rem)";
 
   return (
     <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[var(--bg-base)]/40 p-3 sm:p-4 lg:p-5">
@@ -26,13 +27,21 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
           "relative overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
           "rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-base)]",
         )}
-        style={{
-          aspectRatio: `${canvasSize.width} / ${canvasSize.height}`,
-          maxHeight: "calc(100dvh - 11rem)",
-          maxWidth: "100%",
-          width: isPortrait ? `min(100%, calc((100dvh - 11rem) * ${aspect}))` : "100%",
-          height: isPortrait ? "auto" : `min(100%, calc((100dvh - 11rem) / ${aspect}))`,
-        }}
+        style={
+          isPortrait
+            ? {
+                aspectRatio: `${canvasSize.width} / ${canvasSize.height}`,
+                height: `min(100%, ${maxCanvasHeight})`,
+                width: "auto",
+                maxWidth: "100%",
+              }
+            : {
+                aspectRatio: `${canvasSize.width} / ${canvasSize.height}`,
+                width: "100%",
+                height: "auto",
+                maxHeight: maxCanvasHeight,
+              }
+        }
         onClick={() => selectBlock(null)}
       >
         <CanvasThemeBackground theme={theme} />

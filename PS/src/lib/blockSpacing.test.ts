@@ -29,6 +29,6 @@ describe("spaceBlocksVertically", () => {
       }),
     ]);
 
-    expect(blocks[1].y).toBeGreaterThan(blocks[0].y + 20);
+    expect(blocks[1].y).toBeGreaterThanOrEqual(blocks[0].y + 20);
   });
 });

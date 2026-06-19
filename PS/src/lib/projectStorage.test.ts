@@ -17,8 +17,7 @@ const storage = new Map<string, string>();
 
 beforeEach(() => {
   storage.clear();
-  vi.stubGlobal("window", {});
-  vi.stubGlobal("localStorage", {
+  const mockStorage = {
     getItem: (key: string) => storage.get(key) ?? null,
     setItem: (key: string, value: string) => {
       storage.set(key, value);
@@ -29,7 +28,9 @@ beforeEach(() => {
     clear: () => storage.clear(),
     key: () => null,
     length: 0,
-  });
+  };
+  vi.stubGlobal("localStorage", mockStorage);
+  vi.stubGlobal("window", { localStorage: mockStorage });
 });
 
 describe("projectStorage", () => {

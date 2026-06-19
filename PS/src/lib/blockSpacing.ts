@@ -1,7 +1,7 @@
 import type { TextBlock, TextBlockRole } from "./canvasTypes";
 
 const LINE_HEIGHT_BY_ROLE: Record<TextBlockRole, number> = {
-  headline: 11,
+  headline: 14,
   subhead: 7,
   body: 6,
   label: 5,

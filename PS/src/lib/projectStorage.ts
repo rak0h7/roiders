@@ -1,6 +1,6 @@
 import { DEFAULT_THEME, normalizeTheme, type ThemeConfig } from "@/lib/themes";
 import type { EditorDraft } from "./canvasTypes";
-import { sanitizeDraft } from "./draftSanitize";
+import { prepareDraftForEditor } from "./draftSanitize";
 import {
   createDefaultDraft,
   createDefaultPost,
@@ -40,7 +40,7 @@ function sanitizePost(raw: unknown, index: number): Post | null {
     name: post.name.trim() || `Post ${index + 1}`,
     createdAt,
     updatedAt,
-    draft: sanitizeDraft(post.draft as Partial<EditorDraft>, createDefaultDraft()),
+    draft: prepareDraftForEditor(post.draft as Partial<EditorDraft>, createDefaultDraft()),
   };
 }
 
@@ -118,8 +118,12 @@ export function migrateLegacyDraft(): ProjectsStore | null {
   project.posts[0] = {
     ...project.posts[0],
     name: "Post 1",
-    draft: sanitizeDraft(legacyDraft, createDefaultDraft()),
+    draft: prepareDraftForEditor(legacyDraft, createDefaultDraft()),
   };
+
+  if (typeof window !== "undefined") {
+    window.localStorage.removeItem(PS_DRAFT_KEY);
+  }
 
   return {
     version: 1,
@@ -135,7 +139,9 @@ export function migrateLegacyDraft(): ProjectsStore | null {
 export function loadProjectsStore(): ProjectsStore {
   const stored = readJson<ProjectsStore>(PS_PROJECTS_KEY);
   if (stored && Array.isArray(stored.projects) && stored.projects.length > 0) {
-    return sanitizeStore(stored);
+    const store = sanitizeStore(stored);
+    const view = resolveView(store, store.lastView ?? { type: "projects" });
+    return persistStore(store, view);
   }
 
   const migrated = migrateLegacyDraft();
