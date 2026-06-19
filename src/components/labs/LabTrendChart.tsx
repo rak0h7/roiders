@@ -7,6 +7,7 @@ import {
 } from "recharts";
 import type { BloodworkReport } from "@/lib/types";
 import { LAB_TREND_MARKERS } from "@/lib/labTrendMarkers";
+import { MARKER_MAP } from "@/lib/markers";
 import { getChartTheme } from "@/lib/charts";
 import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
