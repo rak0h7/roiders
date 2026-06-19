@@ -7,6 +7,7 @@ import { TextBlockLayer } from "./TextBlockLayer";
 import { RoidersClubChrome } from "./RoidersClubChrome";
 import { CanvasThemeBackground } from "@ps/components/theme/CanvasThemeBackground";
 import { LAYOUT_PRESETS } from "@ps/lib/contentPresets";
+import { BRANDED_PAD } from "@ps/lib/brandedLayout";
 import { cn } from "@/lib/utils";
 
 export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_, ref) {
@@ -49,10 +50,17 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
           />
         )}
         <div
-          className={cn(
-            "@container absolute inset-0 z-10",
-            branded ? "px-[7%] pb-[10%] pt-[14%]" : "px-[7%] py-[7%]",
-          )}
+          className={cn("@container absolute inset-0 z-10", !branded && "px-[8%] py-[8%]")}
+          style={
+            branded
+              ? {
+                  paddingLeft: `${BRANDED_PAD.x}%`,
+                  paddingRight: `${BRANDED_PAD.x}%`,
+                  paddingTop: `${BRANDED_PAD.top}%`,
+                  paddingBottom: `${BRANDED_PAD.bottom}%`,
+                }
+              : undefined
+          }
         >
           <TextBlockLayer branded={branded} />
         </div>

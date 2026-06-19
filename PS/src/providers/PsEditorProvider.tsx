@@ -34,9 +34,9 @@ interface PsEditorContextValue {
 const PsEditorContext = createContext<PsEditorContextValue | null>(null);
 
 const DEFAULT_DRAFT: EditorDraft = {
-  blocks: blocksFromPreset("blank"),
-  canvasSizeId: "1:1",
-  layoutPresetId: "blank",
+  blocks: blocksFromPreset("roiders-club", "9:16"),
+  canvasSizeId: "9:16",
+  layoutPresetId: "roiders-club",
   selectedBlockId: null,
 };
 

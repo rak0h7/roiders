@@ -11,6 +11,13 @@ export interface LayoutPreset {
 
 export const LAYOUT_PRESETS: LayoutPreset[] = [
   {
+    id: "roiders-club",
+    label: "roiders.club",
+    description: "Branded social slide — badge, gradient headline, body, site footer",
+    defaultCanvasSizeId: "9:16",
+    branded: true,
+  },
+  {
     id: "blank",
     label: "Blank",
     description: "Single body text box",
@@ -34,13 +41,6 @@ export const LAYOUT_PRESETS: LayoutPreset[] = [
     id: "title-card",
     label: "Title card",
     description: "Centered title and subtitle",
-  },
-  {
-    id: "roiders-club",
-    label: "roiders.club",
-    description: "Branded social slide — badge, gradient headline, body, site footer",
-    defaultCanvasSizeId: "9:16",
-    branded: true,
   },
 ];
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { BRANDED_CHROME, BRANDED_PAD } from "@ps/lib/brandedLayout";
+
 /** Branded slide overlay — complements CanvasThemeBackground, does not replace theme colors. */
 export function RoidersClubChrome() {
   return (
@@ -24,7 +26,14 @@ export function RoidersClubChrome() {
           maskImage: "radial-gradient(ellipse 85% 75% at 50% 35%, black, transparent)",
         }}
       />
-      <div className="absolute inset-x-[7%] top-[4%] z-10 flex items-center gap-2">
+      <div
+        className="absolute z-10 flex items-center gap-2"
+        style={{
+          left: `${BRANDED_PAD.x}%`,
+          right: `${BRANDED_PAD.x}%`,
+          top: `${BRANDED_CHROME.headerTop}%`,
+        }}
+      >
         <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--accent)]/50 bg-[var(--bg-surface)]/70 font-display text-[11px] font-extrabold text-[var(--accent)] sm:h-9 sm:w-9 sm:text-xs">
           RC
         </span>
@@ -32,7 +41,15 @@ export function RoidersClubChrome() {
           Roiders Club
         </span>
       </div>
-      <div className="absolute inset-x-0 bottom-0 flex h-[28%] items-end justify-center pb-[5%]">
+      <div
+        className="absolute bottom-0 flex items-end justify-center"
+        style={{
+          left: `${BRANDED_PAD.x}%`,
+          right: `${BRANDED_PAD.x}%`,
+          height: "24%",
+          paddingBottom: `${BRANDED_PAD.bottom * 0.45}%`,
+        }}
+      >
         <div
           className="absolute left-[10%] h-24 w-24 rounded-full opacity-40 blur-3xl sm:h-28 sm:w-28"
           style={{ background: "var(--labs)" }}

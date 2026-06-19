@@ -117,7 +117,7 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
   },
   "roiders-club": {
     default: [
-      block({ x: 52, y: 0, width: 44, text: "Performance health", role: "badge", align: "right" }),
+      block({ x: 54, y: 1, width: 46, text: "Performance health", role: "badge", align: "right" }),
       block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
       block({ x: 0, y: 26, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
@@ -128,15 +128,29 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
         role: "body",
         align: "left",
       }),
-      block({ x: 0, y: 74, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+      block({ x: 0, y: 80, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
     "9:16": [
-      block({ x: 48, y: 0, width: 48, text: "Performance health", role: "badge", align: "right" }),
-      block({ x: 0, y: 10, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
-      block({ x: 0, y: 22, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
+      block({ x: 54, y: 1, width: 46, text: "Performance health", role: "badge", align: "right" }),
+      block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
+      block({ x: 0, y: 26, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
         x: 0,
-        y: 32,
+        y: 36,
+        width: 100,
+        text: "One private command center for everything you track on cycle.",
+        role: "body",
+        align: "left",
+      }),
+      block({ x: 0, y: 84, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+    ],
+    "4:5": [
+      block({ x: 54, y: 1, width: 46, text: "Performance health", role: "badge", align: "right" }),
+      block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
+      block({ x: 0, y: 26, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
+      block({
+        x: 0,
+        y: 36,
         width: 100,
         text: "One private command center for everything you track on cycle.",
         role: "body",
@@ -144,22 +158,8 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
       }),
       block({ x: 0, y: 82, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
-    "4:5": [
-      block({ x: 50, y: 0, width: 46, text: "Performance health", role: "badge", align: "right" }),
-      block({ x: 0, y: 12, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
-      block({ x: 0, y: 24, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
-      block({
-        x: 0,
-        y: 34,
-        width: 100,
-        text: "One private command center for everything you track on cycle.",
-        role: "body",
-        align: "left",
-      }),
-      block({ x: 0, y: 78, width: 100, text: "roiders.club", role: "footer", align: "left" }),
-    ],
     "1:1": [
-      block({ x: 50, y: 2, width: 46, text: "Performance health", role: "badge", align: "right" }),
+      block({ x: 54, y: 1, width: 46, text: "Performance health", role: "badge", align: "right" }),
       block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
       block({ x: 0, y: 26, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
@@ -170,21 +170,21 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
         role: "body",
         align: "left",
       }),
-      block({ x: 0, y: 74, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+      block({ x: 0, y: 78, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
     "16:9": [
-      block({ x: 66, y: 4, width: 30, text: "Performance health", role: "badge", align: "right" }),
+      block({ x: 62, y: 2, width: 38, text: "Performance health", role: "badge", align: "right" }),
       block({ x: 0, y: 16, width: 58, text: "Roiders Club", role: "headline", align: "left" }),
       block({ x: 0, y: 30, width: 58, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
         x: 0,
-        y: 44,
+        y: 42,
         width: 58,
         text: "One private command center for everything you track on cycle.",
         role: "body",
         align: "left",
       }),
-      block({ x: 0, y: 66, width: 58, text: "roiders.club", role: "footer", align: "left" }),
+      block({ x: 0, y: 68, width: 58, text: "roiders.club", role: "footer", align: "left" }),
     ],
   },
 };
