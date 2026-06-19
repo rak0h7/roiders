@@ -36,6 +36,7 @@ export class PsErrorBoundary extends Component<Props, State> {
               onClick={() => {
                 localStorage.removeItem("ps-maker-draft");
                 localStorage.removeItem("ps-maker-settings");
+                localStorage.removeItem("ps-maker-projects");
                 window.location.reload();
               }}
             >

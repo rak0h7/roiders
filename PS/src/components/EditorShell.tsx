@@ -1,8 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Layers, Palette, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, ChevronRight, Layers, Palette, Plus, Pencil } from "lucide-react";
 import { usePsEditor } from "@ps/providers/PsEditorProvider";
+import { usePsProjects } from "@ps/providers/PsProjectsProvider";
 import { LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { CanvasSizePicker } from "./CanvasSizePicker";
 import { LayoutPresetPicker } from "./LayoutPresetPicker";
@@ -18,20 +19,90 @@ type SidebarTab = "content" | "theme";
 export function EditorShell() {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { addBlock, layoutPresetId, canvasSize } = usePsEditor();
+  const { activeProject, activePost, goToProjects, openProject, renamePost } = usePsProjects();
   const [tab, setTab] = useState<SidebarTab>("content");
+  const [renamingPost, setRenamingPost] = useState(false);
+  const [postName, setPostName] = useState(activePost?.name ?? "");
   const preset = LAYOUT_PRESETS.find((p) => p.id === layoutPresetId);
+
+  const submitPostRename = () => {
+    if (!activeProject || !activePost) return;
+    renamePost(activeProject.id, activePost.id, postName.trim() || activePost.name);
+    setRenamingPost(false);
+  };
 
   return (
     <div className="relative z-10 flex h-full min-h-0 flex-col overflow-hidden">
       <header className="shrink-0 border-b border-[var(--border)] bg-[var(--bg-elevated)]/50 px-4 py-3 backdrop-blur-sm sm:px-5">
+        <div className="mb-2 flex items-center gap-1 text-xs text-[var(--muted)]">
+          <button type="button" onClick={goToProjects} className={cn(ui.btnGhost, "h-7 px-2")}>
+            Projects
+          </button>
+          {activeProject && (
+            <>
+              <ChevronRight className="h-3 w-3 shrink-0" />
+              <button
+                type="button"
+                onClick={() => openProject(activeProject.id)}
+                className={cn(ui.btnGhost, "h-7 max-w-[10rem] truncate px-2")}
+              >
+                {activeProject.name}
+              </button>
+            </>
+          )}
+          {activePost && (
+            <>
+              <ChevronRight className="h-3 w-3 shrink-0" />
+              {renamingPost ? (
+                <input
+                  autoFocus
+                  value={postName}
+                  onChange={(e) => setPostName(e.target.value)}
+                  onBlur={submitPostRename}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submitPostRename();
+                    if (e.key === "Escape") {
+                      setPostName(activePost.name);
+                      setRenamingPost(false);
+                    }
+                  }}
+                  className={cn(ui.inputCompact, "h-7 max-w-[12rem]")}
+                />
+              ) : (
+                <span className="flex items-center gap-1 truncate font-medium text-[var(--foreground)]">
+                  {activePost.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPostName(activePost.name);
+                      setRenamingPost(true);
+                    }}
+                    className={ui.btnIconMicro}
+                    aria-label="Rename post"
+                  >
+                    <Pencil className="h-3 w-3" />
+                  </button>
+                </span>
+              )}
+            </>
+          )}
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--accent)]/30 bg-[var(--labs-dim)]">
-              <Sparkles className="h-5 w-5 text-[var(--accent)]" />
-            </div>
+            <button
+              type="button"
+              onClick={() => activeProject && openProject(activeProject.id)}
+              className={ui.btnIcon}
+              aria-label="Back to project"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
             <div className="min-w-0">
-              <h1 className={ui.sectionTitle}>PS Content Maker</h1>
-              <p className={ui.sectionSub}>Roiders Club themed compositions</p>
+              <h1 className={ui.sectionTitle}>{activePost?.name ?? "Editor"}</h1>
+              <p className={ui.sectionSub}>
+                {activeProject?.name ?? "Project"} · Auto-saved
+              </p>
             </div>
           </div>
 

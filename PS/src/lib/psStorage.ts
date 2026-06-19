@@ -2,6 +2,7 @@ import type { EditorDraft } from "./canvasTypes";
 
 export const PS_SETTINGS_KEY = "ps-maker-settings";
 export const PS_DRAFT_KEY = "ps-maker-draft";
+export const PS_PROJECTS_KEY = "ps-maker-projects";
 
 export function readJson<T>(key: string): T | null {
   if (typeof window === "undefined") return null;

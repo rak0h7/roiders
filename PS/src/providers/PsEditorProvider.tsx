@@ -1,9 +1,18 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { blocksFromPreset, LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { repositionBlocksForCanvas } from "@ps/lib/layoutPlacement";
-import { getCanvasSize, normalizeCanvasSizeId } from "@ps/lib/canvasSizes";
+import { getCanvasSize } from "@ps/lib/canvasSizes";
+import { sanitizeDraft } from "@ps/lib/draftSanitize";
+import { createDefaultDraft } from "@ps/lib/projectTypes";
 import {
   createBlockId,
   type CanvasSizeId,
@@ -13,7 +22,6 @@ import {
   type TextBlockRole,
   type TextAlign,
 } from "@ps/lib/canvasTypes";
-import { readDraft, writeDraft } from "@ps/lib/psStorage";
 
 interface PsEditorContextValue {
   blocks: TextBlock[];
@@ -33,81 +41,22 @@ interface PsEditorContextValue {
 
 const PsEditorContext = createContext<PsEditorContextValue | null>(null);
 
-const LAYOUT_IDS = new Set<string>(LAYOUT_PRESETS.map((p) => p.id));
-
-function isLayoutPresetId(id: string): id is LayoutPresetId {
-  return LAYOUT_IDS.has(id);
+interface PsEditorProviderProps {
+  postDraft: EditorDraft;
+  onDraftChange: (draft: EditorDraft) => void;
+  children: React.ReactNode;
 }
 
-function sanitizeBlocks(blocks: unknown): TextBlock[] {
-  if (!Array.isArray(blocks) || blocks.length === 0) return [];
-  return blocks
-    .filter((b): b is TextBlock => {
-      if (!b || typeof b !== "object") return false;
-      const block = b as TextBlock;
-      return (
-        typeof block.id === "string" &&
-        typeof block.text === "string" &&
-        typeof block.x === "number" &&
-        typeof block.y === "number" &&
-        typeof block.width === "number"
-      );
-    })
-    .map((block) => ({
-      ...block,
-      role: block.role ?? "body",
-      align: block.align ?? "left",
-    }));
-}
-
-function createDefaultDraft(): EditorDraft {
-  return {
-    blocks: blocksFromPreset("roiders-club", "9:16"),
-    canvasSizeId: "9:16",
-    layoutPresetId: "roiders-club",
-    selectedBlockId: null,
-  };
-}
-
-function loadDraft(): EditorDraft {
-  const defaults = createDefaultDraft();
-  const stored = readDraft();
-  if (!stored) return defaults;
-
-  const canvasSizeId = normalizeCanvasSizeId(stored.canvasSizeId);
-  const layoutPresetId = isLayoutPresetId(stored.layoutPresetId ?? "")
-    ? stored.layoutPresetId
-    : defaults.layoutPresetId;
-  const blocks = sanitizeBlocks(stored.blocks);
-
-  if (blocks.length === 0) {
-    return {
-      blocks: blocksFromPreset(layoutPresetId, canvasSizeId),
-      canvasSizeId,
-      layoutPresetId,
-      selectedBlockId: null,
-    };
-  }
-
-  return {
-    blocks: repositionBlocksForCanvas(blocks, layoutPresetId, canvasSizeId),
-    canvasSizeId,
-    layoutPresetId,
-    selectedBlockId:
-      typeof stored.selectedBlockId === "string" &&
-      blocks.some((b) => b.id === stored.selectedBlockId)
-        ? stored.selectedBlockId
-        : null,
-  };
-}
-
-export function PsEditorProvider({ children }: { children: React.ReactNode }) {
-  const [draft, setDraft] = useState<EditorDraft>(loadDraft);
+export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEditorProviderProps) {
+  const defaults = useMemo(() => createDefaultDraft(), []);
+  const [draft, setDraft] = useState<EditorDraft>(() => sanitizeDraft(postDraft, defaults));
+  const onDraftChangeRef = useRef(onDraftChange);
+  onDraftChangeRef.current = onDraftChange;
 
   const persist = useCallback((updater: EditorDraft | ((prev: EditorDraft) => EditorDraft)) => {
     setDraft((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
-      writeDraft(next);
+      onDraftChangeRef.current(next);
       return next;
     });
   }, []);
