@@ -1,6 +1,6 @@
 import { differenceInDays, addWeeks, addDays } from "date-fns";
 import type { CycleCompound } from "@/lib/cycleTypes";
-import { getCompoundById } from "@/data/compounds";
+import { getCompoundById, type Compound } from "@/data/compounds";
 import type { FrequencyPattern } from "@/data/frequencies";
 import {
   findSaturationWeek,
@@ -41,11 +41,28 @@ export function weeklyDoseAmount(cc: CycleCompound): number {
   return cc.doseMg * dosesPerWeek(cc.frequency);
 }
 
+/** Convert stored dose to mg-equivalent for load/intensity math across unit types. */
+export function doseToMgEquivalent(dose: number, unit: Compound["unit"]): number {
+  switch (unit) {
+    case "mg":
+      return dose;
+    case "mcg":
+      // Values below 1 are stored as mg-equivalent (e.g. 0.25 = 250mcg); otherwise native mcg.
+      return dose < 1 ? dose : dose / 1000;
+    case "iu":
+      return dose / 3;
+  }
+}
+
 /** Mg-equivalent weekly load used for intensity, stacked charts, and averages. */
 export function weeklyMgLoad(cc: CycleCompound): number {
   const compound = getCompoundById(cc.compoundId);
-  if (!compound || compound.unit !== "mg") return 0;
-  return weeklyDoseAmount(cc) * (compound.pkMultiplier ?? 1);
+  if (!compound) return 0;
+  return (
+    doseToMgEquivalent(cc.doseMg, compound.unit) *
+    dosesPerWeek(cc.frequency) *
+    (compound.pkMultiplier ?? 1)
+  );
 }
 
 export function activeWeekCount(cc: CycleCompound): number {
@@ -253,7 +270,10 @@ export function getDayIntensity(date: Date, startDate: Date, compounds: CycleCom
     const compound = getCompoundById(cc.compoundId);
     if (!compound) return;
     if (shouldDoseOnDay(cc.frequency, dayIndex, dayOfWeek)) {
-      load += cc.doseMg * (compound.pkMultiplier ?? 0.5) * doseMultiplierForDay(cc.frequency);
+      load +=
+        doseToMgEquivalent(cc.doseMg, compound.unit) *
+        (compound.pkMultiplier ?? 0.5) *
+        doseMultiplierForDay(cc.frequency);
     }
   });
 

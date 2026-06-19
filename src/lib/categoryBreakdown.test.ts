@@ -19,6 +19,22 @@ describe("resolveFlagForMarker", () => {
     expect(resolveFlagForMarker("prolactin", map)?.source).toBe("cycle");
   });
 
+  it("resolves current estradiol cycle-watch flag ids", () => {
+    const flags: ReviewFlag[] = [
+      {
+        markerId: "cycle-watch-estradiol",
+        name: "Estradiol — not on panel",
+        date: "2026-01-01",
+        severity: "yellow",
+        deviation: "No AI logged",
+        noDosing: true,
+        source: "cycle",
+      },
+    ];
+    const map = new Map(flags.map((f) => [f.markerId, f]));
+    expect(resolveFlagForMarker("estradiol", map)?.deviation).toBe("No AI logged");
+  });
+
   it("resolves legacy estradiol control flag ids", () => {
     const flags: ReviewFlag[] = [
       {

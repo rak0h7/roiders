@@ -1,7 +1,13 @@
 import { getCompoundById } from "@/data/compounds";
 import type { CycleCompound } from "@/lib/cycleTypes";
 import { calculateRiskProfile, hasHepatotoxicOrals } from "@/lib/cycleCalculations";
-import { COMPOUND_MONITOR_MARKERS } from "@/lib/cycleLabFlags";
+import { COMPOUND_MONITOR_MARKERS } from "@/lib/compoundMonitorMarkers";
+import {
+  has19Nor,
+  hasAromatizer,
+  hasEstrogenControl,
+  hasLiverSupport,
+} from "@/lib/stackAnalysis";
 import type { AppRoute } from "@/context/NavigationContext";
 import type { MarkerValue, ReviewFlag } from "@/lib/types";
 import { macroSummary, pctOfGoal, sumNutrients } from "@/lib/nutritionCalculations";
@@ -32,25 +38,6 @@ function hasMarker(values: Record<string, MarkerValue>, id: string): MarkerValue
 
 function flagForMarker(flags: ReviewFlag[], id: string): ReviewFlag | undefined {
   return flags.find((f) => f.markerId === id);
-}
-
-function hasAromatizer(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => {
-    const compound = getCompoundById(c.compoundId);
-    return compound?.tags.includes("Test") || compound?.id.startsWith("test-");
-  });
-}
-
-function hasEstrogenControl(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => getCompoundById(c.compoundId)?.category === "estrogen");
-}
-
-function has19Nor(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => getCompoundById(c.compoundId)?.tags.includes("19-nor"));
-}
-
-function hasLiverSupport(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => ["tudca", "nac", "udca"].includes(c.compoundId));
 }
 
 export function generateCrossAlerts(

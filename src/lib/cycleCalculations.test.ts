@@ -6,6 +6,7 @@ import {
   generatePKData,
   generateStackedLoadData,
   weeklyDoseAmount,
+  doseToMgEquivalent,
   weeklyMgLoad,
   weeklyMgLoadAtWeek,
 } from "@/lib/cycleCalculations";
@@ -28,6 +29,31 @@ describe("weekly dose math", () => {
 
   it("applies pk multiplier for tren weekly load", () => {
     expect(weeklyMgLoad(ascendedStack[1])).toBe(787.5);
+  });
+
+  it("includes mcg compounds in weekly load", () => {
+    const clen: CycleCompound = {
+      id: "clen-1",
+      compoundId: "clen",
+      doseMg: 40,
+      frequency: "daily",
+      activeWeeks: [1, 4],
+      route: "oral",
+    };
+    expect(doseToMgEquivalent(40, "mcg")).toBe(0.04);
+    expect(weeklyMgLoad(clen)).toBeCloseTo(0.084, 3);
+  });
+
+  it("includes IU compounds in weekly load", () => {
+    const gh: CycleCompound = {
+      id: "gh-1",
+      compoundId: "gh",
+      doseMg: 2,
+      frequency: "daily",
+      activeWeeks: [1, 12],
+      route: "injectable",
+    };
+    expect(weeklyMgLoad(gh)).toBeCloseTo(0.93, 2);
   });
 });
 

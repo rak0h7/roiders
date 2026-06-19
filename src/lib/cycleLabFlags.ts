@@ -1,79 +1,24 @@
 import { getCompoundById } from "@/data/compounds";
+import { COMPOUND_MONITOR_MARKERS } from "@/lib/compoundMonitorMarkers";
 import { hasHepatotoxicOrals } from "@/lib/cycleCalculations";
 import type { CycleCompound } from "@/lib/cycleTypes";
 import { MARKER_MAP } from "@/lib/markers";
 import { buildReviewFlags } from "@/lib/ranges";
+import {
+  compoundsLinkedToMarker,
+  has19Nor,
+  hasAromatizer,
+  hasEstrogenControl,
+  hasLiverSupport,
+} from "@/lib/stackAnalysis";
 import type { MarkerValue, RangeMode, ReviewFlag, Severity } from "@/lib/types";
 
-export const COMPOUND_MONITOR_MARKERS: Record<string, { markers: string[]; note: string }> = {
-  anavar: { markers: ["hdl", "ldl", "alt"], note: "Anavar commonly suppresses HDL and can elevate liver enzymes." },
-  winstrol: { markers: ["hdl", "ldl", "alt", "ast"], note: "Winstrol is harsh on HDL and hepatotoxicity risk rises with dose." },
-  "winstrol-inj": { markers: ["hdl", "ldl"], note: "Injectable winstrol still crushes HDL despite avoiding first-pass liver load." },
-  turinabol: { markers: ["alt", "ast", "hdl"], note: "Tbol is hepatotoxic with moderate lipid impact — track ALT/AST and HDL." },
-  anadrol: { markers: ["alt", "ast", "hematocrit"], note: "Anadrol can elevate liver enzymes and hematocrit." },
-  dbol: { markers: ["estradiol", "alt"], note: "Dbol aromatizes heavily — watch estradiol and liver markers." },
-  sdrol: { markers: ["alt", "ast", "hdl"], note: "Superdrol is highly hepatotoxic with significant lipid impact." },
-  halo: { markers: ["alt", "ast", "hdl"], note: "Halotestin is hepatotoxic and harsh on lipids." },
-  "test-e": { markers: ["estradiol", "hematocrit", "testosterone"], note: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-  "test-c": { markers: ["estradiol", "hematocrit", "testosterone"], note: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-  "test-p": { markers: ["estradiol", "hematocrit", "testosterone"], note: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-  "test-sus": { markers: ["estradiol", "hematocrit", "testosterone"], note: "Exogenous test raises E2 and hematocrit — baseline CBC and E2 matter." },
-  deca: { markers: ["prolactin", "estradiol"], note: "19-nor compounds often elevate prolactin — monitor on-cycle." },
-  npp: { markers: ["prolactin", "estradiol"], note: "19-nor compounds often elevate prolactin — monitor on-cycle." },
-  "tren-a": { markers: ["prolactin", "alt", "hdl"], note: "Tren affects prolactin, lipids, and liver stress — broad panel recommended." },
-  "tren-e": { markers: ["prolactin", "alt", "hdl"], note: "Tren affects prolactin, lipids, and liver stress — broad panel recommended." },
-  eq: { markers: ["hematocrit", "hemoglobin"], note: "EQ commonly elevates hematocrit — monitor CBC on-cycle." },
-  ment: { markers: ["prolactin", "estradiol"], note: "MENT is a potent 19-nor — prolactin and E2 monitoring is critical." },
-};
+export { COMPOUND_MONITOR_MARKERS } from "@/lib/compoundMonitorMarkers";
 
 const SEVERITY_ORDER: Severity[] = ["stop", "high", "yellow", "low"];
 
 function compoundLabel(compoundId: string): string {
   return getCompoundById(compoundId)?.shortName ?? compoundId;
-}
-
-function hasAromatizer(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => {
-    const compound = getCompoundById(c.compoundId);
-    return compound?.tags.includes("Test") || compound?.id.startsWith("test-");
-  });
-}
-
-function hasEstrogenControl(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => getCompoundById(c.compoundId)?.category === "estrogen");
-}
-
-function has19Nor(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => getCompoundById(c.compoundId)?.tags.includes("19-nor"));
-}
-
-function hasLiverSupport(compounds: CycleCompound[]): boolean {
-  return compounds.some((c) => ["tudca", "nac", "udca"].includes(c.compoundId));
-}
-
-function compoundsLinkedToMarker(markerId: string, compounds: CycleCompound[]): CycleCompound[] {
-  return compounds.filter((c) => {
-    const def = getCompoundById(c.compoundId);
-    if (!def) return false;
-
-    const hint = COMPOUND_MONITOR_MARKERS[c.compoundId];
-    if (hint?.markers.includes(markerId)) return true;
-
-    if (markerId === "prolactin" && def.tags.includes("19-nor")) return true;
-    if (markerId === "estradiol" && (def.tags.includes("Test") || def.id.startsWith("test-") || def.id === "dbol")) {
-      return true;
-    }
-    if (["alt", "ast", "ggt"].includes(markerId) && def.hepatotoxic) return true;
-    if (["hematocrit", "hemoglobin"].includes(markerId) && (def.tags.includes("Test") || def.id === "anadrol" || def.id === "eq")) {
-      return true;
-    }
-    if (["hdl", "ldl", "triglycerides"].includes(markerId) && (def.hepatotoxic || def.id.includes("tren") || def.tags.includes("DHT"))) {
-      return true;
-    }
-    if (markerId === "creatinine" && def.category === "anabolics") return true;
-
-    return false;
-  });
 }
 
 export function enrichLabFlagsWithCycleContext(flags: ReviewFlag[], compounds: CycleCompound[]): ReviewFlag[] {

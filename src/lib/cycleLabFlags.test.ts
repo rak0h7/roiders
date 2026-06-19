@@ -84,6 +84,25 @@ describe("buildCycleReviewFlags", () => {
   });
 });
 
+describe("estrogen control detection", () => {
+  it("does not warn about missing AI when proviron is on stack", () => {
+    const stack: CycleCompound[] = [
+      ...testStack,
+      {
+        id: "proviron-1",
+        compoundId: "proviron",
+        doseMg: 50,
+        frequency: "daily",
+        activeWeeks: [1, 12],
+        route: "oral",
+      },
+    ];
+    const flags = buildCycleReviewFlags(stack, {}, [], "18/06/2026");
+    const estradiolWatch = flags.find((f) => f.markerId === "cycle-watch-estradiol");
+    expect(estradiolWatch?.deviation).not.toContain("no estrogen control");
+  });
+});
+
 describe("buildMergedReviewFlags", () => {
   it("merges lab and cycle flags for a deca stack with elevated prolactin", () => {
     const values = {

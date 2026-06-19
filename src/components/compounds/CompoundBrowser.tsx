@@ -17,6 +17,7 @@ export function CompoundBrowser() {
     compoundSearch,
     setCompoundSearch,
     addAndConfigure,
+    setConfiguringEntryId,
     compounds,
     openProfile,
   } = useCycleStore();
@@ -33,7 +34,20 @@ export function CompoundBrowser() {
     return matchesCategory && matchesSearch;
   });
 
-  const addedIds = new Set(compounds.map((c) => c.compoundId));
+  const entryCountByCompound = compounds.reduce<Map<string, number>>((map, c) => {
+    map.set(c.compoundId, (map.get(c.compoundId) ?? 0) + 1);
+    return map;
+  }, new Map());
+
+  const openCompound = (compoundId: string) => {
+    const existing = compounds.find((c) => c.compoundId === compoundId);
+    if (existing) {
+      setConfiguringEntryId(existing.id);
+      setCompoundModalOpen(false);
+      return;
+    }
+    addAndConfigure(compoundId);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-base)]/80 p-4 backdrop-blur-sm">
@@ -87,7 +101,7 @@ export function CompoundBrowser() {
                 key={compound.id}
                 className={cn(
                   "flex items-center gap-3 rounded-[var(--radius-md)] p-3 transition",
-                  addedIds.has(compound.id)
+                  entryCountByCompound.has(compound.id)
                     ? "border border-[var(--protocol)]/25 bg-[var(--bg-surface)]"
                     : "hover:bg-[var(--bg-hover)]"
                 )}
@@ -119,11 +133,15 @@ export function CompoundBrowser() {
                     </button>
                   )}
                   <button
-                    onClick={() => addAndConfigure(compound.id)}
+                    onClick={() => openCompound(compound.id)}
                     className={cn(ui.btnProtocolSm, "shrink-0")}
                     style={{ background: compound.color }}
                   >
-                    {addedIds.has(compound.id) ? "Edit" : "Configure"}
+                    {entryCountByCompound.has(compound.id)
+                      ? entryCountByCompound.get(compound.id)! > 1
+                        ? `Edit (${entryCountByCompound.get(compound.id)})`
+                        : "Edit"
+                      : "Configure"}
                   </button>
                 </div>
               </div>

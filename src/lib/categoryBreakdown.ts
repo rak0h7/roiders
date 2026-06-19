@@ -57,7 +57,9 @@ export function resolveFlagForMarker(
   return (
     flagMap.get(markerId) ??
     flagMap.get(cycleWatchFlagId(markerId)) ??
-    (markerId === "estradiol" ? flagMap.get("cycle-watch-estradiol-control") : undefined)
+    (markerId === "estradiol"
+      ? flagMap.get("cycle-watch-estradiol") ?? flagMap.get("cycle-watch-estradiol-control")
+      : undefined)
   );
 }
 

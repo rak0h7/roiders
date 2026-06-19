@@ -61,6 +61,20 @@ export function ensureCompoundIds(compounds: CycleCompound[]): CycleCompound[] {
   }));
 }
 
+export function clampCompoundsToWeeks(
+  compounds: CycleCompound[],
+  effectiveWeeks: number
+): CycleCompound[] {
+  return compounds.map((c) => {
+    const start = Math.min(c.activeWeeks[0], effectiveWeeks);
+    const end = Math.min(c.activeWeeks[1], effectiveWeeks);
+    if (start > end) {
+      return { ...c, activeWeeks: [effectiveWeeks, effectiveWeeks] as [number, number] };
+    }
+    return { ...c, activeWeeks: [start, end] };
+  });
+}
+
 function makeDefaultCompound(compoundId: string, totalWeeks: number): CycleCompound | null {
   const compound = getCompoundById(compoundId);
   if (!compound) return null;
@@ -91,8 +105,21 @@ export const useCycleStore = create<CycleState>()(
       selectedGuideId: null,
       profileModalId: null,
 
-      setWeeks: (weeks) => set({ weeks, customWeeks: "" }),
-      setCustomWeeks: (val) => set({ customWeeks: val }),
+      setWeeks: (weeks) =>
+        set((state) => ({
+          weeks,
+          customWeeks: "",
+          compounds: clampCompoundsToWeeks(state.compounds, weeks),
+        })),
+      setCustomWeeks: (val) =>
+        set((state) => {
+          const custom = parseInt(val, 10);
+          if (!(custom > 0)) return { customWeeks: val };
+          return {
+            customWeeks: val,
+            compounds: clampCompoundsToWeeks(state.compounds, custom),
+          };
+        }),
       setStartDate: (date) => set({ startDate: date }),
       addAndConfigure: (compoundId) => {
         const entry = makeDefaultCompound(compoundId, get().getEffectiveWeeks());
@@ -132,6 +159,8 @@ export const useCycleStore = create<CycleState>()(
           compounds: ensureCompoundIds(compounds as CycleCompound[]),
           weeks: weeks ?? get().weeks,
           customWeeks: "",
+          configuringEntryId: null,
+          compoundModalOpen: false,
         }),
       clearCycle: () => set({ compounds: [], configuringEntryId: null }),
       getEffectiveWeeks: () => {
@@ -143,6 +172,13 @@ export const useCycleStore = create<CycleState>()(
     {
       name: "cycle-planner-store-v2",
       storage: createJSONStorage(() => createCloudPersistStorage("cycle")),
+      partialize: (state) => ({
+        weeks: state.weeks,
+        customWeeks: state.customWeeks,
+        startDate: state.startDate,
+        compounds: state.compounds,
+        dashboardTab: state.dashboardTab,
+      }),
       merge: (persisted, current) => {
         const p = persisted as Partial<CycleState> | undefined;
         const compounds = ensureCompoundIds(p?.compounds ?? current.compounds);
