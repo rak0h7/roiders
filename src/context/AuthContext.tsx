@@ -27,6 +27,41 @@ interface AuthResult {
   accessKey?: string;
 }
 
+type AuthApiResponse = {
+  error?: string;
+  ok?: boolean;
+  accessKey?: string;
+  access_token?: string;
+  refresh_token?: string;
+};
+
+async function establishBrowserSession(
+  supabase: NonNullable<ReturnType<typeof createClient>>,
+  data: AuthApiResponse
+): Promise<{ error: string | null; user: User | null }> {
+  if (!data.access_token || !data.refresh_token) {
+    return { error: "Session tokens missing from auth response", user: null };
+  }
+
+  const { error: sessionError } = await supabase.auth.setSession({
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+  });
+  if (sessionError) {
+    return { error: sessionError.message, user: null };
+  }
+
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError) {
+    return { error: userError.message, user: null };
+  }
+
+  return { error: null, user: user ?? null };
+}
+
 interface AuthContextValue {
   configured: boolean;
   user: User | null;
@@ -305,11 +340,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ accessKey }),
       });
 
-      const data = (await res.json()) as { ok?: boolean; error?: string };
+      const data = (await res.json()) as AuthApiResponse;
       if (!res.ok) return { error: data.error ?? "Sign in failed" };
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      const nextUser = sessionData.session?.user ?? null;
+      const session = await establishBrowserSession(supabase, data);
+      if (session.error || !session.user) {
+        return { error: session.error ?? "Sign in succeeded but session was not established" };
+      }
+
+      const nextUser = session.user;
       setUser(nextUser);
 
       if (nextUser) {
@@ -343,12 +382,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!supabase) return { error: "Auth is not configured" };
 
     const res = await fetch("/api/auth/register", { method: "POST", credentials: "same-origin" });
-    const data = (await res.json()) as { accessKey?: string; error?: string };
+    const data = (await res.json()) as AuthApiResponse;
 
     if (!res.ok) return { error: data.error ?? "Account creation failed" };
 
+    const session = await establishBrowserSession(supabase, data);
+    if (session.error || !session.user) {
+      return { error: session.error ?? "Account created but session was not established" };
+    }
+
+    setUser(session.user);
+    await refreshProfile(session.user);
+
     return { error: null, accessKey: data.accessKey };
-  }, [supabase]);
+  }, [supabase, refreshProfile]);
 
   const setUsername = useCallback(
     async (raw: string) => {

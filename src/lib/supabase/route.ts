@@ -12,7 +12,11 @@ export async function jsonWithSession(
   session: SessionTokens,
   body: Record<string, unknown>
 ): Promise<NextResponse> {
-  const response = NextResponse.json(body);
+  const response = NextResponse.json({
+    ...body,
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+  });
   const supabase = createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
       getAll() {
