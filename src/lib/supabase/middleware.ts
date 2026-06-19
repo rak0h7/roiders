@@ -64,6 +64,18 @@ export async function updateSession(request: NextRequest) {
 
   const siteSettings = await fetchSiteSettings();
 
+  if (siteSettings.maintenance_mode && pathname !== "/maintenance" && !isAuthRoute(pathname)) {
+    const profile = user ? await loadUserProfile(supabase, user.id) : null;
+    const canBypassMaintenance = Boolean(profile?.is_admin || profile?.is_vendor);
+
+    if (!canBypassMaintenance) {
+      const maintenanceUrl = request.nextUrl.clone();
+      maintenanceUrl.pathname = "/maintenance";
+      maintenanceUrl.search = "";
+      return NextResponse.redirect(maintenanceUrl);
+    }
+  }
+
   if (isPublicRoute(pathname) || isPublicSiteApi(pathname)) {
     return supabaseResponse;
   }
@@ -86,19 +98,7 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (siteSettings.maintenance_mode) {
-    const profile = user ? await loadUserProfile(supabase, user.id) : null;
-    const canBypassMaintenance = Boolean(profile?.is_admin || profile?.is_vendor);
-
-    if (!canBypassMaintenance && !isAuthRoute(pathname)) {
-      const maintenanceUrl = request.nextUrl.clone();
-      maintenanceUrl.pathname = "/maintenance";
-      maintenanceUrl.search = "";
-      return NextResponse.redirect(maintenanceUrl);
-    }
-  }
-
-  if (!user && !isAuthRoute(pathname) && pathname !== "/") {
+  if (!user && !isAuthRoute(pathname) && pathname !== "/" && !isApiRoute(pathname)) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("next", pathname);

@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FeaturePageLayout } from "@/components/marketing/FeaturePageLayout";
-import { FEATURE_SLUGS, getFeaturePage, isFeatureSlug } from "@/lib/featurePages";
+import { getFeaturePage, isFeatureSlug } from "@/lib/featurePages";
 import { buildPageMetadata } from "@/lib/seo";
 import { fetchSiteSettings } from "@/lib/siteSettings";
 
 export const dynamic = "force-dynamic";
-
-export function generateStaticParams() {
-  return FEATURE_SLUGS.map((slug) => ({ slug }));
-}
 
 type PageProps = {
   params: Promise<{ slug: string }>;

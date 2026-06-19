@@ -71,7 +71,34 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   updated_at: new Date().toISOString(),
 };
 
-export type PublicSiteSettings = Omit<SiteSettings, never>;
+export type PublicSiteSettings = Pick<
+  SiteSettings,
+  | "site_name"
+  | "site_tagline"
+  | "site_description"
+  | "maintenance_message"
+  | "allow_public_signup"
+  | "announcement_enabled"
+  | "announcement_message"
+  | "announcement_level"
+  | "announcement_link"
+  | "announcement_guest_visible"
+  | "welcome_message"
+  | "login_message"
+  | "signup_message"
+  | "signup_closed_message"
+  | "support_url"
+  | "cloud_sync_enabled"
+  | "debug_panel_enabled"
+  | "module_labs_enabled"
+  | "module_cycle_enabled"
+  | "module_gym_enabled"
+  | "module_nutrition_enabled"
+  | "public_landing_enabled"
+  | "premium_sources_enabled"
+  | "vendor_portal_enabled"
+  | "default_labs_range_mode"
+>;
 
 export type SiteSettingsPatch = Partial<
   Pick<
@@ -108,7 +135,33 @@ export type SiteSettingsPatch = Partial<
 >;
 
 export function toPublicSettings(settings: SiteSettings): PublicSiteSettings {
-  return { ...settings };
+  return {
+    site_name: settings.site_name,
+    site_tagline: settings.site_tagline,
+    site_description: settings.site_description,
+    maintenance_message: settings.maintenance_message,
+    allow_public_signup: settings.allow_public_signup,
+    announcement_enabled: settings.announcement_enabled,
+    announcement_message: settings.announcement_message,
+    announcement_level: settings.announcement_level,
+    announcement_link: settings.announcement_link,
+    announcement_guest_visible: settings.announcement_guest_visible,
+    welcome_message: settings.welcome_message,
+    login_message: settings.login_message,
+    signup_message: settings.signup_message,
+    signup_closed_message: settings.signup_closed_message,
+    support_url: settings.support_url,
+    cloud_sync_enabled: settings.cloud_sync_enabled,
+    debug_panel_enabled: settings.debug_panel_enabled,
+    module_labs_enabled: settings.module_labs_enabled,
+    module_cycle_enabled: settings.module_cycle_enabled,
+    module_gym_enabled: settings.module_gym_enabled,
+    module_nutrition_enabled: settings.module_nutrition_enabled,
+    public_landing_enabled: settings.public_landing_enabled,
+    premium_sources_enabled: settings.premium_sources_enabled,
+    vendor_portal_enabled: settings.vendor_portal_enabled,
+    default_labs_range_mode: settings.default_labs_range_mode,
+  };
 }
 
 export function resolveLegalContactHref(
@@ -127,7 +180,12 @@ export function routeModule(route: AppRoute): SiteModule | null {
   return null;
 }
 
-export function isModuleEnabled(settings: SiteSettings, module: SiteModule): boolean {
+type ModuleToggleSettings = Pick<
+  SiteSettings,
+  "module_labs_enabled" | "module_cycle_enabled" | "module_gym_enabled" | "module_nutrition_enabled"
+>;
+
+export function isModuleEnabled(settings: ModuleToggleSettings, module: SiteModule): boolean {
   switch (module) {
     case "labs":
       return settings.module_labs_enabled !== false;
@@ -142,7 +200,7 @@ export function isModuleEnabled(settings: SiteSettings, module: SiteModule): boo
   }
 }
 
-export function isRouteEnabled(settings: SiteSettings, route: AppRoute): boolean {
+export function isRouteEnabled(settings: ModuleToggleSettings, route: AppRoute): boolean {
   const mod = routeModule(route);
   if (!mod) return true;
   return isModuleEnabled(settings, mod);

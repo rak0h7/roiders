@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = resolveSiteDescription(settings.site_description, settings.site_tagline);
   return buildPageMetadata({
     title: `What is ${settings.site_name}?`,
-    description: `Learn what ${settings.site_name} (roiders.club) is — a free performance health app for bloodwork, cycle planning, training, and nutrition. Not motorcycle Riders Club communities.`,
+    description: `${description} Not a steroid shop or motorcycle Riders Club — performance health tracking at roiders.club.`,
     path: "/about",
   });
 }

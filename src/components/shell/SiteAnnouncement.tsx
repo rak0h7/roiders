@@ -33,7 +33,9 @@ export function SiteAnnouncement({ audience = "signed-in" }: SiteAnnouncementPro
     settings.announcement_enabled &&
     settings.announcement_message.trim().length > 0 &&
     (audience === "signed-in" || guestOk);
-  const token = enabled ? `${settings.updated_at}:${settings.announcement_message}` : "";
+  const token = enabled
+    ? `${settings.announcement_level}:${settings.announcement_message}:${settings.announcement_link}`
+    : "";
   const [manualDismiss, setManualDismiss] = useState(false);
 
   const storedDismissed = useSyncExternalStore(

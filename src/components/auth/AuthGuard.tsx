@@ -1,11 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { configured, user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (configured && !loading && !user) {
+      router.replace("/auth/login");
+    }
+  }, [configured, loading, user, router]);
 
   if (!configured) {
     return (

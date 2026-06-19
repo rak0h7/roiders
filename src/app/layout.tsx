@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Geist_Mono, Inter, Orbitron, Syne } from "next/font/google";
-import { buildPageMetadata, DEFAULT_SITE_DESCRIPTION } from "@/lib/seo";
+import { getSiteUrl } from "@/lib/siteUrl";
 import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { SiteConfigProvider } from "@/context/SiteConfigContext";
@@ -37,11 +37,11 @@ const orbitron = Orbitron({
 });
 
 export const metadata: Metadata = {
-  ...buildPageMetadata({
-    title: "Roiders Club — Labs, Gear, Training & Nutrition",
-    description: DEFAULT_SITE_DESCRIPTION,
-    path: "/",
-  }),
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: "Roiders Club",
+    template: "%s | Roiders Club",
+  },
   manifest: "/manifest.json",
   appleWebApp: { capable: true, title: "Roiders Club" },
 };

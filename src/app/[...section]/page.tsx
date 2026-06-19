@@ -1,5 +1,6 @@
 "use client";
 
+import { AppSectionGate } from "@/components/app/AppSectionGate";
 import { AppShell } from "@/components/shell/AppShell";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { HomeScreenPromptProvider } from "@/context/HomeScreenPromptContext";
@@ -8,9 +9,11 @@ import { HomeScreenPromptProvider } from "@/context/HomeScreenPromptContext";
 export default function AppSectionPage() {
   return (
     <AuthGuard>
-      <HomeScreenPromptProvider>
-        <AppShell />
-      </HomeScreenPromptProvider>
+      <AppSectionGate>
+        <HomeScreenPromptProvider>
+          <AppShell />
+        </HomeScreenPromptProvider>
+      </AppSectionGate>
     </AuthGuard>
   );
 }

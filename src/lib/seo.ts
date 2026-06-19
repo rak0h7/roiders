@@ -29,6 +29,10 @@ type PageMetaInput = {
   path?: string;
 };
 
+export const PRIVATE_PAGE_METADATA: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export function buildPageMetadata({ title, description, path = "" }: PageMetaInput): Metadata {
   const base = getSiteUrl();
   const url = path ? `${base}${path.startsWith("/") ? path : `/${path}`}` : base;
@@ -44,13 +48,13 @@ export function buildPageMetadata({ title, description, path = "" }: PageMetaInp
       url,
       siteName: "Roiders Club",
       type: "website",
-      images: [{ url: "/og.png", width: 1200, height: 630, alt: "Roiders Club" }],
+      images: [{ url: `${base}/og.png`, width: 1200, height: 630, alt: "Roiders Club" }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/og.png"],
+      images: [`${base}/og.png`],
     },
   };
 }

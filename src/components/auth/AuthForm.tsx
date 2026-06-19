@@ -7,6 +7,7 @@ import { KeyRound } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { AccessKeyReveal } from "@/components/auth/AccessKeyReveal";
+import { safeRedirectPath } from "@/lib/safeRedirect";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -14,7 +15,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { signIn, createAccount, configured } = useAuth();
   const { settings, loading: siteSettingsLoading } = useSiteConfig();
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") ?? "/";
+  const next = safeRedirectPath(searchParams.get("next"));
   const [accessKey, setAccessKey] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
