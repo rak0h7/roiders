@@ -1,13 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ArrowLeft,
-  FilePlus,
-  FolderOpen,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { ArrowLeft, FilePlus, FolderOpen, Pencil, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@ps/components/ui/ConfirmDialog";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 import { usePsProjects } from "@ps/providers/PsProjectsProvider";
@@ -27,6 +22,7 @@ export function ProjectDetailPage() {
   } = usePsProjects();
 
   const [renamingProject, setRenamingProject] = useState(false);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState(false);
   const [projectName, setProjectName] = useState(activeProject?.name ?? "");
 
   if (!activeProject) {
@@ -57,7 +53,7 @@ export function ProjectDetailPage() {
             className={cn(ui.btnGhost, "mb-3 -ml-1 gap-1.5")}
           >
             <ArrowLeft className="h-4 w-4" />
-            Projects
+            All projects
           </button>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -85,8 +81,7 @@ export function ProjectDetailPage() {
                   <h1 className={ui.pageTitle}>{activeProject.name}</h1>
                 )}
                 <p className={ui.pageSub}>
-                  {activeProject.posts.length}{" "}
-                  {activeProject.posts.length === 1 ? "post" : "posts"} · Shared project theme
+                  {activeProject.posts.length} post{activeProject.posts.length === 1 ? "" : "s"} · one shared theme
                 </p>
               </div>
             </div>
@@ -113,15 +108,10 @@ export function ProjectDetailPage() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  if (window.confirm(`Delete "${activeProject.name}" and all its posts?`)) {
-                    deleteProject(activeProject.id);
-                  }
-                }}
+                onClick={() => setConfirmDeleteProject(true)}
                 className={cn(ui.btnSecondary, "gap-2 text-red-400")}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete
               </button>
             </div>
           </div>
@@ -132,9 +122,9 @@ export function ProjectDetailPage() {
         <div className="mx-auto max-w-5xl">
           {activeProject.posts.length === 0 ? (
             <div className={cn(ui.card, ui.cardPad, "text-center")}>
-              <p className={ui.sectionTitle}>No posts in this project</p>
+              <p className={ui.sectionTitle}>Add your first post</p>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                Create a post to start designing compositions.
+                Each post is one graphic. Use the filmstrip in the editor to switch between them.
               </p>
               <button
                 type="button"
@@ -142,7 +132,7 @@ export function ProjectDetailPage() {
                 className={cn(ui.btnPrimary, "mt-4 gap-2")}
               >
                 <FilePlus className="h-4 w-4" />
-                Create first post
+                Create post
               </button>
             </div>
           ) : (
@@ -154,17 +144,26 @@ export function ProjectDetailPage() {
                   onOpen={() => openEditor(activeProject.id, post.id)}
                   onDuplicate={() => duplicatePost(activeProject.id, post.id)}
                   onRename={(name) => renamePost(activeProject.id, post.id, name)}
-                  onDelete={() => {
-                    if (window.confirm(`Delete "${post.name}"?`)) {
-                      deletePost(activeProject.id, post.id);
-                    }
-                  }}
+                  onDelete={() => deletePost(activeProject.id, post.id)}
                 />
               ))}
             </div>
           )}
         </div>
       </main>
+
+      <ConfirmDialog
+        open={confirmDeleteProject}
+        title="Delete project?"
+        description={`"${activeProject.name}" and all its posts will be permanently removed.`}
+        confirmLabel="Delete project"
+        destructive
+        onConfirm={() => {
+          setConfirmDeleteProject(false);
+          deleteProject(activeProject.id);
+        }}
+        onCancel={() => setConfirmDeleteProject(false)}
+      />
     </div>
   );
 }

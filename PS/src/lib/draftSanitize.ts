@@ -104,10 +104,3 @@ export function prepareDraftForEditor(
   return migrateDraftSpacing(validateDraft(stored, defaults));
 }
 
-/** @deprecated Use validateDraft or prepareDraftForEditor */
-export function sanitizeDraft(
-  stored: Partial<EditorDraft> | null | undefined,
-  defaults: EditorDraft,
-): EditorDraft {
-  return prepareDraftForEditor(stored, defaults);
-}

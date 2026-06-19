@@ -9,18 +9,13 @@ const ROLES: TextBlockRole[] = ["headline", "subhead", "body", "label", "badge",
 const ALIGNS: TextAlign[] = ["left", "center", "right"];
 
 export function ContentPanel() {
-  const { selectedBlock, updateBlock, deleteBlock, blocks } = usePsEditor();
+  const { selectedBlock, updateBlock, deleteBlock } = usePsEditor();
 
   if (!selectedBlock) {
     return (
-      <div className={cn(ui.cardInner, "flex flex-col items-center gap-3 p-6 text-center")}>
-        <MousePointerClick className="h-8 w-8 text-[var(--muted)]" />
-        <p className="text-sm text-[var(--muted)]">
-          Click a text block on the canvas to edit it.
-        </p>
-        <p className="text-xs text-[var(--muted-2)]">
-          {blocks.length} block{blocks.length === 1 ? "" : "s"} on canvas · drag to reposition
-        </p>
+      <div className={cn(ui.cardInner, "flex flex-col items-center gap-2 p-5 text-center")}>
+        <MousePointerClick className="h-7 w-7 text-[var(--muted)]" />
+        <p className="text-sm text-[var(--muted)]">Select a layer above or click text on the canvas.</p>
       </div>
     );
   }
