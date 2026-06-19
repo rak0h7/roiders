@@ -27,4 +27,11 @@ body,
   cursor: default !important;
   box-shadow: none !important;
   --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+[data-exporting="true"] [data-canvas-stage] {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }

@@ -1,28 +1,42 @@
 import { toPng } from "html-to-image";
 import type { CanvasSize } from "./canvasTypes";
 
+function waitForPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+}
+
+async function waitForFonts(): Promise<void> {
+  if (typeof document !== "undefined" && "fonts" in document) {
+    await document.fonts.ready;
+  }
+}
+
+/**
+ * Export the artboard at its native canvas dimensions.
+ * The node must already be laid out at size.width × size.height (see CanvasStage).
+ */
 export async function exportCanvasPng(
   node: HTMLElement,
   size: CanvasSize,
-  scale: 1 | 2,
+  pixelRatio: 1 | 2,
   filename: string,
 ): Promise<void> {
   node.setAttribute("data-exporting", "true");
-  const prevWidth = node.style.width;
-  const prevHeight = node.style.height;
-  const prevMaxWidth = node.style.maxWidth;
-  node.style.width = `${size.width}px`;
-  node.style.height = `${size.height}px`;
-  node.style.maxWidth = "none";
+  await waitForFonts();
+  await waitForPaint();
+
   try {
     const dataUrl = await toPng(node, {
-      width: size.width,
-      height: size.height,
-      pixelRatio: scale,
+      pixelRatio,
       cacheBust: true,
+      skipAutoScale: true,
       style: {
         transform: "none",
         margin: "0",
+        width: `${size.width}px`,
+        height: `${size.height}px`,
       },
     });
 
@@ -31,9 +45,6 @@ export async function exportCanvasPng(
     link.href = dataUrl;
     link.click();
   } finally {
-    node.style.width = prevWidth;
-    node.style.height = prevHeight;
-    node.style.maxWidth = prevMaxWidth;
     node.removeAttribute("data-exporting");
   }
 }
