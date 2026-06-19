@@ -3,8 +3,8 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { blocksFromPreset, LAYOUT_PRESETS } from "@ps/lib/contentPresets";
 import { repositionBlocksForCanvas } from "@ps/lib/layoutPlacement";
+import { getCanvasSize } from "@ps/lib/canvasSizes";
 import {
-  CANVAS_SIZES,
   createBlockId,
   type CanvasSizeId,
   type EditorDraft,
@@ -18,7 +18,7 @@ import { readDraft, writeDraft } from "@ps/lib/psStorage";
 interface PsEditorContextValue {
   blocks: TextBlock[];
   canvasSizeId: CanvasSizeId;
-  canvasSize: (typeof CANVAS_SIZES)[number];
+  canvasSize: ReturnType<typeof getCanvasSize>;
   layoutPresetId: LayoutPresetId;
   selectedBlockId: string | null;
   selectedBlock: TextBlock | null;
@@ -58,10 +58,7 @@ export function PsEditorProvider({ children }: { children: React.ReactNode }) {
     writeDraft(next);
   }, []);
 
-  const canvasSize = useMemo(
-    () => CANVAS_SIZES.find((s) => s.id === draft.canvasSizeId) ?? CANVAS_SIZES[0],
-    [draft.canvasSizeId],
-  );
+  const canvasSize = useMemo(() => getCanvasSize(draft.canvasSizeId), [draft.canvasSizeId]);
 
   const selectedBlock = useMemo(
     () => draft.blocks.find((b) => b.id === draft.selectedBlockId) ?? null,

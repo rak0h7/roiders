@@ -10,7 +10,6 @@ import { ContentCanvas } from "./ContentCanvas";
 import { ContentPanel } from "./ContentPanel";
 import { ThemePanel } from "./ThemePanel";
 import { ExportBar } from "./ExportBar";
-import { ToolbarGroup } from "./ToolbarGroup";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -36,19 +35,12 @@ export function EditorShell() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-            <ToolbarGroup label="Canvas">
-              <CanvasSizePicker />
-            </ToolbarGroup>
-            <ToolbarGroup label="Actions">
-              <div className="flex flex-wrap items-center gap-2">
-                <button type="button" onClick={addBlock} className={cn(ui.btnSecondary, "gap-2")}>
-                  <Plus className="h-4 w-4" />
-                  Add text
-                </button>
-                <ExportBar canvasRef={canvasRef} />
-              </div>
-            </ToolbarGroup>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={addBlock} className={cn(ui.btnSecondary, "gap-2")}>
+              <Plus className="h-4 w-4" />
+              Add text
+            </button>
+            <ExportBar canvasRef={canvasRef} />
           </div>
         </div>
       </header>
@@ -67,6 +59,10 @@ export function EditorShell() {
         </main>
 
         <aside className="flex min-h-0 w-full shrink-0 flex-col border-t border-[var(--border)] lg:h-auto lg:w-[26rem] lg:border-l lg:border-t-0 xl:w-[28rem]">
+          <div className="shrink-0 border-b border-[var(--border)] p-3 sm:p-4">
+            <p className={cn(ui.overline, "mb-2.5")}>Canvas size</p>
+            <CanvasSizePicker />
+          </div>
           <div className="shrink-0 border-b border-[var(--border)] p-3 sm:p-4">
             <p className={cn(ui.overline, "mb-2.5")}>Layout</p>
             <LayoutPresetPicker />

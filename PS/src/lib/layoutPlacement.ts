@@ -1,8 +1,10 @@
-import type { CanvasSizeId, LayoutPresetId, TextBlock, TextAlign, TextBlockRole } from "./canvasTypes";
+import type { LayoutPresetId, TextBlock, TextAlign, TextBlockRole } from "./canvasTypes";
+import type { CanvasSizeId } from "./canvasSizes";
+import { resolvePlacementKey, type PlacementKey } from "./canvasPlacement";
 
 type BlockTemplate = Omit<TextBlock, "id">;
 
-type PlacementMap = Partial<Record<CanvasSizeId, BlockTemplate[]>> & { default: BlockTemplate[] };
+type PlacementMap = Partial<Record<PlacementKey, BlockTemplate[]>> & { default: BlockTemplate[] };
 
 function block(
   partial: Omit<BlockTemplate, "role" | "align" | "text"> & {
@@ -194,7 +196,8 @@ export function getLayoutBlockTemplates(
   canvasSizeId: CanvasSizeId,
 ): BlockTemplate[] {
   const map = PLACEMENTS[presetId] ?? PLACEMENTS.blank;
-  return map[canvasSizeId] ?? map.default;
+  const key = resolvePlacementKey(canvasSizeId);
+  return map[key] ?? map.default;
 }
 
 export function repositionBlocksForCanvas(
