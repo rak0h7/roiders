@@ -9,7 +9,21 @@ export type LayoutPresetId =
   | "quote"
   | "stat"
   | "title-card"
-  | "roiders-club";
+  | "roiders-club"
+  | "tip-card"
+  | "product-drop"
+  | "testimonial"
+  | "event"
+  | "dual-stat"
+  | "checklist"
+  | "question-hook"
+  | "labs-result"
+  | "cycle-update"
+  | "motivation"
+  | "before-after"
+  | "listicle"
+  | "promo-code"
+  | "podcast-hook";
 
 export interface TextBlock {
   id: string;

@@ -9,7 +9,7 @@ export function LayoutPresetPicker() {
   const { layoutPresetId, applyLayoutPreset } = usePsEditor();
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid max-h-52 grid-cols-2 gap-2 overflow-y-auto pr-0.5">
       {LAYOUT_PRESETS.map((preset) => {
         const active = layoutPresetId === preset.id;
         return (
