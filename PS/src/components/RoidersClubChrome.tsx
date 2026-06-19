@@ -46,8 +46,7 @@ export function RoidersClubChrome() {
         style={{
           left: `${BRANDED_PAD.x}%`,
           right: `${BRANDED_PAD.x}%`,
-          height: "24%",
-          paddingBottom: `${BRANDED_PAD.bottom * 0.45}%`,
+          height: "20%",
         }}
       >
         <div

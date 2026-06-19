@@ -119,7 +119,7 @@ export function TextBlockLayer({ branded = false }: { branded?: boolean }) {
   return (
     <div
       ref={layerRef}
-      className="@container absolute inset-0"
+      className="@container relative h-full w-full"
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerLeave={onPointerUp}

@@ -7,7 +7,7 @@ import { TextBlockLayer } from "./TextBlockLayer";
 import { RoidersClubChrome } from "./RoidersClubChrome";
 import { CanvasThemeBackground } from "@ps/components/theme/CanvasThemeBackground";
 import { LAYOUT_PRESETS } from "@ps/lib/contentPresets";
-import { BRANDED_PAD } from "@ps/lib/brandedLayout";
+import { canvasContentInset } from "@ps/lib/brandedLayout";
 import { cn } from "@/lib/utils";
 
 export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_, ref) {
@@ -16,28 +16,19 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
   const aspect = canvasSize.width / canvasSize.height;
   const isPortrait = aspect < 1;
   const branded = LAYOUT_PRESETS.find((p) => p.id === layoutPresetId)?.branded ?? false;
+  const inset = canvasContentInset(branded);
 
   return (
-    <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-4 sm:p-6">
+    <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-6 lg:p-8">
       <div
         ref={ref}
         className={cn(
-          "relative z-10 shrink-0 overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
+          "relative max-h-full max-w-full overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
           "rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-base)]",
         )}
         style={{
-          aspectRatio: String(aspect),
-          ...(isPortrait
-            ? {
-                height: "min(calc(100vh - 11rem), 100%)",
-                width: "auto",
-                maxWidth: "100%",
-              }
-            : {
-                width: "min(100%, 52rem)",
-                height: "auto",
-                maxHeight: "calc(100vh - 11rem)",
-              }),
+          aspectRatio: `${canvasSize.width} / ${canvasSize.height}`,
+          ...(isPortrait ? { height: "100%", width: "auto" } : { width: "100%", height: "auto" }),
         }}
         onClick={() => selectBlock(null)}
       >
@@ -49,19 +40,7 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
             style={{ background: "radial-gradient(circle, var(--labs-glow), transparent)" }}
           />
         )}
-        <div
-          className={cn("@container absolute inset-0 z-10", !branded && "px-[8%] py-[8%]")}
-          style={
-            branded
-              ? {
-                  paddingLeft: `${BRANDED_PAD.x}%`,
-                  paddingRight: `${BRANDED_PAD.x}%`,
-                  paddingTop: `${BRANDED_PAD.top}%`,
-                  paddingBottom: `${BRANDED_PAD.bottom}%`,
-                }
-              : undefined
-          }
-        >
+        <div className="@container absolute z-10" style={inset}>
           <TextBlockLayer branded={branded} />
         </div>
       </div>
