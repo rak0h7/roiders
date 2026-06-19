@@ -3,7 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { CLOUD_SYNC_EVENT, labsModuleChanged, type CloudSyncEventDetail } from "@/lib/storeRehydrate";
-import { parseCSV, parseLabText } from "@/lib/parser";
+import { annotateExtractedHistorical, parseCSV, parseLabText } from "@/lib/parser";
 import { extractTextFromImages } from "@/lib/ocr";
 import { isLabCsv, isLabImage, isLabPdf, normalizeLabUpload } from "@/lib/labUpload";
 import { extractTextFromPDF } from "@/lib/pdf";
@@ -175,14 +175,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const parseAndExtract = useCallback((text: string, fileName = "Pasted Results") => {
-    const extracted = parseLabText(text);
-    setState((s) => ({
-      ...s,
-      extractedMarkers: extracted,
-      extractionFileName: fileName,
-      logView: "extraction",
-      mainTab: "log",
-    }));
+    setState((s) => {
+      const extracted = annotateExtractedHistorical(parseLabText(text), s.currentValues);
+      return {
+        ...s,
+        extractedMarkers: extracted,
+        extractionFileName: fileName,
+        logView: "extraction",
+        mainTab: "log",
+      };
+    });
   }, []);
 
   const handleFileUpload = useCallback(async (input: File | File[]) => {
@@ -202,10 +204,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       text = await extractTextFromPDF(file);
     } else if (isLabCsv(file)) {
       text = await file.text();
-      const extracted = parseCSV(text);
       setState((s) => ({
         ...s,
-        extractedMarkers: extracted,
+        extractedMarkers: annotateExtractedHistorical(parseCSV(text), s.currentValues),
         extractionFileName: fileName,
         logView: "extraction",
         mainTab: "log",
@@ -215,10 +216,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       text = await file.text();
     }
 
-    const extracted = parseLabText(text);
     setState((s) => ({
       ...s,
-      extractedMarkers: extracted,
+      extractedMarkers: annotateExtractedHistorical(parseLabText(text), s.currentValues),
       extractionFileName: fileName,
       logView: "extraction",
       mainTab: "log",
@@ -292,16 +292,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const values = Object.values(s.currentValues);
       if (values.length === 0) return s;
 
-      const report: BloodworkReport = {
-        id: generateId(),
-        name: name || s.extractionFileName || `Report ${s.reports.length + 1}`,
-        date: new Date().toLocaleDateString("en-GB"),
-        createdAt: new Date().toISOString(),
-        values,
-        source: s.extractionFileName,
-      };
+      const existing = s.activeReportId
+        ? s.reports.find((r) => r.id === s.activeReportId)
+        : undefined;
 
-      const reports = [report, ...s.reports];
+      let report: BloodworkReport;
+      let reports: BloodworkReport[];
+
+      if (existing) {
+        report = {
+          ...existing,
+          name: name || existing.name,
+          values,
+          source: s.extractionFileName || existing.source,
+        };
+        reports = s.reports.map((r) => (r.id === existing.id ? report : r));
+      } else {
+        report = {
+          id: generateId(),
+          name: name || s.extractionFileName || `Report ${s.reports.length + 1}`,
+          date: new Date().toLocaleDateString("en-GB"),
+          createdAt: new Date().toISOString(),
+          values,
+          source: s.extractionFileName,
+        };
+        reports = [report, ...s.reports];
+      }
+
       saveReports(reports);
       return { ...s, reports, activeReportId: report.id };
     });
@@ -349,17 +366,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, showComparison: show }));
   }, []);
 
-  const reviewFlags = useMemo(
-    () =>
-      buildMergedReviewFlags(
-        Object.values(state.currentValues),
-        new Date().toLocaleDateString("en-GB"),
-        state.rangeMode,
-        compounds,
-        state.currentValues
-      ),
-    [state.currentValues, state.rangeMode, compounds]
-  );
+  const reviewFlags = useMemo(() => {
+    const active = state.reports.find((r) => r.id === state.activeReportId);
+    const panelDate = active?.date ?? new Date().toLocaleDateString("en-GB");
+    return buildMergedReviewFlags(
+      Object.values(state.currentValues),
+      panelDate,
+      state.rangeMode,
+      compounds,
+      state.currentValues
+    );
+  }, [state.currentValues, state.rangeMode, state.reports, state.activeReportId, compounds]);
 
   const categoryScores = useMemo(
     () => calculateCategoryScores(state.currentValues, state.rangeMode),

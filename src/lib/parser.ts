@@ -1,5 +1,5 @@
 import { MARKERS } from "./markers";
-import type { ExtractedMarker } from "./types";
+import type { ExtractedMarker, MarkerValue } from "./types";
 import { getLabStatus } from "./ranges";
 import { normalizeToDefaultUnit, normalizeUnitString } from "./units";
 
@@ -186,7 +186,8 @@ export function parseCSV(text: string): ExtractedMarker[] {
       converted: normalized.converted,
       date: parts[3] || reportDate,
       labStatus,
-      selected: true,
+      selected: labStatus !== "lab-normal",
+      needsReview: labStatus !== "lab-normal",
     });
   }
 
@@ -246,3 +247,15 @@ WBC Count: 13.2 x10^9/L
 Total Testosterone: 1500 ng/dL
 Free Testosterone: 433 pg/mL
 Estradiol: 49.0 pg/mL`;
+
+/** Mark extracted rows that match markers already loaded in the active panel. */
+export function annotateExtractedHistorical(
+  extracted: ExtractedMarker[],
+  currentValues: Record<string, MarkerValue>
+): ExtractedMarker[] {
+  if (Object.keys(currentValues).length === 0) return extracted;
+  return extracted.map((m) => ({
+    ...m,
+    isHistorical: currentValues[m.markerId] !== undefined,
+  }));
+}

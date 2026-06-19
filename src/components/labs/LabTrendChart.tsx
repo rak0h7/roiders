@@ -6,20 +6,10 @@ import {
   CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import type { BloodworkReport } from "@/lib/types";
-import { MARKER_MAP } from "@/lib/markers";
+import { LAB_TREND_MARKERS } from "@/lib/labTrendMarkers";
 import { getChartTheme } from "@/lib/charts";
 import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
-
-const TREND_MARKERS = [
-  { id: "alt", label: "ALT" },
-  { id: "ast", label: "AST" },
-  { id: "hematocrit", label: "Hematocrit" },
-  { id: "hdl", label: "HDL" },
-  { id: "ldl", label: "LDL" },
-  { id: "estradiol", label: "E2" },
-  { id: "testosterone", label: "Testosterone" },
-] as const;
 
 type LabTrendChartProps = {
   reports: BloodworkReport[];
@@ -30,7 +20,7 @@ export function LabTrendChart({ reports }: LabTrendChartProps) {
 
   const { data, activeMarkers } = useMemo(() => {
     const sorted = [...reports].sort((a, b) => a.date.localeCompare(b.date));
-    const active = TREND_MARKERS.filter((m) =>
+    const active = LAB_TREND_MARKERS.filter((m) =>
       sorted.some((r) => r.values.some((v) => v.markerId === m.id))
     );
     const rows = sorted.map((report) => {

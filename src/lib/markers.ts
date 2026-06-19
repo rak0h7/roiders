@@ -41,7 +41,7 @@ const m = (
 export const MARKERS: MarkerDefinition[] = [
   // Hormonal
   m("total-testosterone", "Total Testosterone", "hormonal", "ng/dL", ["ng/dL", "nmol/L"], ["testosterone total", "testosterone, total", "total testosterone"], { labMin: 300, labMax: 1000, optimalMin: 500, optimalMax: 900, cautionMin: 900, cautionMax: 1200, strictThreshold: 1500 }),
-  m("free-testosterone", "Free Testosterone", "hormonal", "pg/mL", ["pg/mL", "pmol/L", "nmol/L"], ["free testosterone", "testosterone free", "free testosterone calculated"], { labMin: 9, labMax: 30, optimalMin: 231, optimalMax: 433 }),
+  m("free-testosterone", "Free Testosterone", "hormonal", "pg/mL", ["pg/mL", "pmol/L", "nmol/L"], ["free testosterone", "testosterone free", "free testosterone calculated"], { labMin: 9, labMax: 30, optimalMin: 67, optimalMax: 125 }),
   m("shbg", "SHBG", "hormonal", "nmol/L", ["nmol/L"], ["shbg", "sex hormone binding globulin"], { labMin: 10, labMax: 57, optimalMin: 40, optimalMax: 50 }),
   m("estradiol", "Estradiol (E2)", "hormonal", "pg/mL", ["pg/mL", "pmol/L"], ["estradiol", "e2", "oestradiol"], { labMin: 10, labMax: 40, optimalMin: 22, optimalMax: 38, cautionMin: 38, cautionMax: 50, strictThreshold: 60 }),
   m("lh", "LH", "hormonal", "mIU/mL", ["mIU/mL", "IU/L"], ["lh", "luteinizing hormone"], { labMin: 1.5, labMax: 9.3, optimalMin: 4, optimalMax: 7 }),

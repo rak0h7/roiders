@@ -68,7 +68,7 @@ export function evaluateSeverity(
       deviation += " above strict app threshold";
     } else if (r.cautionMax && v > r.cautionMax) {
       severity = "high";
-      deviation += " above strict app threshold";
+      deviation += " above caution band";
     } else if (r.cautionMin && v >= r.cautionMin) {
       severity = "yellow";
       deviation += " in app caution band";

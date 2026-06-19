@@ -86,7 +86,7 @@ export function enrichLabFlagsWithCycleContext(flags: ReviewFlag[], compounds: C
     const names = linked.map((c) => compoundLabel(c.compoundId));
     return {
       ...flag,
-      source: "lab" as const,
+      source: "stack" as const,
       relatedCompounds: linked.map((c) => c.compoundId),
       deviation: `${flag.deviation} • Linked to your stack: ${names.join(", ")}`,
     };

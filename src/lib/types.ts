@@ -56,7 +56,7 @@ export interface ExtractedMarker extends MarkerValue {
   needsReview?: boolean;
 }
 
-export type ReviewFlagSource = "lab" | "cycle";
+export type ReviewFlagSource = "lab" | "cycle" | "stack";
 
 export interface ReviewFlag {
   markerId: string;

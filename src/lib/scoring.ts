@@ -46,8 +46,10 @@ export function calculateCategoryScores(
     }
 
     if (yellowCount > 0) tags.push({ label: `${yellowCount} CAUT`, type: "caut" });
-    if (assessed > 0 && penalty < 10) tags.push({ label: "1 EASY", type: "easy" });
-    if (assessed > 0 && penalty >= 10 && penalty < 30) tags.push({ label: "1 STEP", type: "step" });
+    if (assessed > 0 && penalty === 0) tags.push({ label: `${assessed} EASY`, type: "easy" });
+    if (assessed > 0 && penalty >= 10 && penalty < 30) {
+      tags.push({ label: `${Math.max(1, Math.round(penalty / 12))} STEP`, type: "step" });
+    }
 
     const score = assessed === 0 ? null : Math.max(0, Math.min(100, 100 - penalty / Math.max(assessed, 1)));
 

@@ -58,6 +58,7 @@ describe("enrichLabFlagsWithCycleContext", () => {
     ];
 
     const enriched = enrichLabFlagsWithCycleContext(flags, decaStack);
+    expect(enriched[0].source).toBe("stack");
     expect(enriched[0].relatedCompounds).toContain("deca");
     expect(enriched[0].deviation).toContain("Deca");
   });
