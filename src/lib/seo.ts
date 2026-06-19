@@ -36,6 +36,7 @@ export function buildPageMetadata({ title, description, path = "" }: PageMetaInp
   return {
     title,
     description,
+    robots: { index: true, follow: true },
     alternates: { canonical: url },
     openGraph: {
       title,
@@ -76,9 +77,13 @@ export function webSiteJsonLd(description: string) {
       },
       {
         "@type": "SoftwareApplication",
+        "@id": `${url}/#software`,
         name: "Roiders Club",
         applicationCategory: "HealthApplication",
         operatingSystem: "Web",
+        browserRequirements: "Requires JavaScript",
+        featureList: ["Labs bloodwork tracking", "Gear cycle planning", "Training workout log", "Nutrition macro tracking"],
+        publisher: { "@id": `${url}/#organization` },
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         url,
         description,
@@ -101,11 +106,51 @@ export const PUBLIC_FAQ: FaqItem[] = [
       "No. Roiders Club is not Riders Club, Royal Enfield riders groups, or cycling marathon sites. It is a performance health tracking app at roiders.club.",
   },
   {
+    question: "Is Roiders Club a steroid shop or vendor?",
+    answer:
+      "No. Roiders Club does not sell compounds or operate as an e-commerce steroid site. It is a free harm-reduction-adjacent tracking tool for bloodwork, protocol planning, training, and nutrition — not a supplier.",
+  },
+  {
     question: "Is Roiders Club free?",
     answer:
       "Yes. Labs, gear, training, and nutrition trackers are free. Optional premium adds cloud sync and is available on request.",
   },
 ];
+
+export function featurePageJsonLd(page: {
+  slug: string;
+  h1: string;
+  metaDescription: string;
+  highlights: string[];
+  title: string;
+}) {
+  const base = getSiteUrl();
+  const url = `${base}/features/${page.slug}`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${url}/#webpage`,
+        url,
+        name: page.h1,
+        description: page.metaDescription,
+        isPartOf: { "@id": `${base}/#website` },
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": `${url}/#feature`,
+        name: `Roiders Club — ${page.title}`,
+        applicationCategory: "HealthApplication",
+        operatingSystem: "Web",
+        featureList: page.highlights,
+        publisher: { "@id": `${base}/#organization` },
+        url: base,
+        description: page.metaDescription,
+      },
+    ],
+  };
+}
 
 export function faqJsonLd(items: FaqItem[]) {
   return {

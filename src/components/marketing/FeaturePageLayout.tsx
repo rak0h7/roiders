@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { MarketingPageShell } from "@/components/marketing/MarketingPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import type { FeaturePage } from "@/lib/featurePages";
-import { getSiteUrl } from "@/lib/siteUrl";
+import { featurePageJsonLd } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
@@ -26,26 +26,10 @@ function accentText(accent: FeaturePage["accent"]) {
   }[accent];
 }
 
-function featureWebPageJsonLd(page: FeaturePage, siteName: string) {
-  const url = `${getSiteUrl()}/features/${page.slug}`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    url,
-    name: page.h1,
-    description: page.metaDescription,
-    isPartOf: {
-      "@type": "WebSite",
-      name: siteName,
-      url: getSiteUrl(),
-    },
-  };
-}
-
 export function FeaturePageLayout({ page, siteName, signupEnabled, premiumHref }: FeaturePageLayoutProps) {
   return (
     <MarketingPageShell siteName={siteName}>
-      <JsonLd data={featureWebPageJsonLd(page, siteName)} />
+      <JsonLd data={featurePageJsonLd(page)} />
 
       <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
         <Link

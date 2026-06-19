@@ -280,7 +280,7 @@ export function AdminSiteSettings({ onSaved }: Props) {
               </p>
               <AdminToggleRow
                 label="Public marketing landing"
-                description="When off, visitors at / are sent straight to login instead of the marketing page"
+                description="When off, visitors at / are sent straight to login instead of the marketing page. Keep enabled for SEO — disabling hides the homepage from Google."
                 checked={draft.public_landing_enabled}
                 onChange={(public_landing_enabled) => patch({ public_landing_enabled })}
               />

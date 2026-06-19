@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 import { fetchSiteSettings, resolveLegalContactHref } from "@/lib/siteSettings";
 
 const UPDATED = "June 18, 2026";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Privacy Policy",
   description:
     "How Roiders Club handles your data — local-first storage, optional cloud sync, and access-key authentication.",
-};
+  path: "/privacy",
+});
 
 export default async function PrivacyPage() {
   const settings = await fetchSiteSettings();

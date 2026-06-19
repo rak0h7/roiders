@@ -81,10 +81,12 @@ export function PublicHomeContent({ settings }: Props) {
           {description} Every core module is free. Premium cloud sync is available on request.
         </p>
 
-        <p className="mt-4 max-w-2xl rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-elevated)]/50 px-4 py-3 text-sm text-[var(--muted)]">
-          <strong className="text-[var(--foreground)]">Not motorcycle or cycling &quot;Riders Club&quot; sites.</strong>{" "}
-          {settings.site_name} at <strong className="text-[var(--foreground)]">roiders.club</strong> is a
-          performance health tracking app for bloodwork, protocol planning, training, and nutrition.
+        <p className="mt-4 max-w-2xl text-sm text-[var(--muted)]">
+          Not a steroid shop, motorcycle club, or cycling site —{" "}
+          <Link href="/about" className="text-[var(--labs)] hover:underline">
+            learn what {settings.site_name} is
+          </Link>
+          .
         </p>
 
         <div className="mt-8 flex flex-wrap items-center gap-3">

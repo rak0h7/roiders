@@ -56,6 +56,27 @@ export default async function AboutPage() {
 
           <section className="space-y-3">
             <h2 className="text-base font-semibold text-[var(--foreground)]">
+              Not a steroid shop or compound vendor
+            </h2>
+            <p>
+              <strong className="text-[var(--foreground)]">{settings.site_name}</strong> does not sell compounds,
+              ship products, or operate as an e-commerce steroid site. There is no cart, no checkout, and no
+              inventory. The app is a harm-reduction-adjacent tracking tool: log bloodwork, plan protocols,
+              record training, and track nutrition so you can make more informed decisions with your own data and
+              clinical guidance.
+            </p>
+            <p>
+              If you landed here looking for a &quot;roid&quot; brand or underground vendor marketplace, that is
+              not what this is. See our{" "}
+              <Link href="/terms" className="text-[var(--labs)] hover:underline">
+                Terms of Service
+              </Link>{" "}
+              for the educational-use disclaimer.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-base font-semibold text-[var(--foreground)]">
               Not &quot;Riders Club&quot; motorcycle or cycling sites
             </h2>
             <p>

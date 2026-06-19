@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPageShell } from "@/components/legal/LegalPageShell";
+import { buildPageMetadata } from "@/lib/seo";
 import { fetchSiteSettings, resolveLegalContactHref } from "@/lib/siteSettings";
 
 const UPDATED = "June 18, 2026";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Terms of Service",
   description:
     "Terms of Service for Roiders Club — private performance health tracking with access-key authentication.",
-};
+  path: "/terms",
+});
 
 export default async function TermsPage() {
   const settings = await fetchSiteSettings();
