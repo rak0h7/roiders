@@ -1,6 +1,7 @@
 import type { LayoutPresetId, TextBlock, TextAlign, TextBlockRole } from "./canvasTypes";
 import type { CanvasSizeId } from "./canvasSizes";
 import { resolvePlacementKey, type PlacementKey } from "./canvasPlacement";
+import { spaceBlocksVertically } from "./blockSpacing";
 
 type BlockTemplate = Omit<TextBlock, "id">;
 
@@ -142,31 +143,31 @@ const PLACEMENTS: Record<LayoutPresetId, PlacementMap> = {
     ],
     "9:16": [
       block({ x: 50, y: 0, width: 50, text: "Performance health", role: "badge", align: "right" }),
-      block({ x: 0, y: 18, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
-      block({ x: 0, y: 32, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
+      block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
+      block({ x: 0, y: 48, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
         x: 0,
-        y: 44,
+        y: 58,
         width: 100,
         text: "One private command center for everything you track on cycle.",
         role: "body",
         align: "left",
       }),
-      block({ x: 0, y: 72, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+      block({ x: 0, y: 82, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
     "4:5": [
       block({ x: 50, y: 0, width: 50, text: "Performance health", role: "badge", align: "right" }),
-      block({ x: 0, y: 18, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
-      block({ x: 0, y: 32, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
+      block({ x: 0, y: 14, width: 100, text: "Roiders Club", role: "headline", align: "left" }),
+      block({ x: 0, y: 46, width: 100, text: "Labs · Gear · Training · Nutrition", role: "subhead", align: "left" }),
       block({
         x: 0,
-        y: 44,
+        y: 56,
         width: 100,
         text: "One private command center for everything you track on cycle.",
         role: "body",
         align: "left",
       }),
-      block({ x: 0, y: 72, width: 100, text: "roiders.club", role: "footer", align: "left" }),
+      block({ x: 0, y: 78, width: 100, text: "roiders.club", role: "footer", align: "left" }),
     ],
     "1:1": [
       block({ x: 50, y: 0, width: 50, text: "Performance health", role: "badge", align: "right" }),
@@ -534,4 +535,12 @@ export function repositionBlocksForCanvas(
       fontSize: template.fontSize ?? block.fontSize,
     };
   });
+}
+
+export function layoutBlocksForCanvas(
+  blocks: TextBlock[],
+  presetId: LayoutPresetId,
+  canvasSizeId: CanvasSizeId,
+): TextBlock[] {
+  return spaceBlocksVertically(repositionBlocksForCanvas(blocks, presetId, canvasSizeId));
 }

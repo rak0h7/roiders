@@ -40,7 +40,7 @@ function sanitizePost(raw: unknown, index: number): Post | null {
     name: post.name.trim() || `Post ${index + 1}`,
     createdAt,
     updatedAt,
-    draft: sanitizeDraft(post.draft, createDefaultDraft()),
+    draft: sanitizeDraft(post.draft as Partial<EditorDraft>, createDefaultDraft()),
   };
 }
 

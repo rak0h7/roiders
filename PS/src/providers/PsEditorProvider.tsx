@@ -9,7 +9,7 @@ import React, {
   useState,
 } from "react";
 import { blocksFromPreset, LAYOUT_PRESETS } from "@ps/lib/contentPresets";
-import { repositionBlocksForCanvas } from "@ps/lib/layoutPlacement";
+import { layoutBlocksForCanvas } from "@ps/lib/layoutPlacement";
 import { getCanvasSize } from "@ps/lib/canvasSizes";
 import { sanitizeDraft } from "@ps/lib/draftSanitize";
 import { createDefaultDraft } from "@ps/lib/projectTypes";
@@ -75,7 +75,7 @@ export function PsEditorProvider({ postDraft, onDraftChange, children }: PsEdito
         return {
           ...prev,
           canvasSizeId: id,
-          blocks: repositionBlocksForCanvas(prev.blocks, prev.layoutPresetId, id),
+          blocks: layoutBlocksForCanvas(prev.blocks, prev.layoutPresetId, id),
         };
       });
     },

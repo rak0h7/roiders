@@ -19,16 +19,19 @@ export const ContentCanvas = forwardRef<HTMLDivElement>(function ContentCanvas(_
   const inset = canvasContentInset(branded);
 
   return (
-    <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden p-5 sm:p-6 lg:p-8">
+    <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[var(--bg-base)]/40 p-3 sm:p-4 lg:p-5">
       <div
         ref={ref}
         className={cn(
-          "relative max-h-full max-w-full overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
+          "relative overflow-hidden shadow-[0_24px_80px_rgba(0,0,0,0.45)]",
           "rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-base)]",
         )}
         style={{
           aspectRatio: `${canvasSize.width} / ${canvasSize.height}`,
-          ...(isPortrait ? { height: "100%", width: "auto" } : { width: "100%", height: "auto" }),
+          maxHeight: "calc(100dvh - 11rem)",
+          maxWidth: "100%",
+          width: isPortrait ? `min(100%, calc((100dvh - 11rem) * ${aspect}))` : "100%",
+          height: isPortrait ? "auto" : `min(100%, calc((100dvh - 11rem) / ${aspect}))`,
         }}
         onClick={() => selectBlock(null)}
       >

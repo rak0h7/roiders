@@ -34,62 +34,8 @@ export function EditorShell() {
   return (
     <div className="relative z-10 flex h-full min-h-0 flex-col overflow-hidden">
       <header className="shrink-0 border-b border-[var(--border)] bg-[var(--bg-elevated)]/50 px-4 py-3 backdrop-blur-sm sm:px-5">
-        <div className="mb-2 flex items-center gap-1 text-xs text-[var(--muted)]">
-          <button type="button" onClick={goToProjects} className={cn(ui.btnGhost, "h-7 px-2")}>
-            Projects
-          </button>
-          {activeProject && (
-            <>
-              <ChevronRight className="h-3 w-3 shrink-0" />
-              <button
-                type="button"
-                onClick={() => openProject(activeProject.id)}
-                className={cn(ui.btnGhost, "h-7 max-w-[10rem] truncate px-2")}
-              >
-                {activeProject.name}
-              </button>
-            </>
-          )}
-          {activePost && (
-            <>
-              <ChevronRight className="h-3 w-3 shrink-0" />
-              {renamingPost ? (
-                <input
-                  autoFocus
-                  value={postName}
-                  onChange={(e) => setPostName(e.target.value)}
-                  onBlur={submitPostRename}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") submitPostRename();
-                    if (e.key === "Escape") {
-                      setPostName(activePost.name);
-                      setRenamingPost(false);
-                    }
-                  }}
-                  className={cn(ui.inputCompact, "h-7 max-w-[12rem]")}
-                />
-              ) : (
-                <span className="flex items-center gap-1 truncate font-medium text-[var(--foreground)]">
-                  {activePost.name}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPostName(activePost.name);
-                      setRenamingPost(true);
-                    }}
-                    className={ui.btnIconMicro}
-                    aria-label="Rename post"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </button>
-                </span>
-              )}
-            </>
-          )}
-        </div>
-
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <button
               type="button"
               onClick={() => activeProject && openProject(activeProject.id)}
@@ -98,12 +44,60 @@ export function EditorShell() {
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
-            <div className="min-w-0">
-              <h1 className={ui.sectionTitle}>{activePost?.name ?? "Editor"}</h1>
-              <p className={ui.sectionSub}>
-                {activeProject?.name ?? "Project"} · Auto-saved
-              </p>
-            </div>
+
+            <nav className="flex min-w-0 flex-1 items-center gap-1 text-xs text-[var(--muted)]">
+              <button type="button" onClick={goToProjects} className={cn(ui.btnGhost, "h-7 shrink-0 px-2")}>
+                Projects
+              </button>
+              {activeProject && (
+                <>
+                  <ChevronRight className="h-3 w-3 shrink-0 opacity-50" />
+                  <button
+                    type="button"
+                    onClick={() => openProject(activeProject.id)}
+                    className={cn(ui.btnGhost, "h-7 max-w-[9rem] truncate px-2")}
+                  >
+                    {activeProject.name}
+                  </button>
+                </>
+              )}
+              {activePost && (
+                <>
+                  <ChevronRight className="h-3 w-3 shrink-0 opacity-50" />
+                  {renamingPost ? (
+                    <input
+                      autoFocus
+                      value={postName}
+                      onChange={(e) => setPostName(e.target.value)}
+                      onBlur={submitPostRename}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitPostRename();
+                        if (e.key === "Escape") {
+                          setPostName(activePost.name);
+                          setRenamingPost(false);
+                        }
+                      }}
+                      className={cn(ui.inputCompact, "h-7 max-w-[11rem]")}
+                    />
+                  ) : (
+                    <span className="flex min-w-0 items-center gap-1 truncate font-medium text-[var(--foreground)]">
+                      <span className="truncate">{activePost.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPostName(activePost.name);
+                          setRenamingPost(true);
+                        }}
+                        className={ui.btnIconMicro}
+                        aria-label="Rename post"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+                </>
+              )}
+            </nav>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -114,14 +108,16 @@ export function EditorShell() {
             <ExportBar canvasRef={canvasRef} />
           </div>
         </div>
+
+        <p className="mt-2 pl-11 text-xs text-[var(--muted)]">
+          {preset?.label ?? "Canvas"} · {canvasSize.label} · Auto-saved
+        </p>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,38vh)] lg:grid-cols-[minmax(0,1fr)_26rem] lg:grid-rows-1 xl:grid-cols-[minmax(0,1fr)_28rem]">
+      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(0,36vh)] lg:grid-cols-[minmax(0,1fr)_24rem] lg:grid-rows-1 xl:grid-cols-[minmax(0,1fr)_26rem]">
         <main className="relative flex min-h-0 min-w-0 flex-col overflow-hidden bg-[var(--bg-base)]">
           <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[var(--border)]/60 px-4 py-2 text-xs text-[var(--muted)]">
-            <span>
-              {preset?.label ?? "Canvas"} · {canvasSize.label}
-            </span>
+            <span>Canvas preview</span>
             <span>
               {canvasSize.width}×{canvasSize.height}px export
             </span>

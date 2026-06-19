@@ -1,5 +1,5 @@
 import { blocksFromPreset, LAYOUT_PRESETS } from "./contentPresets";
-import { repositionBlocksForCanvas } from "./layoutPlacement";
+import { layoutBlocksForCanvas } from "./layoutPlacement";
 import { normalizeCanvasSizeId } from "./canvasSizes";
 import type { EditorDraft, LayoutPresetId, TextBlock } from "./canvasTypes";
 
@@ -42,7 +42,11 @@ export function sanitizeDraft(stored: Partial<EditorDraft> | null | undefined, d
 
   if (blocks.length === 0) {
     return {
-      blocks: blocksFromPreset(layoutPresetId, canvasSizeId),
+      blocks: layoutBlocksForCanvas(
+        blocksFromPreset(layoutPresetId, canvasSizeId),
+        layoutPresetId,
+        canvasSizeId,
+      ),
       canvasSizeId,
       layoutPresetId,
       selectedBlockId: null,
@@ -50,7 +54,7 @@ export function sanitizeDraft(stored: Partial<EditorDraft> | null | undefined, d
   }
 
   return {
-    blocks: repositionBlocksForCanvas(blocks, layoutPresetId, canvasSizeId),
+    blocks: layoutBlocksForCanvas(blocks, layoutPresetId, canvasSizeId),
     canvasSizeId,
     layoutPresetId,
     selectedBlockId:
