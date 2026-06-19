@@ -266,11 +266,15 @@ function normalizeRow(row: Record<string, unknown>): SiteSettings {
 }
 
 export async function fetchSiteSettings(): Promise<SiteSettings> {
-  const admin = createAdminClient();
-  const { data, error } = await admin.from("site_settings").select("*").eq("id", 1).maybeSingle();
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.from("site_settings").select("*").eq("id", 1).maybeSingle();
 
-  if (error || !data) return DEFAULT_SITE_SETTINGS;
-  return normalizeRow(data);
+    if (error || !data) return DEFAULT_SITE_SETTINGS;
+    return normalizeRow(data);
+  } catch {
+    return DEFAULT_SITE_SETTINGS;
+  }
 }
 
 export async function fetchAccountCount(): Promise<number> {

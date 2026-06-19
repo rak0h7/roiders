@@ -42,7 +42,11 @@ export function writeLocalModule(
   options?: { touchLocal?: boolean }
 ): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(LOCAL_STORAGE_KEYS[module], JSON.stringify(data));
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEYS[module], JSON.stringify(data));
+  } catch {
+    return;
+  }
   if (updatedAt) {
     setLocalUpdatedAt(module, updatedAt);
   } else if (options?.touchLocal !== false) {
@@ -62,7 +66,11 @@ function readSyncMeta(): SyncMeta {
 
 function writeSyncMeta(meta: SyncMeta): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta));
+  try {
+    localStorage.setItem(SYNC_META_KEY, JSON.stringify(meta));
+  } catch {
+    return;
+  }
 }
 
 function getLocalUpdatedAt(module: CloudModule): string | null {

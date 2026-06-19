@@ -20,6 +20,7 @@ import {
   setUsernamesSchemaKnown,
 } from "@/lib/profile";
 import { formatUsername, normalizeUsername } from "@/lib/username";
+import { ensureAccountStorageScope, resetAccountLocalState } from "@/lib/accountStorage";
 import { canUserCloudSync, PREMIUM_SYNC_REQUIRED_MESSAGE } from "@/lib/cloudSyncAccess";
 
 interface AuthResult {
@@ -259,45 +260,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     primeUsernamesSchema(schemaPromise);
 
     const bootstrap = async () => {
-      const enabled = await schemaPromise;
-      setUsernamesSchemaKnown(enabled);
-      setUsernamesEnabled(enabled);
+      try {
+        const enabled = await schemaPromise;
+        setUsernamesSchemaKnown(enabled);
+        setUsernamesEnabled(enabled);
 
-      const { data } = await supabase.auth.getSession();
-      const nextUser = data.session?.user ?? null;
-      setUser(nextUser);
-      await refreshProfile(nextUser);
+        const { data } = await supabase.auth.getSession();
+        const nextUser = data.session?.user ?? null;
+        if (nextUser) await ensureAccountStorageScope(nextUser.id);
+        setUser(nextUser);
+        await refreshProfile(nextUser);
 
-      if (nextUser) {
+        if (nextUser) {
+          try {
+            const result = await pullOnce(nextUser.id);
+            if (result) applyPullResult(result);
+          } catch {
+            /* local-only fallback */
+          }
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void bootstrap();
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      try {
+        const nextUser = session?.user ?? null;
+        if (nextUser) await ensureAccountStorageScope(nextUser.id);
+        setUser(nextUser);
+        await refreshProfile(nextUser);
+
+        if (!nextUser) {
+          pullState.current = { userId: null, promise: null };
+          setSyncConflicts([]);
+          if (event === "SIGNED_OUT") await resetAccountLocalState();
+          return;
+        }
+
+        if (event !== "SIGNED_IN" && event !== "INITIAL_SESSION") return;
+
         try {
           const result = await pullOnce(nextUser.id);
           if (result) applyPullResult(result);
         } catch {
           /* local-only fallback */
         }
-      }
-
-      setLoading(false);
-    };
-
-    void bootstrap();
-
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const nextUser = session?.user ?? null;
-      setUser(nextUser);
-      await refreshProfile(nextUser);
-
-      if (!nextUser) {
-        pullState.current = { userId: null, promise: null };
-        setSyncConflicts([]);
-        return;
-      }
-
-      try {
-        const result = await pullOnce(nextUser.id);
-        if (result) applyPullResult(result);
       } catch {
-        /* local-only fallback */
+        /* keep current UI state; bootstrap/sign-in flows surface errors */
       }
     });
 
@@ -363,6 +377,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const nextUser = session.user;
+      await ensureAccountStorageScope(nextUser.id);
       setUser(nextUser);
       pullState.current = { userId: null, promise: null };
 
@@ -406,6 +421,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error: session.error ?? "Account created but session was not established" };
     }
 
+    await ensureAccountStorageScope(session.user.id);
     setUser(session.user);
     await refreshProfile(session.user);
 
@@ -433,8 +449,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     if (!supabase) return;
-    if (user && canCloudSync) await syncAndApplyUserData(supabase, user.id);
+    if (user && canCloudSync) {
+      try {
+        await syncAndApplyUserData(supabase, user.id);
+      } catch {
+        /* proceed with sign-out even if final sync fails */
+      }
+    }
     await supabase.auth.signOut();
+    await resetAccountLocalState();
     setUser(null);
     setUsernameState(null);
     setDisplayNameState(null);

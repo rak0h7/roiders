@@ -7,7 +7,11 @@ export function createCloudPersistStorage(module: CloudModule): StateStorage {
   return {
     getItem: (name) => localStorage.getItem(name),
     setItem: (name, value) => {
-      localStorage.setItem(name, value);
+      try {
+        localStorage.setItem(name, value);
+      } catch {
+        return;
+      }
       if (name === key) touchLocalModule(module);
     },
     removeItem: (name) => localStorage.removeItem(name),
