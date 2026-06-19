@@ -25,6 +25,7 @@ import { canUserCloudSync, PREMIUM_SYNC_REQUIRED_MESSAGE } from "@/lib/cloudSync
 interface AuthResult {
   error: string | null;
   accessKey?: string;
+  needsWelcome?: boolean;
 }
 
 type AuthApiResponse = {
@@ -75,6 +76,7 @@ interface AuthContextValue {
   usernamesEnabled: boolean;
   profileLoading: boolean;
   loading: boolean;
+  rehydrateSession: () => Promise<void>;
   signIn: (accessKey: string) => Promise<AuthResult>;
   createAccount: () => Promise<AuthResult>;
   setUsername: (raw: string) => Promise<{ error: string | null }>;
@@ -329,19 +331,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user, supabase, canCloudSync]);
 
+  const rehydrateSession = useCallback(async () => {
+    if (!supabase) return;
+    const { data } = await supabase.auth.getSession();
+    const nextUser = data.session?.user ?? null;
+    setUser(nextUser);
+    if (nextUser) await refreshProfile(nextUser);
+  }, [supabase, refreshProfile]);
+
   const signIn = useCallback(
     async (accessKey: string) => {
       if (!supabase) return { error: "Auth is not configured" };
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessKey }),
-      });
-
-      const data = (await res.json()) as AuthApiResponse;
-      if (!res.ok) return { error: data.error ?? "Sign in failed" };
+      let data: AuthApiResponse;
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accessKey }),
+        });
+        data = (await res.json()) as AuthApiResponse;
+        if (!res.ok) return { error: data.error ?? "Sign in failed" };
+      } catch {
+        return { error: "Sign in request failed" };
+      }
 
       const session = await establishBrowserSession(supabase, data);
       if (session.error || !session.user) {
@@ -350,13 +364,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const nextUser = session.user;
       setUser(nextUser);
+      pullState.current = { userId: null, promise: null };
 
-      if (nextUser) {
-        pullState.current = { userId: null, promise: null };
-        const profile = await refreshProfile(nextUser);
-        if (profile && canUserCloudSync(siteSettings.cloud_sync_enabled, profile)) {
-          try {
-            const result = await pullAndApplyUserData(supabase, nextUser.id);
+      const profile = await refreshProfile(nextUser);
+      const needsWelcome = Boolean(profile?.usernames_enabled && !profile.username);
+
+      if (profile && canUserCloudSync(siteSettings.cloud_sync_enabled, profile)) {
+        void pullAndApplyUserData(supabase, nextUser.id)
+          .then((result) => {
             pullState.current.userId = nextUser.id;
             setSyncConflicts(result.conflicts);
             setSyncStatus({
@@ -366,14 +381,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               lastPushed: [],
               lastError: null,
             });
-          } catch (e) {
+          })
+          .catch((e) => {
             const msg = e instanceof Error ? e.message : "Sync failed";
             setSyncStatus((s) => ({ ...s, syncing: false, lastError: msg }));
-          }
-        }
+          });
       }
 
-      return { error: null };
+      return { error: null, needsWelcome };
     },
     [supabase, refreshProfile, siteSettings.cloud_sync_enabled],
   );
@@ -444,6 +459,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         usernamesEnabled,
         profileLoading,
         loading,
+        rehydrateSession,
         signIn,
         createAccount,
         setUsername,

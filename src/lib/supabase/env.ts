@@ -52,6 +52,11 @@ export function isSupabaseConfigured(): boolean {
   return Boolean(getSupabaseUrlOptional() && getSupabaseAnonKeyOptional());
 }
 
+/** True when any non-empty service role / secret key is configured. */
+export function hasServiceRoleKey(): boolean {
+  return Boolean(getSupabaseServiceKeyOptional());
+}
+
 /** True only when service key exists and matches the configured project ref. */
 export function hasSupabaseServiceKey(): boolean {
   const urlRef = projectRefFromUrl(getSupabaseUrlOptional());
@@ -70,7 +75,7 @@ export function hasSupabaseServiceKey(): boolean {
 
 export function isAuthServerConfigured(): boolean {
   if (!isSupabaseConfigured()) return false;
-  if (hasSupabaseServiceKey()) return true;
+  if (hasServiceRoleKey()) return true;
   return Boolean(
     process.env.DATABASE_URL ??
       process.env.SUPABASE_DB_URL ??

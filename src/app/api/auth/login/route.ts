@@ -1,21 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import {
   fingerprintAccessKey,
-  internalEmail,
   normalizeAccessKey,
   verifyAccessKey,
 } from "@/lib/accessKey.server";
+import {
+  isInvalidCredentialsError,
+  repairAccountCredentials,
+  signInWithSessionSecret,
+} from "@/lib/auth/loginSession";
 import { isAdminFingerprint } from "@/lib/adminFingerprint";
 import { queryPg } from "@/lib/db/postgres.server";
 import { OWNER_DISPLAY_NAME, OWNER_USERNAME } from "@/lib/profile";
-import { createAdminClient, createAuthClient } from "@/lib/supabase/admin";
-import { hasSupabaseServiceKey, isAuthServerConfigured } from "@/lib/supabase/env";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { hasServiceRoleKey, isAuthServerConfigured } from "@/lib/supabase/env";
 import { jsonWithSession } from "@/lib/supabase/route";
 
 type LoginProfile = { id: string; access_key_hash: string };
 
 async function loadProfile(keyFingerprint: string): Promise<LoginProfile | null> {
-  if (hasSupabaseServiceKey()) {
+  if (hasServiceRoleKey()) {
     const admin = createAdminClient();
     const { data: profile, error } = await admin
       .from("profiles")
@@ -47,7 +51,7 @@ async function loadProfileViaPg(keyFingerprint: string): Promise<LoginProfile | 
 }
 
 async function loadSessionSecret(userId: string): Promise<string | null> {
-  if (hasSupabaseServiceKey()) {
+  if (hasServiceRoleKey()) {
     const admin = createAdminClient();
     const { data: secretRow, error } = await admin
       .from("auth_secrets")
@@ -69,7 +73,7 @@ async function loadSessionSecret(userId: string): Promise<string | null> {
 async function promoteOwner(profileId: string, keyFingerprint: string) {
   if (!isAdminFingerprint(keyFingerprint)) return;
 
-  if (hasSupabaseServiceKey()) {
+  if (hasServiceRoleKey()) {
     const admin = createAdminClient();
     const { data: profile } = await admin
       .from("profiles")
@@ -102,6 +106,58 @@ async function promoteOwner(profileId: string, keyFingerprint: string) {
   );
 }
 
+async function resolveSession(profileId: string): Promise<{ session: { access_token: string; refresh_token: string } | null; error: string | null }> {
+  let sessionSecret = await loadSessionSecret(profileId);
+
+  if (!sessionSecret) {
+    try {
+      sessionSecret = await repairAccountCredentials(profileId);
+    } catch (err) {
+      return {
+        session: null,
+        error: err instanceof Error ? err.message : "Account credentials unavailable",
+      };
+    }
+  }
+
+  let attempt = await signInWithSessionSecret(profileId, sessionSecret);
+  if (attempt.session) {
+    return {
+      session: {
+        access_token: attempt.session.access_token,
+        refresh_token: attempt.session.refresh_token,
+      },
+      error: null,
+    };
+  }
+
+  if (!isInvalidCredentialsError(attempt.error ?? undefined)) {
+    return { session: null, error: attempt.error ?? "Sign in failed" };
+  }
+
+  try {
+    sessionSecret = await repairAccountCredentials(profileId);
+  } catch (err) {
+    return {
+      session: null,
+      error: err instanceof Error ? err.message : "Credential repair failed",
+    };
+  }
+
+  attempt = await signInWithSessionSecret(profileId, sessionSecret);
+  if (!attempt.session) {
+    return { session: null, error: attempt.error ?? "Sign in failed after credential repair" };
+  }
+
+  return {
+    session: {
+      access_token: attempt.session.access_token,
+      refresh_token: attempt.session.refresh_token,
+    },
+    error: null,
+  };
+}
+
 export async function POST(request: NextRequest) {
   if (!isAuthServerConfigured()) {
     return NextResponse.json({ error: "Auth server is not configured" }, { status: 503 });
@@ -130,9 +186,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid access key" }, { status: 401 });
   }
 
-  let sessionSecret: string | null;
+  let sessionResult: { session: { access_token: string; refresh_token: string } | null; error: string | null };
   try {
-    sessionSecret = await loadSessionSecret(profile.id);
+    sessionResult = await resolveSession(profile.id);
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Credential lookup failed" },
@@ -140,38 +196,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!sessionSecret) {
-    return NextResponse.json({ error: "Account credentials unavailable" }, { status: 500 });
-  }
-
-  const authClient = hasSupabaseServiceKey() ? createAdminClient() : createAuthClient();
-  const { data: sessionData, error: sessionError } = await authClient.auth.signInWithPassword({
-    email: internalEmail(profile.id),
-    password: sessionSecret,
-  });
-
-  if (sessionError || !sessionData.session) {
-    return NextResponse.json(
-      { error: sessionError?.message ?? "Sign in failed" },
-      { status: 401 },
-    );
+  if (!sessionResult.session) {
+    const status = sessionResult.error?.toLowerCase().includes("invalid") ? 401 : 500;
+    return NextResponse.json({ error: sessionResult.error ?? "Sign in failed" }, { status });
   }
 
   try {
     await promoteOwner(profile.id, keyFingerprint);
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Admin promotion failed" },
-      { status: 500 },
-    );
+    console.error("Admin promotion failed during login:", err);
   }
 
-  return jsonWithSession(
-    request,
-    {
-      access_token: sessionData.session.access_token,
-      refresh_token: sessionData.session.refresh_token,
-    },
-    { ok: true },
-  );
+  return jsonWithSession(request, sessionResult.session, { ok: true });
 }

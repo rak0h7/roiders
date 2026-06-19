@@ -35,7 +35,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       return;
     }
 
-    window.location.assign(next);
+    window.location.assign(result.needsWelcome ? "/welcome" : next);
   };
 
   const handleCreate = async () => {
