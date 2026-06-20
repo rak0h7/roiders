@@ -402,4 +402,142 @@ export const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: "hydration-electrolytes-retention",
+    title: "Hydration Manipulation: Why More Water Can Mean Less Water Retention",
+    tagline:
+      "Steady water and electrolyte balance affects day-to-day leanness and recovery — not just \"drink more.\"",
+    category: "diet",
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Most people treat hydration as an afterthought — drink when thirsty, maybe more on training days. But water and electrolyte intake is one of the more controllable levers for how lean and defined you look day to day, independent of body fat. Some days you look dry and sharp; other days you look puffy and smooth despite eating and training the same. That swing is usually water, not fat, and it's largely manageable.",
+      },
+      {
+        heading: "The core mechanism",
+        body: "When water intake increases and stays elevated, the body suppresses antidiuretic hormone (ADH) and shifts toward producing more dilute urine. When intake is brought back down, ADH suppression can persist roughly 24–36 hours — during which total body water can fall faster than the change in intake alone would predict. This is the same physiological lag exploited during competition peak week. You don't need that level of manipulation to benefit from the principle: consistently high water intake, sustained over time, trains the body to stop holding water defensively. The flip side: inconsistent hydration keeps the body in a more defensive, water-retentive state.",
+      },
+      {
+        heading: "Electrolytes are the other half",
+        body: "Increasing water without adequate electrolytes doesn't improve hydration — it dilutes you. Plain water with no sodium, potassium, or magnesium often passes through largely unused rather than being retained at the cellular level. Sodium is what kidneys use to regulate fluid; without it, water moves through faster than your body can use it.",
+        blocks: [
+          {
+            heading: "Sodium",
+            body: "Sodium is the primary driver of how much water your body holds. A very high-sodium meal causes fast extracellular bloat. Cutting sodium too aggressively isn't the answer either — sodium also helps muscles hold glycogen and water intracellularly, which supports a full, vascular look rather than a flat one.",
+          },
+          {
+            heading: "Potassium",
+            body: "Potassium counterbalances sodium through the same hormonal system — aldosterone tends to reabsorb sodium while losing potassium in urine. Potassium helps flush excess water the body doesn't need, including subcutaneous retention that blurs definition. It's harder to get from diet than sodium; potatoes, leafy greens, and fruit are reliable sources.",
+          },
+          {
+            heading: "Magnesium",
+            body: "Magnesium supports the sodium-potassium pump and is often under-consumed from diet alone. If you supplement, form matters: magnesium oxide is poorly absorbed compared with citrate or other chelated forms. For hydration and electrolyte balance goals, citrate is generally preferable to oxide at the same labeled dose.",
+          },
+        ],
+      },
+      {
+        heading: "Why the balance matters (RAAS)",
+        body: "Sodium, potassium, and magnesium are tied together by the renin-angiotensin-aldosterone system (RAAS). Large single boluses of water or electrolytes are less effective than spreading intake steadily across the day — a slow supply lets the system regulate around a stable baseline rather than reacting to spikes and troughs.",
+      },
+      {
+        heading: "Hydration, sleep, and recovery",
+        body: "Hydration status affects sleep architecture and recovery, not just appearance. Controlled studies in resistance-trained men have reported shifts toward lighter sleep under dehydration, with authors noting that adequate fluid intake may improve sleep efficiency and deeper sleep stages relevant to tissue recovery. If recovery feels inconsistent despite similar training and nutrition, hydration consistency is worth examining.",
+      },
+      {
+        heading: "Compounds that affect fluid balance",
+        body: "For anyone using compounds with mineralocorticoid or aromatizing activity, this matters beyond cosmetics. Some anabolic steroids increase sodium reabsorption and potassium excretion, producing extracellular fluid retention; mineralocorticoid-like effects can raise blood pressure through expanded fluid volume. Having sodium and potassium intake dialed in is a meaningful factor in cardiovascular load and how much water retention shows up visibly — not just smoothness in the mirror.",
+      },
+      {
+        heading: "Practical takeaways",
+        list: [
+          "Drink consistently throughout the day — not in large single boluses",
+          "Pair water intake with steady sodium and potassium — plain water alone can dilute rather than hydrate",
+          "Keep sodium and potassium roughly balanced; large imbalances drive bloating or flatness",
+          "Choose bioavailable magnesium (e.g. citrate) over oxide if supplementing for electrolyte balance",
+          "Be especially deliberate if running compounds that affect fluid balance — visible smoothness can signal underlying cardiovascular load",
+        ],
+      },
+    ],
+  },
+  {
+    id: "retatrutide-triple-agonist",
+    title: "Retatrutide: The Triple Agonist Reshaping the GLP-1 Landscape",
+    tagline:
+      "What the triple agonist is, what trials show, side effects, and where it stands regulatorily — investigational only.",
+    category: "health",
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Retatrutide has moved from a promising early-phase compound to one of the most closely watched investigational drugs in metabolic medicine. With phase 3 data now reading out, it's worth understanding what it is, how it works, what trials actually show, and where it stands from a regulatory and safety perspective. This article is educational reference only — retatrutide is not FDA-approved for any indication as of mid-2026.",
+      },
+      {
+        heading: "What Retatrutide actually is",
+        body: "Retatrutide is a once-weekly injectable peptide developed by Eli Lilly that activates three hormone receptors: GLP-1, GIP, and the glucagon receptor — a step beyond semaglutide (GLP-1 only) and tirzepatide (GLP-1 + GIP). LDL reductions observed in trials (roughly 20%) are thought to reflect glucagon receptor activity on PCSK9-related cholesterol clearance, distinct from appetite and glycemic effects.",
+        blocks: [
+          {
+            heading: "GLP-1",
+            body: "Slows gastric emptying, increases satiety signaling, boosts insulin release in response to rising glucose, and suppresses glucagon.",
+          },
+          {
+            heading: "GIP",
+            body: "Supports blood sugar regulation and, in combination with GLP-1 agonism, appears to potentiate weight-loss effects rather than work against them.",
+          },
+          {
+            heading: "Glucagon receptor",
+            body: "In this combined context, glucagon receptor activity is believed to increase energy expenditure and fat oxidation — a mechanistic piece proposed to explain why retatrutide has outpaced single- and dual-agonist compounds in matched-duration comparisons.",
+          },
+        ],
+      },
+      {
+        heading: "What the trials show",
+        body: "Headline efficacy has climbed at each development stage. Phase 2 (obesity, NEJM 2023): up to 24.2% average weight loss at 48 weeks on the highest (12 mg) dose in participants without diabetes; in type 2 diabetes, 16.9% at 36 weeks with meaningful HbA1c improvement. TRIUMPH-4 (obesity with knee osteoarthritis, published December 2025): 28.7% average loss at 68 weeks on 12 mg. TRANSCEND-T2D-1 (type 2 diabetes, phase 3, published March 2026): HbA1c reduced by up to 1.94% from baseline 7.9% (vs 0.81% placebo), dose-dependent across 4 mg, 9 mg, and 12 mg arms; 12 mg arm also lost 16.8% body weight at 40 weeks.",
+        list: [
+          "TRIUMPH-1 (obesity without diabetes, topline May 2026, 80 weeks, n=2,339): 4 mg → 17.6% loss; 9 mg → 23.7%; 12 mg → 25.0% (up to ~28.3% in some analyses); placebo → 3.9%",
+          "In BMI ≥35 participants escalated to maximum tolerated dose for an additional 24 weeks, loss reached up to ~30%",
+          "TRIUMPH-2 (obesity + type 2 diabetes) and TRIUMPH-3 (obesity + established cardiovascular disease) expected later in 2026",
+        ],
+      },
+      {
+        heading: "Beyond weight loss",
+        blocks: [
+          {
+            heading: "Liver health",
+            body: "Incretin-based therapies, including the GLP-1/GIP/glucagon class, have shown reductions in hepatic steatosis and related biomarkers in MASLD contexts — largely through weight loss and improved insulin sensitivity; direct fibrosis outcome data for retatrutide specifically remains limited.",
+          },
+          {
+            heading: "Cardiovascular risk",
+            body: "Retatrutide-specific cardiovascular outcome data is still maturing (TRIUMPH-3 will help). The broader GLP-1 class has shown reductions in major adverse cardiovascular events in outcome trials; network meta-analyses generally rank GLP-1-based agents among the most effective pharmacologic weight-loss approaches.",
+          },
+          {
+            heading: "Energy expenditure",
+            body: "Reviews on next-generation obesity pharmacology highlight compensatory drops in energy expenditure with appetite-only approaches. Triple agonists are positioned as addressing intake (GLP-1/GIP) and expenditure (glucagon receptor) simultaneously — proposed as one explanation for consistently larger effect sizes versus single- and dual-agonist therapies.",
+          },
+        ],
+      },
+      {
+        heading: "Side effects and safety",
+        body: "Tolerability tracks other incretin therapies, with GI effects dominating. Nausea, vomiting, diarrhea, and constipation are dose-dependent; phase 2 nausea ranged from ~14% at low doses to ~60% at 12 mg, often worst during escalation. Lower starting doses and gradual titration reduce severity.",
+        list: [
+          "Heart rate: dose-dependent increase of roughly 5–10 bpm, often peaking around week 24 — monitor if you have cardiovascular concerns",
+          "Dysesthesia (altered skin sensation): more specific to retatrutide than single-agonist GLP-1 drugs; ~1 in 5 at 9–12 mg in phase 3, usually mild; often resolves after discontinuation",
+          "Serious adverse events: relatively rare in phase 2 (~4% vs placebo); pancreatitis, gallbladder issues, and liver enzyme elevation remain class risks warranting medical monitoring",
+          "Long-term safety beyond ~1–2 years is still being established as TRIUMPH continues",
+        ],
+      },
+      {
+        heading: "Fat grafting and aesthetic procedures",
+        body: "A scoping review raised whether GLP-1 receptor agonists — including retatrutide — could theoretically reduce autologous fat graft survival via adipocyte browning, lipolysis, and altered adipose stem-cell differentiation. Retatrutide's glucagon activity was flagged as a particular mechanistic concern. No direct clinical studies in patients on these medications have confirmed graft outcomes; this remains hypothesis-generating, but relevant if planning fat-transfer procedures while using incretin-class compounds.",
+      },
+      {
+        heading: "Regulatory and availability",
+        body: "As of mid-2026, retatrutide remains investigational — not approved by the FDA, EMA, or other regulators for any indication. Eli Lilly's TRIUMPH program (5,800+ participants) is expected to support a filing, with industry projections often placing FDA submission in late 2026 and potential approval in 2027–2028 pending remaining data and review. An expanded access (compassionate use) pathway exists for narrow, case-by-case serious-disease scenarios under the investigational name LY3437943 — not general availability.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Retatrutide is a mechanistic step beyond single- and dual-agonist GLP-1 therapies, with glucagon receptor activity targeting energy expenditure as well as appetite and glycemic control. Phase 3 weight-loss signals (up to ~28–30% in highest-dose, longest-duration cohorts) are among the largest reported for the class. Tolerability is broadly similar to existing GLP-1 drugs, with GI effects dominant and dysesthesia as a newer class-specific finding. It remains investigational, with full approval likely still a year or more away pending remaining TRIUMPH readouts.",
+      },
+    ],
+  },
 ];
