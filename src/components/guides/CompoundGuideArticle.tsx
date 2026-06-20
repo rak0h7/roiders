@@ -1,7 +1,7 @@
 "use client";
 
 import { MedicalDisclaimer } from "@/components/ui/MedicalDisclaimer";
-import { buildSectionToc, SectionCard } from "@/components/content/ContentArticleBody";
+import { ArticleSections, buildSectionToc } from "@/components/content/ArticleBody";
 import type { CompoundProfile } from "@/lib/compoundProfileTypes";
 import { ROUTE_LABEL } from "@/lib/guideCatalog";
 import { cn } from "@/lib/utils";
@@ -51,11 +51,7 @@ export function CompoundGuideArticle({ profile }: { profile: CompoundProfile }) 
         </nav>
       )}
 
-      <div className="space-y-4">
-        {profile.sections.map((section, i) => (
-          <SectionCard key={`${profile.id}-section-${i}`} block={section} index={i} />
-        ))}
-      </div>
+      <ArticleSections sections={profile.sections} variant="guide" />
 
       <MedicalDisclaimer variant="protocol" />
     </article>
