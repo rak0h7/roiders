@@ -9,25 +9,23 @@ import { CyclePlannerView } from "@/components/CyclePlannerView";
 import { CycleTabNav } from "@/components/CycleTabNav";
 import { CycleSourcesShell } from "@/components/CycleSourcesShell";
 import { DebugPanel } from "@/components/DebugPanel";
-import { ExtractionReview } from "@/components/ExtractionReview";
-
-import { InsightsDashboard } from "@/components/InsightsDashboard";
-import { LogEntryView } from "@/components/LogEntryView";
-import { ReviewFlags } from "@/components/ReviewFlags";
-import { SecondaryNav } from "@/components/SecondaryNav";
+import { LabsWorkspace } from "@/components/labs/LabsWorkspace";
+import { LabsTabNav } from "@/components/labs/LabsTabNav";
 import { UnifiedDashboard } from "@/components/home/UnifiedDashboard";
 import { SettingsView } from "@/components/settings/SettingsView";
 import { GymView } from "@/components/GymView";
-import { NutritionView } from "@/components/NutritionView";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { useNavigation } from "@/context/NavigationContext";
+import { articleSlugFromPathname } from "@/lib/appRoutes";
+import { usePathname } from "next/navigation";
 import { firstEnabledRoute } from "@/lib/navVisibility";
 import { useApp } from "@/context/AppContext";
 import { useSettings } from "@/context/SettingsContext";
 import { CONTENT_WIDTH_CLASS } from "@/lib/themes";
 import { useCycleStore } from "@/store/cycleStore";
 import { useGymStore } from "@/store/gymStore";
-import { useNutritionStore } from "@/store/nutritionStore";
+
+import { ArticlesView } from "@/components/articles/ArticlesView";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Blocks } from "lucide-react";
 import { ui } from "@/lib/ui";
@@ -50,6 +48,8 @@ function CyclePlannerShell() {
 }
 
 export function AppShell() {
+  const pathname = usePathname();
+  const articleSlug = articleSlugFromPathname(pathname);
   const { route, sidebarCollapsed, setRoute, setSidebarCollapsed } = useNavigation();
   const { settings, routeEnabled } = useSiteConfig();
   const { secondaryTab, setSecondaryTab, showComparison, logView, setMainTab } = useApp();
@@ -59,8 +59,6 @@ export function AppShell() {
     : Math.max(0.08, 0.38 - (theme.pageTransitionSpeed / 100) * 0.3);
   const { setView, compounds } = useCycleStore();
   const { setGymView } = useGymStore();
-  const { setNutritionView } = useNutritionStore();
-
   useEffect(() => {
     setSidebarCollapsed(compactSidebar);
   }, [compactSidebar, setSidebarCollapsed]);
@@ -82,23 +80,16 @@ export function AppShell() {
     if (route === "gym-history") setGymView("history");
     if (route === "gym-progress") setGymView("progress");
     if (route === "gym-exercises") setGymView("exercises");
-    if (route === "nutrition-diary") setNutritionView("diary");
-    if (route === "nutrition-search") setNutritionView("search");
-    if (route === "nutrition-micro") setNutritionView("micro");
-    if (route === "nutrition-goals") setNutritionView("goals");
-    if (route === "nutrition-foods") setNutritionView("foods");
-  }, [route, setMainTab, setView, setGymView, setNutritionView]);
+  }, [route, setMainTab, setView, setGymView]);
 
   const renderContent = () => {
     switch (route) {
       case "home":
         return <UnifiedDashboard />;
       case "bloodwork-log":
-        if (logView === "extraction") return <ExtractionReview />;
-        if (logView === "flags") return <ReviewFlags />;
-        return <LogEntryView />;
+        return <LabsWorkspace mode="log" />;
       case "bloodwork-insights":
-        return showComparison ? <ComparisonView /> : <InsightsDashboard />;
+        return showComparison ? <ComparisonView /> : <LabsWorkspace mode="analysis" />;
       case "cycle-planner":
       case "cycle-guides":
         return <CyclePlannerShell />;
@@ -127,12 +118,8 @@ export function AppShell() {
       case "gym-progress":
       case "gym-exercises":
         return <GymView />;
-      case "nutrition-diary":
-      case "nutrition-search":
-      case "nutrition-micro":
-      case "nutrition-goals":
-      case "nutrition-foods":
-        return <NutritionView />;
+      case "articles":
+        return <ArticlesView />;
       case "settings":
         return <SettingsView />;
       default:
@@ -140,7 +127,7 @@ export function AppShell() {
     }
   };
 
-  const showBloodworkSecondary = route.startsWith("bloodwork");
+  const showLabsTabs = route.startsWith("bloodwork");
 
   return (
     <div className="relative min-h-screen">
@@ -156,14 +143,10 @@ export function AppShell() {
         <SiteAnnouncement />
         <main className="app-main-with-mobile-nav flex-1 px-3 py-5 sm:px-6 sm:py-6 lg:pb-8">
           <div className={cn("mx-auto w-full min-w-0 max-w-full px-0", CONTENT_WIDTH_CLASS[theme.contentWidth])}>
-            {showBloodworkSecondary && (
-              <div className="mb-4">
-                <SecondaryNav />
-              </div>
-            )}
+            {showLabsTabs && <LabsTabNav />}
             <AnimatePresence mode="wait">
               <motion.div
-                key={route + (logView) + (showComparison ? "-cmp" : "")}
+                key={route + (articleSlug ? `-${articleSlug}` : "") + (logView) + (showComparison ? "-cmp" : "")}
                 initial={reducedMotion ? false : { opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={reducedMotion ? undefined : { opacity: 0, y: -8 }}

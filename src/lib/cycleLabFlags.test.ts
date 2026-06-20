@@ -50,7 +50,6 @@ describe("enrichLabFlagsWithCycleContext", () => {
         unit: "ng/mL",
         date: "18/06/2026",
         severity: "high",
-        labRange: "4-15 ng/mL",
         optimalRange: "4-12 ng/mL",
         deviation: "↑ above optimal max",
         noDosing: true,
@@ -112,7 +111,6 @@ describe("buildMergedReviewFlags", () => {
     const merged = buildMergedReviewFlags(
       Object.values(values),
       "18/06/2026",
-      "optimized",
       decaStack,
       values
     );

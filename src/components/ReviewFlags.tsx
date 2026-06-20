@@ -10,12 +10,13 @@ import { useLabsActions } from "@/components/labs/useLabsActions";
 import { CompoundPills, SeverityBadge } from "@/components/labs/labsUi";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
-import { ChevronDown, AlertTriangle, FlaskConical } from "lucide-react";
+import { MedicalDisclaimer } from "@/components/ui/MedicalDisclaimer";
+import { ChevronDown, FlaskConical } from "lucide-react";
 import { useState } from "react";
 import type { ReviewFlag } from "@/lib/types";
 
 export function ReviewFlags() {
-  const { reviewFlags, rangeMode, setRangeMode, extractionFileName, setLogView, activeReport } = useApp();
+  const { reviewFlags, extractionFileName, setLogView, activeReport } = useApp();
   const { compounds } = useCycleStore();
   const { setRoute } = useNavigation();
   const { saveAndOpenInsights, openInsights, markerCount } = useLabsActions();
@@ -72,11 +73,11 @@ export function ReviewFlags() {
             <p className="mt-1 text-sm font-semibold text-[var(--protocol)]">Not on current panel</p>
           )}
 
-          {flag.labRange && flag.optimalRange && (
+          {flag.optimalRange && (
             <p className="mt-1 text-[10px] text-[var(--muted)]">
-              Lab: {flag.labRange} | Optimal: {flag.optimalRange}
+              Optimal: {flag.optimalRange}
               {flag.cautionRange && ` | Caution: ${flag.cautionRange}`}
-              {flag.strictThreshold && ` | Strict threshold: #${flag.strictThreshold}`}
+              {flag.strictThreshold && ` | Strict threshold: ≥${flag.strictThreshold}`}
             </p>
           )}
 
@@ -118,12 +119,6 @@ export function ReviewFlags() {
             {extractionFileName || "manual entry"} • {new Date().toLocaleDateString("en-GB")}
           </p>
         </div>
-        <button
-          onClick={() => setRangeMode(rangeMode === "lab" ? "optimized" : "lab")}
-          className={cn(ui.btnSecondary, "text-xs font-bold uppercase")}
-        >
-          {rangeMode === "lab" ? "Lab Reference Mode" : "Optimized Match"} • Switch
-        </button>
       </div>
 
       {compounds.length > 0 && (
@@ -164,12 +159,7 @@ export function ReviewFlags() {
         Active report date: {activeReport?.date ?? new Date().toLocaleDateString("en-GB")}
       </Panel>
 
-      <Panel variant="protocol" className="p-4 text-xs text-[var(--foreground)]/80">
-        <AlertTriangle className="mb-1 inline h-4 w-4 text-[var(--warning)]" />{" "}
-        <strong>Interpretation only.</strong> This is not medical advice. Do not stop, or change any medication,
-        treatment, or cycle based on this automated read. Discuss any concerns — especially repeat-tested
-        abnormalities — with a qualified clinician.
-      </Panel>
+      <MedicalDisclaimer variant="labs" />
 
       {reviewFlags.length === 0 ? (
         <Panel className="border-[var(--success)]/30 bg-[var(--success)]/5 p-8 text-center">

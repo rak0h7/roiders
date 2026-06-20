@@ -9,7 +9,7 @@ describe("calculateCategoryScores", () => {
       fsh: { markerId: "fsh", value: 3, unit: "mIU/mL" },
     };
 
-    const scores = calculateCategoryScores(values, "optimized");
+    const scores = calculateCategoryScores(values);
     const hormonal = scores.find((s) => s.category === "hormonal");
     expect(hormonal?.tags.some((t) => t.label === "2 EASY")).toBe(true);
   });
@@ -19,7 +19,7 @@ describe("calculateCategoryScores", () => {
       "free-testosterone": { markerId: "free-testosterone", value: 5, unit: "pg/mL" },
     };
 
-    const scores = calculateCategoryScores(values, "optimized");
+    const scores = calculateCategoryScores(values);
     const hormonal = scores.find((s) => s.category === "hormonal");
     expect(hormonal?.tags.some((t) => t.type === "easy")).toBe(false);
   });

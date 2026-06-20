@@ -13,7 +13,7 @@ import { Droplet, FileEdit, ImageIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function LandingView() {
-  const { setLogView, rangeMode, setRangeMode, reports } = useApp();
+  const { setLogView, reports } = useApp();
   const { fileRef, parsing, onInputChange, onDrop, pickAny } = useLabFilePicker();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -117,29 +117,18 @@ export function LandingView() {
       </div>
 
       <Panel className={ui.cardPad}>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <span
-              className={cn(
-                ui.chip,
-                "shrink-0 border border-[var(--labs)]/20 bg-[var(--labs-dim)] text-[var(--labs)]"
-              )}
-            >
-              {rangeMode === "lab" ? "Lab Range" : "Optimized"}
-            </span>
-            <p className="text-sm text-[var(--muted)]">
-              {rangeMode === "lab"
-                ? "Flags results outside official lab reference ranges."
-                : "Flags results outside optimized performance ranges with severity tiers."}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setRangeMode(rangeMode === "lab" ? "optimized" : "lab")}
-            className={cn(ui.btnSecondary, "shrink-0")}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <span
+            className={cn(
+              ui.chip,
+              "shrink-0 border border-[var(--labs)]/20 bg-[var(--labs-dim)] text-[var(--labs)]"
+            )}
           >
-            Switch to {rangeMode === "lab" ? "Optimized" : "Lab Range"}
-          </button>
+            Optimal
+          </span>
+          <p className="text-sm text-[var(--muted)]">
+            Flags results outside optimal ranges for minimal-cycle health. Deviations are monitored via caution and strict thresholds.
+          </p>
         </div>
       </Panel>
     </div>

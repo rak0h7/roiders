@@ -10,9 +10,9 @@ describe("evaluateSeverity", () => {
     expect(marker.range.optimalMax).toBe(125);
   });
 
-  it("scores in-range lab free testosterone as normal in lab mode", () => {
+  it("scores in-range free testosterone as normal", () => {
     const marker = MARKER_MAP.get("free-testosterone")!;
-    const result = evaluateSeverity(marker, 20, "pg/mL", "lab");
+    const result = evaluateSeverity(marker, 100, "pg/mL");
     expect(result.severity).toBe("normal");
   });
 
@@ -33,7 +33,7 @@ describe("evaluateSeverity", () => {
       },
     };
 
-    const result = evaluateSeverity(marker, 9, "U/L", "optimized");
+    const result = evaluateSeverity(marker, 9, "U/L");
     expect(result.severity).toBe("high");
     expect(result.deviation).toContain("above caution band");
     expect(result.deviation).not.toContain("strict app threshold");
@@ -47,7 +47,7 @@ describe("buildReviewFlags", () => {
       { markerId: "hematocrit", value: 54, unit: "%" },
     ];
 
-    const flags = buildReviewFlags(values, "19/06/2026", "optimized");
+    const flags = buildReviewFlags(values, "19/06/2026");
     expect(flags.length).toBeGreaterThan(0);
     expect(flags[0].severity).toBe("stop");
   });

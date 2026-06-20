@@ -5,7 +5,6 @@ import {
   FlaskConical,
   Lock,
   Sparkles,
-  UtensilsCrossed,
 } from "lucide-react";
 import { MarketingPageShell } from "@/components/marketing/MarketingPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -35,13 +34,6 @@ const MODULES = [
     slug: "training",
     accent: "protocol" as const,
     desc: "Workout diary with programs, PRs, weekly volume charts, rest timers, and supersets.",
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Nutrition",
-    slug: "nutrition",
-    accent: "intel" as const,
-    desc: "Macro targets, daily food log, micronutrient tracking, and custom foods.",
   },
 ] as const;
 
@@ -74,7 +66,7 @@ export function PublicHomeContent({ settings }: Props) {
       <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-16">
         <p className={ui.overline}>Free performance health platform</p>
         <h1 className="font-display mt-3 max-w-3xl text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
-          {settings.site_name} — labs, gear, training &amp; nutrition in{" "}
+          {settings.site_name} — labs, gear &amp; training in{" "}
           <span className="text-gradient text-gradient-glow">one command center</span>
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-[var(--muted)] sm:text-lg">
@@ -121,10 +113,14 @@ export function PublicHomeContent({ settings }: Props) {
           Performance health modules built for serious trackers
         </h2>
         <p className="mt-2 max-w-2xl text-sm text-[var(--muted)] sm:text-base">
-          Cross-module intelligence connects labs, gear, training, and nutrition so flags surface when your data lines up.
-          Explore each module on our public{" "}
+          Cross-module intelligence connects labs, gear, and training so flags surface when your data lines up.
+          Explore each module on our{" "}
           <Link href="/features" className="text-[var(--labs)] hover:underline">
             features pages
+          </Link>{" "}
+          or browse the free{" "}
+          <Link href="/articles" className="text-[var(--intel)] hover:underline">
+            articles library
           </Link>
           .
         </p>

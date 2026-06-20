@@ -1,6 +1,6 @@
 import { MARKERS_BY_CATEGORY } from "./markers";
-import { evaluateSeverity, formatRange } from "./ranges";
-import type { MarkerCategory, MarkerValue, RangeMode, ReviewFlag, Severity } from "./types";
+import { evaluateSeverity, formatCautionRange, formatOptimalRange } from "./ranges";
+import type { MarkerCategory, MarkerValue, ReviewFlag, Severity } from "./types";
 
 export const CATEGORY_DESCRIPTIONS: Record<MarkerCategory, string> = {
   hormonal:
@@ -34,8 +34,7 @@ export interface CategoryMarkerRow {
   unit: string;
   severity: Severity;
   deviation: string;
-  labRange: string;
-  activeRange: string;
+  optimalRange: string;
   cautionRange?: string;
   strictThreshold?: number;
   relatedCompounds?: string[];
@@ -67,7 +66,6 @@ export function buildCategoryMarkerRows(
   category: MarkerCategory,
   values: Record<string, MarkerValue>,
   reviewFlags: ReviewFlag[],
-  rangeMode: RangeMode
 ): CategoryMarkerRow[] {
   const markers = MARKERS_BY_CATEGORY[category] ?? [];
   const flagMap = new Map(reviewFlags.map((f) => [f.markerId, f]));
@@ -75,18 +73,16 @@ export function buildCategoryMarkerRows(
   const rows: CategoryMarkerRow[] = markers.map((marker) => {
     const val = values[marker.id];
     const flag = resolveFlagForMarker(marker.id, flagMap);
-    const labRange = (formatRange(marker.range, "lab", "lab") + marker.defaultUnit).trim();
-    const activeRange = (formatRange(marker.range, rangeMode, "optimal") + marker.defaultUnit).trim();
+    const optimalRange = (formatOptimalRange(marker.range) + marker.defaultUnit).trim();
     const cautionRange =
       marker.range.cautionMin !== undefined
-        ? (formatRange(marker.range, rangeMode, "caution") + marker.defaultUnit).trim()
+        ? (formatCautionRange(marker.range) + marker.defaultUnit).trim()
         : undefined;
 
     const shared = {
       markerId: marker.id,
       name: marker.name,
-      labRange,
-      activeRange,
+      optimalRange,
       cautionRange,
       strictThreshold: marker.range.strictThreshold,
       relatedCompounds: flag?.relatedCompounds,
@@ -105,7 +101,7 @@ export function buildCategoryMarkerRows(
       };
     }
 
-    const { severity, deviation } = evaluateSeverity(marker, val.value, val.unit, rangeMode);
+    const { severity, deviation } = evaluateSeverity(marker, val.value, val.unit);
 
     return {
       ...shared,

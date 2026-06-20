@@ -2,7 +2,6 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { CLOUD_SYNC_EVENT } from "@/lib/storeRehydrate";
-import type { RangeMode } from "@/lib/types";
 import { LOCAL_STORAGE_KEYS, writeLocalModule } from "@/lib/cloudSync";
 import {
   DEFAULT_THEME,
@@ -15,14 +14,12 @@ import {
 } from "@/lib/themes";
 
 export interface AppSettings {
-  defaultRangeMode: RangeMode;
   reducedMotion: boolean;
   compactSidebar: boolean;
   theme: ThemeConfig;
 }
 
 const DEFAULTS: AppSettings = {
-  defaultRangeMode: "optimized",
   reducedMotion: false,
   compactSidebar: false,
   theme: DEFAULT_THEME,

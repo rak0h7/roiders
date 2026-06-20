@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Database, Plus, Search, Trash2 } from "lucide-react";
+import { Database, KeyRound, Plus, Search, Trash2 } from "lucide-react";
 import type { AdminUser } from "@/lib/admin";
 import { formatBytes } from "@/lib/adminStats";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ type AdminAccountsProps = {
   onGenerate: () => void;
   onDelete: (user: AdminUser) => void;
   onInspect: (user: AdminUser) => void;
+  onRevealKey: (user: AdminUser) => void;
   onTogglePremiumSync: (user: AdminUser, enabled: boolean) => void;
 };
 
@@ -30,6 +31,7 @@ export function AdminAccounts({
   onGenerate,
   onDelete,
   onInspect,
+  onRevealKey,
   onTogglePremiumSync,
 }: AdminAccountsProps) {
   const [query, setQuery] = useState("");
@@ -194,6 +196,15 @@ export function AdminAccounts({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        disabled={busyId === row.id}
+                        onClick={() => onRevealKey(row)}
+                        className={cn(ui.btnGhost, "text-[var(--muted)] hover:text-[var(--foreground)]")}
+                        title="Reveal escrowed access key"
+                      >
+                        <KeyRound className="h-4 w-4" />
+                      </button>
                       <button
                         type="button"
                         onClick={() => onInspect(row)}

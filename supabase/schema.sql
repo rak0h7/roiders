@@ -32,6 +32,16 @@ create table if not exists public.auth_secrets (
   session_secret text not null
 );
 
+-- Admin-recoverable access keys (AES-encrypted; server-only, no client policies)
+create table if not exists public.access_key_vault (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  encrypted_key text not null,
+  issued_by uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.access_key_vault enable row level security;
+
 create table if not exists public.user_modules (
   user_id uuid not null references auth.users (id) on delete cascade,
   module text not null check (module in ('labs', 'cycle', 'gym', 'nutrition', 'settings')),
@@ -140,6 +150,7 @@ create table if not exists public.site_settings (
   module_labs_enabled boolean not null default true,
   module_cycle_enabled boolean not null default true,
   module_gym_enabled boolean not null default true,
+  module_articles_enabled boolean not null default true,
   module_nutrition_enabled boolean not null default true,
   public_landing_enabled boolean not null default true,
   premium_sources_enabled boolean not null default true,
@@ -156,3 +167,23 @@ create table if not exists public.site_settings (
 insert into public.site_settings (id) values (1) on conflict (id) do nothing;
 
 alter table public.site_settings enable row level security;
+
+-- Published reference articles (admin-managed via service role; no client RLS policies)
+create table if not exists public.articles (
+  id text primary key,
+  title text not null,
+  tagline text,
+  category text not null check (category in ('gear', 'training', 'diet', 'health', 'general')),
+  sections jsonb not null default '[]'::jsonb,
+  cover_image text,
+  cover_image_alt text,
+  series_order int,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists articles_category_idx on public.articles (category);
+create index if not exists articles_published_at_idx on public.articles (published_at desc nulls last);
+
+alter table public.articles enable row level security;

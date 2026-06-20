@@ -106,5 +106,38 @@ alter table public.site_settings add column if not exists signup_closed_message 
 alter table public.site_settings add column if not exists site_description text not null default '';
 alter table public.site_settings add column if not exists announcement_guest_visible boolean not null default false;
 
+-- 8) Admin key escrow (encrypted recovery for all accounts)
+create table if not exists public.access_key_vault (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  encrypted_key text not null,
+  issued_by uuid references auth.users (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.access_key_vault enable row level security;
+
+-- 9) Articles module toggle
+alter table public.site_settings add column if not exists module_articles_enabled boolean not null default true;
+
+-- 10) Published articles (admin-managed; server-only RLS)
+create table if not exists public.articles (
+  id text primary key,
+  title text not null,
+  tagline text,
+  category text not null check (category in ('gear', 'training', 'diet', 'health', 'general')),
+  sections jsonb not null default '[]'::jsonb,
+  cover_image text,
+  cover_image_alt text,
+  series_order int,
+  published_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists articles_category_idx on public.articles (category);
+create index if not exists articles_published_at_idx on public.articles (published_at desc nulls last);
+
+alter table public.articles enable row level security;
+
 -- Refresh PostgREST schema cache (safe to run; no-op if already current)
 notify pgrst, 'reload schema';

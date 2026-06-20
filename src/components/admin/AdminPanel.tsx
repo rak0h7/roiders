@@ -7,11 +7,13 @@ import {
   ExternalLink,
   LayoutDashboard,
   RefreshCw,
+  BookOpen,
   Settings2,
   Shield,
   Store,
   Users,
 } from "lucide-react";
+import { AdminArticles } from "@/components/admin/AdminArticles";
 import { AdminAccounts } from "@/components/admin/AdminAccounts";
 import { AdminOverview } from "@/components/admin/AdminOverview";
 import { AdminUserModules } from "@/components/admin/AdminUserModules";
@@ -26,11 +28,12 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
-type AdminTab = "overview" | "accounts" | "vendors" | "settings";
+type AdminTab = "overview" | "accounts" | "articles" | "vendors" | "settings";
 
-const ADMIN_TABS: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+const ADMIN_TABS: { id: AdminTab; label: string; icon: React.ReactNode; adminOnly?: boolean }[] = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard className="h-4 w-4" /> },
   { id: "accounts", label: "Accounts", icon: <Users className="h-4 w-4" /> },
+  { id: "articles", label: "Articles", icon: <BookOpen className="h-4 w-4" />, adminOnly: true },
   { id: "vendors", label: "Vendors", icon: <Store className="h-4 w-4" /> },
   { id: "settings", label: "Settings", icon: <Settings2 className="h-4 w-4" /> },
 ];
@@ -39,9 +42,11 @@ export function AdminPanel() {
   const { user, accountName, isAdmin, isVendor } = useAuth();
   const { settings } = useSiteConfig();
   const [tab, setTab] = useState<AdminTab>("overview");
-  const adminTabs = ADMIN_TABS.filter(
-    (item) => item.id !== "vendors" || (settings.vendor_portal_enabled && isAdmin)
-  );
+  const adminTabs = ADMIN_TABS.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false;
+    if (item.id === "vendors") return settings.vendor_portal_enabled && isAdmin;
+    return true;
+  });
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,6 +145,24 @@ export function AdminPanel() {
       );
     } catch (e) {
       alert(e instanceof Error ? e.message : "Update failed");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const revealKey = async (target: AdminUser) => {
+    setBusyId(target.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/users/${target.id}/key`, {
+        credentials: "same-origin",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to reveal key");
+      setGeneratedKey(data.accessKey);
+      setTab("accounts");
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to reveal key");
     } finally {
       setBusyId(null);
     }
@@ -302,10 +325,13 @@ export function AdminPanel() {
                   onGenerate={() => void generateAccount()}
                   onDelete={(target) => void deleteUser(target)}
                   onTogglePremiumSync={(target, enabled) => void togglePremiumSync(target, enabled)}
+                  onRevealKey={(target) => void revealKey(target)}
                   onInspect={setModulesUser}
                 />
               </>
             )}
+
+            {tab === "articles" && isAdmin && <AdminArticles />}
 
             {tab === "vendors" && <AdminVendors onChanged={() => void load()} />}
 

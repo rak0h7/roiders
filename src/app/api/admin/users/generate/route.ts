@@ -4,7 +4,7 @@ import { createAccessKeyAccount } from "@/lib/createAccessKeyAccount";
 import { assertCanCreateAccount, fetchSiteSettings } from "@/lib/siteSettings";
 
 export async function POST(request: NextRequest) {
-  const { error } = await requireAdmin(request);
+  const { user, error } = await requireAdmin(request);
   if (error) return error;
 
   const siteSettings = await fetchSiteSettings();
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const created = await createAccessKeyAccount();
+    const created = await createAccessKeyAccount({ issuedByUserId: user!.id });
     return NextResponse.json({
       accessKey: created.accessKey,
       userId: created.userId,

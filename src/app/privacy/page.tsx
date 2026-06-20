@@ -3,7 +3,7 @@ import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { buildPageMetadata } from "@/lib/seo";
 import { fetchSiteSettings, resolveLegalContactHref } from "@/lib/siteSettings";
 
-const UPDATED = "June 18, 2026";
+const UPDATED = "June 19, 2026";
 
 export const dynamic = "force-dynamic";
 
@@ -33,12 +33,13 @@ export default async function PrivacyPage() {
         <h2 className="text-base font-semibold text-[var(--foreground)]">What we collect</h2>
         <p>
           <strong className="text-[var(--foreground)]">Account identifiers.</strong> When you create an
-          account, we store a cryptographic hash and fingerprint of your access key — never the key itself in
-          plain text. We may store an optional username and display name you choose.
+          account, we store a cryptographic hash and fingerprint of your access key for authentication. We
+          also escrow an encrypted copy of each generated key so site administrators can assist with recovery
+          when you contact support. We may store a username and display name you choose during onboarding.
         </p>
         <p>
           <strong className="text-[var(--foreground)]">Application data (local).</strong> Labs, gear,
-          training, nutrition logs, settings, and exports are stored in your browser&apos;s local storage by
+          training, settings, and exports are stored in your browser&apos;s local storage by
           default. This data does not leave your device unless you enable cloud sync or export it yourself.
         </p>
         <p>

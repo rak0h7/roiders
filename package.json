@@ -18,6 +18,7 @@
     "db:migrate": "node scripts/apply-migrations.mjs",
     "db:migrate:print": "node scripts/apply-migrations.mjs --print-sql",
     "db:bootstrap": "node scripts/post-migrate-bootstrap.mjs",
+    "db:seed-articles": "node --experimental-strip-types scripts/seed-articles.mjs",
     "deploy": "vercel --prod --yes",
     "deploy:preview": "vercel --yes",
     "assets:tiktok": "node scripts/generate-tiktok-assets.mjs",

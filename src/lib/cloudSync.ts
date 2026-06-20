@@ -1,6 +1,22 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { DEFAULT_GOALS } from "@/lib/nutritionTypes";
 import { safeSetLocalStorage } from "@/lib/safeLocalStorage";
+
+/** Default nutrition goals for legacy cloud-sync empty checks (module removed from app UI). */
+const LEGACY_NUTRITION_DEFAULT_GOALS: Record<string, number> = {
+  calories: 2200,
+  protein: 165,
+  fat: 73,
+  carbs: 220,
+  fiber: 30,
+  calcium: 1300,
+  iron: 18,
+  potassium: 4700,
+  sodium: 2300,
+  vitaminD: 20,
+  vitaminC: 90,
+  magnesium: 420,
+  zinc: 11,
+};
 
 export type CloudModule = "labs" | "cycle" | "gym" | "nutrition" | "settings";
 
@@ -340,7 +356,9 @@ export async function bootstrapUserCloudSync(
 function goalsMatchDefaults(goals: unknown): boolean {
   if (!goals || typeof goals !== "object") return true;
   const g = goals as Record<string, number>;
-  return Object.keys(DEFAULT_GOALS).every((key) => (g[key] ?? DEFAULT_GOALS[key]) === DEFAULT_GOALS[key]);
+  return Object.keys(LEGACY_NUTRITION_DEFAULT_GOALS).every(
+    (key) => (g[key] ?? LEGACY_NUTRITION_DEFAULT_GOALS[key]) === LEGACY_NUTRITION_DEFAULT_GOALS[key]
+  );
 }
 
 export function isNutritionPersistedDataEmpty(data: unknown): boolean {

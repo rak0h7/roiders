@@ -15,7 +15,6 @@ export interface ExportBundle {
     compounds: CycleCompound[];
   };
   gym?: unknown;
-  nutrition?: unknown;
   settings?: unknown;
 }
 
@@ -35,7 +34,6 @@ export function buildExportBundle(partial: {
       compounds: partial.compounds,
     },
     gym: readLocalModule("gym"),
-    nutrition: readLocalModule("nutrition"),
     settings: readLocalModule("settings"),
   };
 }
@@ -46,13 +44,13 @@ export function exportJSON(bundle: ExportBundle): void {
 }
 
 export interface ImportResult {
-  imported: ("bloodwork" | "cycle" | "gym" | "nutrition" | "settings")[];
+  imported: ("bloodwork" | "cycle" | "gym" | "settings")[];
   errors: string[];
 }
 
 export function parseImportBundle(raw: string): { bundle: ExportBundle | null; error: string | null } {
   try {
-    const data = JSON.parse(raw) as Partial<ExportBundle>;
+    const data = JSON.parse(raw) as Partial<ExportBundle> & { nutrition?: unknown };
     if (!data.bloodwork?.reports || !data.cycle) {
       return { bundle: null, error: "Invalid bundle: missing bloodwork or cycle section" };
     }
@@ -63,7 +61,6 @@ export function parseImportBundle(raw: string): { bundle: ExportBundle | null; e
         bloodwork: data.bloodwork,
         cycle: data.cycle,
         gym: data.gym,
-        nutrition: data.nutrition,
         settings: data.settings,
       },
       error: null,
@@ -75,13 +72,12 @@ export function parseImportBundle(raw: string): { bundle: ExportBundle | null; e
 
 export function applyImportBundle(
   bundle: ExportBundle,
-  options: { bloodwork?: boolean; cycle?: boolean; gym?: boolean; nutrition?: boolean; settings?: boolean } = {}
+  options: { bloodwork?: boolean; cycle?: boolean; gym?: boolean; settings?: boolean } = {}
 ): ImportResult {
   const opts = {
     bloodwork: true,
     cycle: true,
     gym: true,
-    nutrition: true,
     settings: true,
     ...options,
   };
@@ -123,7 +119,7 @@ export function applyImportBundle(
     }
   }
 
-  for (const mod of ["gym", "nutrition", "settings"] as const) {
+  for (const mod of ["gym", "settings"] as const) {
     if (!opts[mod] || bundle[mod] == null) continue;
     try {
       safeSetLocalStorage(LOCAL_STORAGE_KEYS[mod], JSON.stringify(bundle[mod]));

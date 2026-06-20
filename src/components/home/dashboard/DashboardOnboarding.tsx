@@ -10,8 +10,6 @@ type DashboardOnboardingProps = {
   hasReports: boolean;
   hasCompounds: boolean;
   hasWorkouts: boolean;
-  nutritionOnboardingComplete: boolean;
-  hasNutritionLogs: boolean;
   setRoute: (route: AppRoute) => void;
 };
 
@@ -19,8 +17,6 @@ export function DashboardOnboarding({
   hasReports,
   hasCompounds,
   hasWorkouts,
-  nutritionOnboardingComplete,
-  hasNutritionLogs,
   setRoute,
 }: DashboardOnboardingProps) {
   const { moduleEnabled } = useSiteConfig();
@@ -43,12 +39,6 @@ export function DashboardOnboarding({
       label: "Log a training session",
       done: hasWorkouts,
       route: "gym-workout" as const,
-    },
-    moduleEnabled("nutrition") && {
-      id: "nutrition",
-      label: nutritionOnboardingComplete ? "Track today's macros" : "Set up your nutrition plan",
-      done: nutritionOnboardingComplete && hasNutritionLogs,
-      route: "nutrition-diary" as const,
     },
   ].filter(Boolean) as { id: string; label: string; done: boolean; route: AppRoute }[];
 

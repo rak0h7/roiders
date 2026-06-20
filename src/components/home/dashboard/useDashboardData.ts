@@ -5,15 +5,13 @@ import { useApp } from "@/context/AppContext";
 import { useAuth } from "@/context/AuthContext";
 import { useCycleStore } from "@/store/cycleStore";
 import { useGymStore } from "@/store/gymStore";
-import { useNutritionStore } from "@/store/nutritionStore";
-import { macroSummary, sumNutrients, todayStr } from "@/lib/nutritionCalculations";
 import { getExerciseById } from "@/data/exercises";
 import { generateCrossAlerts } from "@/lib/crossIntelligence";
 import { calculateStats, calculateRiskProfile } from "@/lib/cycleCalculations";
 import { formatDuration, volumeByWeek } from "@/lib/gymCalculations";
 import type { AppRoute } from "@/context/NavigationContext";
 
-export type ModuleId = "labs" | "gear" | "training" | "nutrition";
+export type ModuleId = "labs" | "gear" | "training";
 
 export interface ActivityItem {
   id: string;
@@ -34,7 +32,6 @@ export function useDashboardData() {
     history: gymHistory, personalRecords, activeWorkout, customExercises,
     routines: gymRoutines, weightUnit,
   } = useGymStore();
-  const { logs, goals, getLog, onboardingComplete: nutritionOnboardingComplete } = useNutritionStore();
 
   const [thirtyDayCutoff] = useState(() => Date.now() - 30 * 86_400_000);
 
@@ -50,18 +47,7 @@ export function useDashboardData() {
     [gymHistory, thirtyDayCutoff],
   );
 
-  const today = todayStr();
-  const todayLog = getLog(today);
-  const todayMacros = macroSummary(sumNutrients(todayLog, true));
-  const daysLogged = Object.keys(logs).filter((d) => (logs[d]?.length ?? 0) > 0).length;
-
-  const crossAlerts = generateCrossAlerts(
-    currentValues,
-    reviewFlags,
-    compounds,
-    { goals, todayLog, daysLogged },
-    gym30d.length,
-  );
+  const crossAlerts = generateCrossAlerts(currentValues, reviewFlags, compounds);
 
   const vol30d = gym30d.reduce((s, w) => s + w.totalVolume, 0);
   const weeklyVolume = useMemo(() => volumeByWeek(gymHistory).slice(-6), [gymHistory]);
@@ -98,24 +84,13 @@ export function useDashboardData() {
         route: "cycle-dashboard",
       });
     }
-    if (todayLog.length > 0) {
-      items.push({
-        id: "nutrition-today",
-        module: "nutrition",
-        title: "Today's food log",
-        subtitle: `${todayMacros.calories} kcal · ${todayMacros.protein}g protein`,
-        at: today,
-        route: "nutrition-diary",
-      });
-    }
     return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()).slice(0, 6);
-  }, [reports, gymHistory, compounds.length, weeks, startDate, todayLog.length, todayMacros.calories, todayMacros.protein, today]);
+  }, [reports, gymHistory, compounds.length, weeks, startDate]);
 
   const modulesActive = [
     reports.length > 0 || markerCount > 0,
     compounds.length > 0,
     gymHistory.length > 0 || !!activeWorkout,
-    daysLogged > 0,
   ].filter(Boolean).length;
 
   const siteStatus = useMemo(() => {
@@ -123,7 +98,7 @@ export function useDashboardData() {
       return { label: "Attention required", color: "text-[var(--danger)]", dot: "bg-[var(--danger)]" };
     if (reviewFlags.length > 0 || crossAlerts.length > 0)
       return { label: "Review recommended", color: "text-[var(--warning)]", dot: "bg-[var(--warning)]" };
-    if (modulesActive >= 3)
+    if (modulesActive >= 2)
       return { label: "All systems tracking", color: "text-[var(--success)]", dot: "bg-[var(--success)]" };
     if (modulesActive === 1)
       return { label: "Getting started — add more data", color: "text-[var(--intel)]", dot: "bg-[var(--intel)]" };
@@ -159,11 +134,6 @@ export function useDashboardData() {
     customExercises,
     gymRoutines,
     weightUnit,
-    todayLog,
-    todayMacros,
-    daysLogged,
-    nutritionOnboardingComplete,
-    goals,
     crossAlerts,
     activity,
     modulesActive,

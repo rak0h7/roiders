@@ -2,7 +2,6 @@
 
 import { useCycleStore } from "@/store/cycleStore";
 import { useGymStore } from "@/store/gymStore";
-import { useNutritionStore } from "@/store/nutritionStore";
 
 export const CLOUD_SYNC_EVENT = "roiders:cloud-sync";
 
@@ -17,7 +16,6 @@ export async function rehydratePersistedStores(modules: string[] = []): Promise<
   const tasks = [
     useCycleStore.persist.rehydrate(),
     useGymStore.persist.rehydrate(),
-    useNutritionStore.persist.rehydrate(),
   ];
   await Promise.all(tasks);
   dispatchCloudSyncEvent({ modules });

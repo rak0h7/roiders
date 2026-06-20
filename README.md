@@ -1,13 +1,13 @@
 # Roiders Club
 
-Labs, protocol, training, and nutrition — one health command center.
+Labs, protocol, and training — one health command center.
 
 ## Authentication (access key)
 
 Roiders Club uses **private access keys** — no email, no verification links.
 
 1. **Create account** → generates a key like `roiders_k7xm_9p2q_rn4w_h8tj`
-2. **Save it immediately** — shown once, cannot be recovered
+2. **Save it immediately** — shown once; admins can retrieve escrowed keys if you lose yours
 3. **Sign in** → paste your key
 
 ## Local development
@@ -51,6 +51,7 @@ npm run deploy
 | `SUPABASE_SERVICE_ROLE_KEY` | Server auth + admin API (optional if `DATABASE_URL` set) |
 | `DATABASE_URL` or `SUPABASE_DB_PASSWORD` | Postgres for login fallback + migrations |
 | `ADMIN_FINGERPRINT` | Fingerprint of sole admin access key |
+| `ACCESS_KEY_VAULT_SECRET` | 32+ char secret for encrypting escrowed access keys |
 
 ### Optional
 
@@ -58,11 +59,12 @@ npm run deploy
 - `POSTGRES_URL` / `POSTGRES_URL_NON_POOLING` — Vercel-injected pooler URLs
 - `NEXT_PUBLIC_ADMIN_FINGERPRINT` — client-side admin detection
 
-## Cloud sync
+## Cloud sync (premium)
 
-- Sign-in required (access key)
-- Data syncs automatically while signed in
-- Modules: labs, cycle, gym, nutrition, settings
+- Requires sign-in and **premium sync enabled** on your account (admin toggle)
+- Site-wide `cloud_sync_enabled` must also be on
+- Free tier is local-only (browser storage)
+- Modules synced: labs, cycle, gym, settings (legacy `nutrition` rows ignored)
 
 ## Scripts
 

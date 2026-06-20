@@ -13,12 +13,7 @@ import {
 import { rehydratePersistedStores } from "@/lib/storeRehydrate";
 import { accountLabel } from "@/lib/accessKey.shared";
 import { useSiteConfig } from "@/context/SiteConfigContext";
-import {
-  loadUserProfile,
-  primeUsernamesSchema,
-  resolveProfileGate,
-  setUsernamesSchemaKnown,
-} from "@/lib/profile";
+import { loadUserProfile, resolveProfileGate } from "@/lib/profile";
 import { formatUsername, normalizeUsername } from "@/lib/username";
 import { ensureAccountStorageScope, resetAccountLocalState } from "@/lib/accountStorage";
 import { canUserCloudSync, PREMIUM_SYNC_REQUIRED_MESSAGE } from "@/lib/cloudSyncAccess";
@@ -74,7 +69,6 @@ interface AuthContextValue {
   isVendor: boolean;
   premiumSyncEnabled: boolean;
   canCloudSync: boolean;
-  usernamesEnabled: boolean;
   profileLoading: boolean;
   loading: boolean;
   rehydrateSession: () => Promise<void>;
@@ -106,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isVendor, setIsVendor] = useState(false);
   const [premiumSyncEnabled, setPremiumSyncEnabled] = useState(false);
-  const [usernamesEnabled, setUsernamesEnabled] = useState(true);
   const canCloudSync = useMemo(
     () => canUserCloudSync(siteSettings.cloud_sync_enabled, { premium_sync_enabled: premiumSyncEnabled }),
     [siteSettings.cloud_sync_enabled, premiumSyncEnabled],
@@ -135,7 +128,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsAdmin(false);
         setIsVendor(false);
         setPremiumSyncEnabled(false);
-        setUsernamesEnabled(true);
         setProfileLoading(false);
         return null;
       }
@@ -145,14 +137,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const metaFingerprint = nextUser.user_metadata?.key_fingerprint as string | undefined;
       const resolved =
         !profile.is_admin && metaFingerprint
-          ? { ...resolveProfileGate({ ...profile, key_fingerprint: metaFingerprint }), usernames_enabled: profile.usernames_enabled }
+          ? resolveProfileGate({ ...profile, key_fingerprint: metaFingerprint })
           : profile;
       setUsernameState(resolved.username);
       setDisplayNameState(resolved.display_name);
       setIsAdmin(resolved.is_admin);
       setIsVendor(resolved.is_vendor);
       setPremiumSyncEnabled(resolved.premium_sync_enabled);
-      setUsernamesEnabled(resolved.usernames_enabled);
       setProfileLoading(false);
       return resolved;
     },
@@ -168,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return "Account";
   }, [user, username, displayName]);
 
-  const needsUsername = Boolean(user && !profileLoading && usernamesEnabled && !username);
+  const needsUsername = Boolean(user && !profileLoading && !username);
 
   const syncNow = useCallback(async () => {
     if (!supabase || !user) return { error: null };
@@ -250,24 +241,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return pullState.current.promise;
     };
 
-    const schemaPromise = fetch("/api/profile/schema", { credentials: "same-origin" })
-      .then((res) => res.json())
-      .then((data: { usernames_enabled?: boolean }) =>
-        typeof data.usernames_enabled === "boolean" ? data.usernames_enabled : true
-      )
-      .catch(() => true);
-
-    primeUsernamesSchema(schemaPromise);
-
     const bootstrap = async () => {
-      try {
-        const enabled = await schemaPromise;
-        setUsernamesSchemaKnown(enabled);
-        setUsernamesEnabled(enabled);
-      } catch {
-        /* schema defaults to enabled via .catch(() => true) */
-      }
-
       const { data } = await supabase.auth.getSession();
       const nextUser = data.session?.user ?? null;
       setUser(nextUser);
@@ -385,7 +359,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       pullState.current = { userId: null, promise: null };
 
       const profile = await refreshProfile(nextUser);
-      const needsWelcome = Boolean(profile?.usernames_enabled && !profile.username);
+      const needsWelcome = Boolean(profile && !profile.username);
 
       if (profile && canUserCloudSync(siteSettings.cloud_sync_enabled, profile)) {
         void pullAndApplyUserData(supabase, nextUser.id)
@@ -480,7 +454,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isVendor,
         premiumSyncEnabled,
         canCloudSync,
-        usernamesEnabled,
         profileLoading,
         loading,
         rehydrateSession,

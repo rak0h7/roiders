@@ -1,5 +1,5 @@
 import { CATEGORY_INSIGHT_LABELS, CATEGORY_ORDER, MARKERS_BY_CATEGORY } from "./markers";
-import type { CategoryScore, MarkerValue, RangeMode } from "./types";
+import type { CategoryScore, MarkerValue } from "./types";
 import { evaluateSeverity } from "./ranges";
 
 function statusFromScore(score: number | null, assessed: number): string {
@@ -22,7 +22,6 @@ function severityPenalty(severity: string): number {
 
 export function calculateCategoryScores(
   values: Record<string, MarkerValue>,
-  mode: RangeMode
 ): CategoryScore[] {
   return CATEGORY_ORDER.map((category) => {
     const markers = MARKERS_BY_CATEGORY[category] || [];
@@ -35,7 +34,7 @@ export function calculateCategoryScores(
     for (const marker of markers) {
       const val = values[marker.id];
       if (!val) continue;
-      const { severity } = evaluateSeverity(marker, val.value, val.unit, mode);
+      const { severity } = evaluateSeverity(marker, val.value, val.unit);
       penalty += severityPenalty(severity);
       if (severity === "stop") {
         stopCount++;

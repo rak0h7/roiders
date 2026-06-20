@@ -73,8 +73,8 @@ export function scoreBarColor(score: number | null): string {
   return "bg-[var(--danger)]";
 }
 
-export function rangeModeLabel(mode: "lab" | "optimized"): string {
-  return mode === "lab" ? "Lab reference" : "On-cycle target";
+export function optimalRangeLabel(): string {
+  return "Optimal target";
 }
 
 export function CompoundPills({ compoundIds }: { compoundIds?: string[] }) {

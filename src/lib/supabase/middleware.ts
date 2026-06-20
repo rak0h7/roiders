@@ -5,7 +5,16 @@ import { loadUserProfile } from "@/lib/profile";
 import { fetchSiteSettings } from "@/lib/siteSettings";
 
 const AUTH_ROUTES = ["/auth/login", "/auth/signup", "/api/auth"];
-const PUBLIC_ROUTES = ["/maintenance", "/terms", "/privacy", "/about", "/features", "/robots.txt", "/sitemap.xml"];
+const PUBLIC_ROUTES = [
+  "/maintenance",
+  "/terms",
+  "/privacy",
+  "/about",
+  "/features",
+  "/articles",
+  "/robots.txt",
+  "/sitemap.xml",
+];
 
 function isAuthRoute(pathname: string) {
   return AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
@@ -123,15 +132,11 @@ export async function updateSession(request: NextRequest) {
   if (user && !isAuthRoute(pathname) && !isApiRoute(pathname)) {
     const profile = await loadUserProfile(supabase, user.id);
 
-    if (profile.usernames_enabled && !profile.username && pathname !== "/welcome") {
+    if (!profile.username && pathname !== "/welcome") {
       return NextResponse.redirect(new URL("/welcome", request.url));
     }
 
-    if (profile.usernames_enabled && profile.username && pathname === "/welcome") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    if (!profile.usernames_enabled && pathname === "/welcome") {
+    if (profile.username && pathname === "/welcome") {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }

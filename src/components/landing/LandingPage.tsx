@@ -13,7 +13,6 @@ import {
   Mail,
   Shield,
   Sparkles,
-  UtensilsCrossed,
   Zap,
 } from "lucide-react";
 import { Background } from "@/components/Background";
@@ -44,13 +43,6 @@ const MODULES = [
     desc: "Log workouts, manage programs, track PRs and weekly volume, with rest timers and supersets.",
     highlights: ["Workout log", "Programs", "Progress charts"],
   },
-  {
-    icon: UtensilsCrossed,
-    title: "Nutrition",
-    accent: "intel" as const,
-    desc: "Personalized macro targets from your stats, daily food diary, micronutrient tracking, and custom foods.",
-    highlights: ["Macro goals", "Food search", "Micro tracking"],
-  },
 ];
 
 const TIERS = [
@@ -61,7 +53,7 @@ const TIERS = [
     period: "forever",
     tagline: "Full access to every tracker. Create an account and start logging immediately.",
     features: [
-      "All four modules — labs, gear, training, nutrition",
+      "All three modules — labs, gear, training",
       "Cross-module intelligence & alerts",
       "Export & import your data anytime",
       "Private access-key login — no email required",
@@ -148,9 +140,9 @@ function PreviewDashboard() {
             <p className="mt-1 text-[10px] text-[var(--muted)]">lb volume this week</p>
           </div>
           <div className={cn(ui.cardIntel, "p-3")}>
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--intel)]">Nutrition</p>
-            <p className="font-display mt-1 text-2xl font-bold">2,840</p>
-            <p className="mt-1 text-[10px] text-[var(--muted)]">kcal · 186g protein</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--intel)]">Cross-alerts</p>
+            <p className="font-display mt-1 text-2xl font-bold">3</p>
+            <p className="mt-1 text-[10px] text-[var(--muted)]">labs + gear insights</p>
           </div>
         </div>
 
@@ -215,7 +207,7 @@ export function LandingPage() {
             <motion.div {...fadeUp}>
               <p className={ui.overline}>Free performance health platform</p>
               <h1 className="font-display mt-3 text-3xl font-bold leading-[1.1] tracking-tight sm:text-4xl lg:text-5xl">
-                Labs, protocol, training & nutrition —{" "}
+                Labs, protocol & training —{" "}
                 <span className="text-gradient text-gradient-glow">one command center</span>
               </h1>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--muted)] sm:text-lg">
@@ -270,14 +262,14 @@ export function LandingPage() {
               Your data talks to each other
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-              Roiders Club correlates labs, gear compounds, training load, and nutrition — surfacing alerts
+              Roiders Club correlates labs, gear compounds, and training load — surfacing alerts
               you would miss when each tracker lives in a separate app.
             </p>
             <div className="mx-auto mt-10 grid max-w-3xl items-stretch gap-3 sm:grid-cols-3">
               {[
                 { label: "Lab flags", sub: "Baseline & on-cycle ranges" },
                 { label: "Compound risk", sub: "Stack-aware analytics" },
-                { label: "Daily macros", sub: "Goal-based from your stats" },
+                { label: "Training load", sub: "Volume and PR trends" },
               ].map((item) => (
                 <div key={item.label} className={cn(ui.cardInner, "flex h-full flex-col justify-center px-4 py-4 text-left")}>
                   <p className="text-sm font-semibold">{item.label}</p>
@@ -291,7 +283,7 @@ export function LandingPage() {
         {/* Modules */}
         <section id="modules" className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <motion.div {...fadeUp} className="mb-10 text-center sm:mb-14">
-            <p className={ui.overline}>Four integrated trackers</p>
+            <p className={ui.overline}>Three integrated trackers</p>
             <h2 className="font-display mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
               Everything included — no paywalls
             </h2>

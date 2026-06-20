@@ -11,7 +11,7 @@ import {
   hasEstrogenControl,
   hasLiverSupport,
 } from "@/lib/stackAnalysis";
-import type { MarkerValue, RangeMode, ReviewFlag, Severity } from "@/lib/types";
+import type { MarkerValue, ReviewFlag, Severity } from "@/lib/types";
 
 export { COMPOUND_MONITOR_MARKERS } from "@/lib/compoundMonitorMarkers";
 
@@ -118,7 +118,6 @@ export function buildCycleReviewFlags(
       unit: e2Flag.unit,
       date,
       severity: e2Flag.severity === "stop" || e2Flag.severity === "high" ? "high" : "yellow",
-      labRange: e2Flag.labRange,
       optimalRange: e2Flag.optimalRange,
       deviation: "Estradiol is flagged while running aromatizing compounds with no estrogen control on your stack.",
       recommendation: "Add Aromasin or Arimidex to your cycle planner stack.",
@@ -142,7 +141,6 @@ export function buildCycleReviewFlags(
       unit: prolactinFlag.unit,
       date,
       severity: prolactinFlag.severity === "stop" ? "high" : "yellow",
-      labRange: prolactinFlag.labRange,
       optimalRange: prolactinFlag.optimalRange,
       deviation: "19-nor compounds commonly elevate prolactin — your flagged value aligns with this stack profile.",
       recommendation: "Consider Cabergoline (0.25mg 2x/week) and monitor prolactin every 4–6 weeks.",
@@ -164,7 +162,6 @@ export function buildCycleReviewFlags(
         unit: liverFlag.unit,
         date,
         severity: liverFlag.severity === "stop" || liverFlag.severity === "high" ? "high" : "yellow",
-        labRange: liverFlag.labRange,
         optimalRange: liverFlag.optimalRange,
         deviation: `Elevated ${liverFlag.name.toLowerCase()} while running hepatotoxic oral compounds.`,
         recommendation: "Add TUDCA/NAC, reduce oral dose, or pause orals until enzymes normalize.",
@@ -189,7 +186,6 @@ export function buildCycleReviewFlags(
         unit: hctFlag.unit,
         date,
         severity: criticalHct || hctFlag.severity === "stop" ? "stop" : hctFlag.severity === "high" ? "high" : "yellow",
-        labRange: hctFlag.labRange,
         optimalRange: hctFlag.optimalRange,
         deviation: criticalHct
           ? "Hematocrit is at or above 52% — major cardiovascular risk on an androgen stack."
@@ -210,11 +206,10 @@ export function buildCycleReviewFlags(
 export function buildMergedReviewFlags(
   values: MarkerValue[],
   date: string,
-  mode: RangeMode,
   compounds: CycleCompound[],
   valuesRecord: Record<string, MarkerValue>
 ): ReviewFlag[] {
-  const labFlags = buildReviewFlags(values, date, mode);
+  const labFlags = buildReviewFlags(values, date);
   const enriched = enrichLabFlagsWithCycleContext(labFlags, compounds);
   const cycleFlags = buildCycleReviewFlags(compounds, valuesRecord, enriched, date);
 

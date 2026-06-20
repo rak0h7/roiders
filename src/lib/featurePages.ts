@@ -1,4 +1,4 @@
-export type FeatureSlug = "labs" | "gear" | "training" | "nutrition";
+export type FeatureSlug = "labs" | "gear" | "training";
 
 export type FeatureSubFeature = {
   title: string;
@@ -171,7 +171,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
     slug: "training",
     title: "Workout Logging & Progress Analytics",
     metaDescription:
-      "Log workouts, build training programs, track PRs and weekly volume, and connect training load with labs and nutrition in Roiders Club.",
+      "Log workouts, build training programs, track PRs and weekly volume, and connect training load with labs and gear in Roiders Club.",
     h1: "Workout Logging & Progress Analytics",
     intro:
       "Record every session with sets, reps, and RPE — then review volume trends, personal records, and program adherence over time.",
@@ -233,79 +233,7 @@ export const FEATURE_PAGES: FeaturePage[] = [
           },
           {
             title: "Cross-module context",
-            description: "Training load sits beside labs and nutrition for fuller performance picture.",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    slug: "nutrition",
-    title: "Macro & Micronutrient Tracking",
-    metaDescription:
-      "Hit macro targets, log daily meals, track micronutrients, and build custom foods in the Roiders Club Nutrition module.",
-    h1: "Macro Targets & Micronutrient Tracking",
-    intro:
-      "Set protein, carb, and fat goals from your profile, log meals through the day, and see micronutrient gaps before they become chronic shortfalls.",
-    highlights: [
-      "Profile-based macro goal calculator",
-      "Daily food diary by meal slot",
-      "Micronutrient coverage view",
-      "Custom foods and quick-add search",
-    ],
-    accent: "intel",
-    sections: [
-      {
-        heading: "Goals grounded in your profile",
-        summary: "Start from body stats and targets instead of generic calorie formulas.",
-        subFeatures: [
-          {
-            title: "Macro goal calculator",
-            description: "Derive calories and macros from weight, activity, and goal settings.",
-          },
-          {
-            title: "Daily targets",
-            description: "See remaining protein, carbs, and fat as you log through the day.",
-          },
-          {
-            title: "Adjust on the fly",
-            description: "Tweak targets when training phase or body comp goals change.",
-          },
-        ],
-      },
-      {
-        heading: "Fast daily food logging",
-        summary: "Capture breakfast through late-night snacks in a structured diary.",
-        subFeatures: [
-          {
-            title: "Meal slots",
-            description: "Organize entries by meal so patterns are easy to spot.",
-          },
-          {
-            title: "Food search",
-            description: "Find common foods quickly and add custom items you eat often.",
-          },
-          {
-            title: "Custom food builder",
-            description: "Save homemade meals and branded products with accurate macros.",
-          },
-        ],
-      },
-      {
-        heading: "Micronutrients beyond macros",
-        summary: "Protein and calories are only part of the performance health picture.",
-        subFeatures: [
-          {
-            title: "Micronutrient panel",
-            description: "Track vitamins and minerals against daily reference targets.",
-          },
-          {
-            title: "Gap highlighting",
-            description: "See which micros trend low across your typical eating pattern.",
-          },
-          {
-            title: "Holistic dashboard tie-in",
-            description: "Nutrition data complements labs and training in one command center.",
+            description: "Training load sits beside labs and gear for a fuller performance picture.",
           },
         ],
       },

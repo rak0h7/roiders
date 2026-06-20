@@ -3,7 +3,7 @@ import { LegalPageShell } from "@/components/legal/LegalPageShell";
 import { buildPageMetadata } from "@/lib/seo";
 import { fetchSiteSettings, resolveLegalContactHref } from "@/lib/siteSettings";
 
-const UPDATED = "June 18, 2026";
+const UPDATED = "June 19, 2026";
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +32,15 @@ export default async function TermsPage() {
         <h2 className="text-base font-semibold text-[var(--foreground)]">Not medical advice</h2>
         <p>
           {settings.site_name} is a personal tracking and interpretation tool. It does not provide medical
-          advice, diagnosis, or treatment. Content, flags, simulations, and guides are for informational
-          purposes only. Always consult a qualified healthcare professional before making health decisions.
-          You use the Service at your own risk.
+          advice, diagnosis, or treatment. Bloodwork flags, category scores, simulations, compound guides,
+          and dosing references are for informational and educational purposes only — not prescriptions or
+          clinical recommendations.
+        </p>
+        <p>
+          Lab interpretation uses <strong className="text-[var(--foreground)]">optimal target ranges</strong>{" "}
+          tuned for health on a very minimal cycle. Deviations outside those targets are flagged for monitoring;
+          they are not diagnoses. Always consult a qualified healthcare professional before making health
+          decisions. You use the Service at your own risk.
         </p>
       </section>
 
@@ -50,12 +56,19 @@ export default async function TermsPage() {
         <h2 className="text-base font-semibold text-[var(--foreground)]">Accounts &amp; access keys</h2>
         <p>
           The Service uses private access keys instead of email passwords. You are solely responsible for
-          keeping your key secure. We cannot recover a lost key. Do not share your key with others. You are
-          responsible for all activity under your account.
+          keeping your key secure. Do not share your key with others. You are responsible for all activity
+          under your account.
         </p>
         <p>
-          Free accounts store data locally in your browser by default. Premium cloud sync, when enabled for
-          your account, stores encrypted application data on our infrastructure to sync across devices.
+          Access keys are shown once at account creation. If you lose your key, self-service recovery is not
+          available. Site administrators may retrieve escrowed keys generated through signup, admin issuance,
+          or approved vendor programs — contact support if you need assistance.
+        </p>
+        <p>
+          Free accounts store data locally in your browser by default.{" "}
+          <strong className="text-[var(--foreground)]">Cloud sync is a premium feature</strong> — it is only
+          available when explicitly enabled on your account by an administrator. Premium sync stores your
+          module data on our infrastructure so you can access it across devices.
         </p>
       </section>
 

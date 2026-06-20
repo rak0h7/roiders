@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Blocks, Dumbbell, FlaskConical, UtensilsCrossed } from "lucide-react";
+import { Blocks, Dumbbell, FlaskConical } from "lucide-react";
 import { MarketingPageShell } from "@/components/marketing/MarketingPageShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { FEATURE_PAGES } from "@/lib/featurePages";
@@ -11,7 +11,6 @@ const ICONS = {
   labs: FlaskConical,
   gear: Blocks,
   training: Dumbbell,
-  nutrition: UtensilsCrossed,
 } as const;
 
 type FeaturesIndexContentProps = {
@@ -25,7 +24,7 @@ function featuresIndexJsonLd(siteName: string) {
     url: `${getSiteUrl()}/features`,
     name: `${siteName} Features`,
     description:
-      "Explore Roiders Club modules for bloodwork tracking, cycle planning, workout logging, and nutrition — free performance health tools at roiders.club.",
+      "Explore Roiders Club modules for bloodwork tracking, cycle planning, and workout logging — free performance health tools at roiders.club.",
     hasPart: FEATURE_PAGES.map((page) => ({
       "@type": "WebPage",
       name: page.h1,
@@ -57,7 +56,7 @@ export function FeaturesIndexContent({ siteName }: FeaturesIndexContentProps) {
           Performance health features at roiders.club
         </h1>
         <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--muted)] sm:text-base">
-          {siteName} keeps labs, gear, training, and nutrition in one private dashboard. These pages describe what
+          {siteName} keeps labs, gear, and training in one private dashboard. These pages describe what
           each module does — crawlable overviews separate from the secure in-app experience behind access-key login.
         </p>
 

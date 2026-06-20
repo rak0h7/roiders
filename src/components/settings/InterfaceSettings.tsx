@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 export function InterfaceSettings() {
-  const { defaultRangeMode, updateSettings } = useSettings();
   const { defaultRestSeconds, weightUnit, setDefaultRestSeconds, setWeightUnit } = useGymStore();
 
   return (
@@ -25,28 +24,6 @@ export function InterfaceSettings() {
       </div>
 
       <div className="space-y-5">
-        <div>
-          <p className={cn(ui.overline, "mb-3")}>Labs</p>
-          <div className={ui.rowBetween}>
-            <div>
-              <p className="text-sm text-[var(--foreground)]">Default range mode</p>
-              <p className={ui.sectionSub}>How markers are evaluated on new panels</p>
-            </div>
-            <div className="flex gap-2">
-              {(["optimized", "lab"] as const).map((mode) => (
-                <SegmentButton
-                  key={mode}
-                  active={defaultRangeMode === mode}
-                  onClick={() => updateSettings({ defaultRangeMode: mode })}
-                  accent="labs"
-                >
-                  {mode}
-                </SegmentButton>
-              ))}
-            </div>
-          </div>
-        </div>
-
         <div>
           <p className={cn(ui.overline, "mb-3")}>Training</p>
           <div className="space-y-4">

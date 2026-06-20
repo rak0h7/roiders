@@ -18,7 +18,7 @@ import { ui } from "@/lib/ui";
 
 export function SettingsView() {
   const { reports, overallScore, resetAll } = useApp();
-  const { defaultRangeMode, resetSettings } = useSettings();
+  const { resetSettings } = useSettings();
   const { startDate, compounds, getEffectiveWeeks, clearCycle } = useCycleStore();
   const { toast } = useToast();
   const importRef = useRef<HTMLInputElement>(null);
@@ -35,7 +35,7 @@ export function SettingsView() {
         compounds,
       })
     );
-    toast({ type: "success", title: "JSON exported", description: "Full bundle: labs, cycle, gym, nutrition, settings." });
+    toast({ type: "success", title: "JSON exported", description: "Full bundle: labs, cycle, gym, settings." });
   };
 
   const handleImportJSON = async (file: File) => {
@@ -95,7 +95,7 @@ export function SettingsView() {
 
       <div className={`${ui.card} ${ui.cardPad}`}>
         <h3 className={ui.sectionTitle}>Export Data</h3>
-        <p className={ui.sectionSub}>Download or restore your full data bundle (labs, cycle, gym, nutrition, settings).</p>
+        <p className={ui.sectionSub}>Download or restore your full data bundle (labs, cycle, gym, settings).</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { icon: FileJson, label: "JSON", desc: "Full bundle", action: handleExportJSON, accent: ui.statLabs },
@@ -180,7 +180,7 @@ export function SettingsView() {
       </div>
 
       <p className="text-center text-[10px] text-[var(--muted-2)]">
-        {reports.length} reports · {compounds.length} compounds · Range: {defaultRangeMode}
+        {reports.length} reports · {compounds.length} compounds · Optimal ranges
       </p>
     </div>
   );

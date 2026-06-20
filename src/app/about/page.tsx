@@ -43,12 +43,12 @@ export default async function AboutPage() {
             <p>
               <strong className="text-[var(--foreground)]">{settings.site_name}</strong> at{" "}
               <strong className="text-[var(--foreground)]">roiders.club</strong> is a private web app for people
-              who track bloodwork, cycle planning, training, and nutrition seriously. Upload lab PDFs or
-              screenshots, get traffic-light analysis flags, plan compounds with saturation curves, log workouts,
-              and hit macro targets — without juggling four separate apps.
+              who track bloodwork, cycle planning, and training seriously. Upload lab PDFs or
+              screenshots, get traffic-light analysis flags, plan compounds with saturation curves, and log workouts
+              — without juggling separate apps.
             </p>
             <p>
-              The core product is <strong className="text-[var(--foreground)]">free</strong>: all four modules,
+              The core product is <strong className="text-[var(--foreground)]">free</strong>: all three modules,
               cross-module intelligence, export/import, and private access-key login. Optional premium adds
               encrypted cloud sync and premium sources — available on request.
             </p>
@@ -62,7 +62,7 @@ export default async function AboutPage() {
               <strong className="text-[var(--foreground)]">{settings.site_name}</strong> does not sell compounds,
               ship products, or operate as an e-commerce steroid site. There is no cart, no checkout, and no
               inventory. The app is a harm-reduction-adjacent tracking tool: log bloodwork, plan protocols,
-              record training, and track nutrition so you can make more informed decisions with your own data and
+              and record training so you can make more informed decisions with your own data and
               clinical guidance.
             </p>
             <p>
@@ -116,12 +116,6 @@ export default async function AboutPage() {
                   <strong className="text-[var(--foreground)]">Training</strong>
                 </Link>{" "}
                 — workout log, programs, PRs, weekly volume
-              </li>
-              <li>
-                <Link href="/features/nutrition" className="text-[var(--labs)] hover:underline">
-                  <strong className="text-[var(--foreground)]">Nutrition</strong>
-                </Link>{" "}
-                — macros, food diary, micronutrients
               </li>
             </ul>
           </section>

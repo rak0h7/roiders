@@ -86,7 +86,7 @@ export function webSiteJsonLd(description: string) {
         applicationCategory: "HealthApplication",
         operatingSystem: "Web",
         browserRequirements: "Requires JavaScript",
-        featureList: ["Labs bloodwork tracking", "Gear cycle planning", "Training workout log", "Nutrition macro tracking"],
+        featureList: ["Labs bloodwork tracking", "Gear cycle planning", "Training workout log"],
         publisher: { "@id": `${url}/#organization` },
         offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         url,
@@ -102,12 +102,12 @@ export const PUBLIC_FAQ: FaqItem[] = [
   {
     question: "What is roiders.club?",
     answer:
-      "A free performance health web app for bloodwork analysis, cycle planning, training, and nutrition — all in one private dashboard.",
+      "A free performance health web app for bloodwork analysis, cycle planning, and training — all in one private dashboard.",
   },
   {
     question: "Is it free?",
     answer:
-      "Yes. Labs, gear, training, and nutrition trackers are free. Optional premium adds cloud sync and is available on request.",
+      "Yes. Labs, gear, and training trackers are free. Optional premium adds cloud sync and is available on request.",
   },
 ];
 
@@ -141,6 +141,44 @@ export function featurePageJsonLd(page: {
         publisher: { "@id": `${base}/#organization` },
         url: base,
         description: page.metaDescription,
+      },
+    ],
+  };
+}
+
+export function articlePageJsonLd(article: {
+  id: string;
+  title: string;
+  tagline?: string;
+  publishedAt?: string;
+  updatedAt?: string;
+}) {
+  const base = getSiteUrl();
+  const url = `${base}/articles/${article.id}`;
+  const description = article.tagline ?? article.title;
+  const dateModified = article.updatedAt ?? article.publishedAt;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${url}/#article`,
+        headline: article.title,
+        description,
+        url,
+        datePublished: article.publishedAt,
+        dateModified,
+        isPartOf: { "@id": `${base}/#website` },
+        publisher: { "@id": `${base}/#organization` },
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${url}/#webpage`,
+        url,
+        name: article.title,
+        description,
+        isPartOf: { "@id": `${base}/#website` },
       },
     ],
   };

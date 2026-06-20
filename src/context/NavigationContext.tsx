@@ -17,17 +17,15 @@ export type AppRoute =
   | "gym-history"
   | "gym-progress"
   | "gym-exercises"
-  | "nutrition-diary"
-  | "nutrition-search"
-  | "nutrition-micro"
-  | "nutrition-goals"
-  | "nutrition-foods"
+  | "articles"
   | "settings";
 
-export type NavGroup = "overview" | "labs" | "protocol" | "training" | "nutrition" | "misc";
+export type NavItemId = AppRoute;
+
+export type NavGroup = "overview" | "labs" | "protocol" | "training" | "misc";
 
 export interface NavItem {
-  id: AppRoute;
+  id: NavItemId;
   label: string;
   group: NavGroup;
   icon: string;
@@ -48,11 +46,7 @@ export const NAV_ITEMS: NavItem[] = [
   { id: "gym-history", label: "Workout Log", group: "training", icon: "history", description: "Past training sessions", accent: "protocol" },
   { id: "gym-progress", label: "Training Stats", group: "training", icon: "trending", description: "Volume, PRs & charts", accent: "intel" },
   { id: "gym-exercises", label: "Exercises", group: "training", icon: "library", description: "Browse & create exercises", accent: "neutral" },
-  { id: "nutrition-diary", label: "Diary", group: "nutrition", icon: "utensils", description: "Daily food log & macros", accent: "intel" },
-  { id: "nutrition-search", label: "Add Food", group: "nutrition", icon: "search-food", description: "Search & log foods", accent: "intel" },
-  { id: "nutrition-micro", label: "Micronutrients", group: "nutrition", icon: "leaf", description: "Vitamins, minerals & aminos", accent: "intel" },
-  { id: "nutrition-goals", label: "Nutrition Goals", group: "nutrition", icon: "target", description: "Macro & micro targets", accent: "intel" },
-  { id: "nutrition-foods", label: "Food Library", group: "nutrition", icon: "apple", description: "Custom foods & favorites", accent: "neutral" },
+  { id: "articles", label: "Articles", group: "misc", icon: "book", description: "Gear, training & diet reference", accent: "intel" },
   { id: "settings", label: "Settings", group: "misc", icon: "sliders", description: "Export & preferences", accent: "neutral" },
 ];
 

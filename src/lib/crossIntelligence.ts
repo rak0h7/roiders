@@ -10,14 +10,6 @@ import {
 } from "@/lib/stackAnalysis";
 import type { AppRoute } from "@/context/NavigationContext";
 import type { MarkerValue, ReviewFlag } from "@/lib/types";
-import { macroSummary, pctOfGoal, sumNutrients } from "@/lib/nutritionCalculations";
-import type { FoodLogEntry } from "@/lib/nutritionTypes";
-
-export interface NutritionSnapshot {
-  goals: Record<string, number>;
-  todayLog: FoodLogEntry[];
-  daysLogged?: number;
-}
 
 export type CrossAlertSeverity = "critical" | "warning" | "info";
 
@@ -43,13 +35,11 @@ function flagForMarker(flags: ReviewFlag[], id: string): ReviewFlag | undefined 
 export function generateCrossAlerts(
   values: Record<string, MarkerValue>,
   flags: ReviewFlag[],
-  compounds: CycleCompound[],
-  nutrition?: NutritionSnapshot,
-  trainingSessions30d?: number
+  compounds: CycleCompound[]
 ): CrossAlert[] {
   const alerts: CrossAlert[] = [];
 
-  if (compounds.length === 0 && Object.keys(values).length === 0 && !nutrition) return alerts;
+  if (compounds.length === 0 && Object.keys(values).length === 0) return alerts;
 
   const hepatotoxic = hasHepatotoxicOrals(compounds);
   const altFlag = flagForMarker(flags, "alt");
@@ -175,91 +165,6 @@ export function generateCrossAlerts(
       recommendation: "Open the cycle planner to build your stack and see saturation projections.",
       route: "cycle-planner",
     });
-  }
-
-  if (nutrition) {
-    const totals = sumNutrients(nutrition.todayLog, true);
-    const macros = macroSummary(totals);
-    const proteinGoal = nutrition.goals.protein ?? 165;
-    const proteinPct = pctOfGoal(macros.protein, proteinGoal);
-
-    if (trainingSessions30d && trainingSessions30d >= 8 && proteinPct < 70) {
-      alerts.push({
-        id: "protein-training",
-        severity: "warning",
-        title: "Protein intake below target with active training",
-        message: `Today's protein is ${macros.protein}g (${proteinPct}% of ${proteinGoal}g goal) while you're training regularly.`,
-        recommendation: "Increase lean protein across meals or adjust your protein goal in Nutrition Goals.",
-        route: "nutrition-diary",
-      });
-    }
-
-    const ferritinFlag = flagForMarker(flags, "ferritin");
-    const ironIntake = totals.iron ?? 0;
-    const ironGoal = nutrition.goals.iron ?? 18;
-    if (ferritinFlag && ironIntake < ironGoal * 0.5) {
-      alerts.push({
-        id: "iron-ferritin",
-        severity: ferritinFlag.severity === "stop" ? "critical" : "warning",
-        title: "Low iron intake with flagged ferritin",
-        message: `Ferritin is flagged on labs while today's iron intake is only ${ironIntake.toFixed(1)}mg.`,
-        recommendation: "Prioritize iron-rich foods (red meat, spinach, legumes) and pair with vitamin C.",
-        route: "nutrition-micro",
-        markers: ["ferritin"],
-      });
-    }
-
-    const sodiumIntake = totals.sodium ?? 0;
-    const sodiumGoal = nutrition.goals.sodium ?? 2300;
-    if (sodiumIntake > sodiumGoal * 1.25) {
-      const bpFlag = flagForMarker(flags, "bloodPressureSystolic") ?? flagForMarker(flags, "bloodPressureDiastolic");
-      alerts.push({
-        id: "sodium-high",
-        severity: bpFlag ? "warning" : "info",
-        title: "Sodium intake above daily target",
-        message: `Today's sodium is ${Math.round(sodiumIntake)}mg vs a ${sodiumGoal}mg reference.`,
-        recommendation: "Reduce processed foods and track sodium in the micronutrient view.",
-        route: "nutrition-micro",
-        markers: bpFlag ? ["bloodPressureSystolic", "bloodPressureDiastolic"].filter((m) => values[m]) : undefined,
-      });
-    }
-
-    const vitDIntake = totals.vitaminD ?? 0;
-    const vitDFlag = flagForMarker(flags, "vitaminD");
-    if (vitDFlag && vitDIntake < (nutrition.goals.vitaminD ?? 20) * 0.4) {
-      alerts.push({
-        id: "vitd-labs",
-        severity: "warning",
-        title: "Low vitamin D intake with flagged labs",
-        message: "Vitamin D is low on your panel and today's food log shows minimal dietary vitamin D.",
-        recommendation: "Add fatty fish, fortified dairy, or discuss supplementation with your provider.",
-        route: "nutrition-search",
-        markers: ["vitaminD"],
-      });
-    }
-
-    if (hepatotoxic && (totals.protein ?? 0) < proteinGoal * 0.6) {
-      alerts.push({
-        id: "liver-protein",
-        severity: "info",
-        title: "Hepatotoxic stack — adequate protein supports recovery",
-        message: "Running oral hepatotoxic compounds while protein intake is under target today.",
-        recommendation: "Hit your protein goal to support liver repair alongside TUDCA/NAC.",
-        route: "nutrition-diary",
-      });
-    }
-
-    const daysLogged = nutrition.daysLogged ?? 0;
-    if (daysLogged === 0 && (trainingSessions30d ?? 0) > 0) {
-      alerts.push({
-        id: "nutrition-not-started",
-        severity: "info",
-        title: "Training logged — nutrition not tracked yet",
-        message: "You're logging workouts but haven't started a food diary.",
-        recommendation: "Open the diary to log today's meals and connect intake with training load.",
-        route: "nutrition-diary",
-      });
-    }
   }
 
   for (const compound of compounds) {

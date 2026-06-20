@@ -24,7 +24,7 @@ export function ExtractionReview() {
   const review = extractedMarkers.filter((m) => m.needsReview);
 
   const statusColor = (status: string) => {
-    if (status === "lab-normal") return "border-[var(--success)]/30 bg-[var(--success)]/15 text-[var(--success)]";
+    if (status === "in-range") return "border-[var(--success)]/30 bg-[var(--success)]/15 text-[var(--success)]";
     if (status === "high") return "border-[var(--danger)]/30 bg-[var(--danger)]/15 text-[var(--danger)]";
     return "border-[var(--intel)]/30 bg-[var(--intel-dim)] text-[var(--intel)]";
   };
@@ -54,7 +54,7 @@ export function ExtractionReview() {
         <div className="flex flex-wrap gap-2">
           {[
             { label: "Select All Current", action: selectAllCurrent },
-            { label: "Lab-Abnormal Only", action: selectAbnormalOnly },
+            { label: "Out-of-Range Only", action: selectAbnormalOnly },
             { label: "Converted Only", action: selectConvertedOnly },
             { label: "Deselect All", action: deselectAll },
           ].map((btn) => (
@@ -96,7 +96,7 @@ export function ExtractionReview() {
             <p className="mt-1 text-[10px] text-[var(--muted)]">{marker.date}</p>
             <div className="mt-2 flex flex-wrap gap-1">
               <span className={cn("rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase", statusColor(marker.labStatus))}>
-                {marker.labStatus === "lab-normal" ? "Lab-Normal" : marker.labStatus}
+                {marker.labStatus === "in-range" ? "In range" : marker.labStatus}
               </span>
               <span className="rounded-full border border-[var(--success)]/30 bg-[var(--success)]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-[var(--success)]">
                 {marker.converted ? "Converted" : "Same Unit"}

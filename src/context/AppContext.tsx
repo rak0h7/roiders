@@ -1,7 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useSiteConfig } from "@/context/SiteConfigContext";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { CLOUD_SYNC_EVENT, labsModuleChanged, type CloudSyncEventDetail } from "@/lib/storeRehydrate";
 import { annotateExtractedHistorical, parseCSV, parseLabText } from "@/lib/parser";
 import { extractTextFromImages } from "@/lib/ocr";
@@ -23,7 +22,6 @@ import type {
   BloodworkReport,
   MainTab,
   MarkerValue,
-  RangeMode,
   SecondaryTab,
 } from "@/lib/types";
 
@@ -31,7 +29,6 @@ interface AppContextValue extends AppState {
   setMainTab: (tab: MainTab) => void;
   setLogView: (view: AppState["logView"]) => void;
   setSecondaryTab: (tab: SecondaryTab) => void;
-  setRangeMode: (mode: RangeMode) => void;
   setMarkerValue: (markerId: string, value: number | null, unit: string) => void;
   setCurrentValues: (values: Record<string, MarkerValue>) => void;
   parseAndExtract: (text: string, fileName?: string) => void;
@@ -44,6 +41,7 @@ interface AppContextValue extends AppState {
   applySelected: () => void;
   saveReport: (name?: string) => void;
   loadReport: (id: string) => void;
+  startNewLabPanel: () => void;
   deleteReport: (id: string) => void;
   resetAll: () => void;
   setCompareReports: (a: string | null, b: string | null) => void;
@@ -56,17 +54,10 @@ interface AppContextValue extends AppState {
 
 const AppContext = createContext<AppContextValue | null>(null);
 
-function defaultRangeMode(reports: BloodworkReport[]): RangeMode {
-  if (typeof window === "undefined") return "optimized";
-  const hasStack = useCycleStore.getState().compounds.length > 0;
-  return hasStack || reports.length > 0 ? "optimized" : "lab";
-}
-
 const initialState: AppState = {
   mainTab: "log",
   logView: "landing",
   secondaryTab: null,
-  rangeMode: "optimized",
   currentValues: {},
   extractedMarkers: [],
   extractionFileName: "",
@@ -77,9 +68,7 @@ const initialState: AppState = {
 };
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const { settings: siteSettings } = useSiteConfig();
   const compounds = useCycleStore((s) => s.compounds);
-  const rangeModeUserSet = useRef(false);
   const [state, setState] = useState<AppState>(() => {
     const reports = loadReports();
     const hydrated = hydrateLabsState(reports, null);
@@ -88,14 +77,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       reports,
       currentValues: hydrated.currentValues,
       activeReportId: hydrated.activeReportId,
-      rangeMode: defaultRangeMode(reports),
     };
   });
-
-  useEffect(() => {
-    if (rangeModeUserSet.current) return;
-    setState((s) => ({ ...s, rangeMode: siteSettings.default_labs_range_mode }));
-  }, [siteSettings.default_labs_range_mode]);
 
   useEffect(() => {
     const reload = (event: Event) => {
@@ -120,27 +103,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener(CLOUD_SYNC_EVENT, reload);
   }, []);
 
-  useEffect(() => {
-    const reconcileRangeMode = () => {
-      if (rangeModeUserSet.current) return;
-      setState((s) => {
-        const next = defaultRangeMode(s.reports);
-        return s.rangeMode === next ? s : { ...s, rangeMode: next };
-      });
-    };
-
-    reconcileRangeMode();
-
-    const onCycleSync = (event: Event) => {
-      const modules = (event as CustomEvent<CloudSyncEventDetail>).detail?.modules;
-      if (modules?.length && !modules.includes("cycle")) return;
-      reconcileRangeMode();
-    };
-
-    window.addEventListener(CLOUD_SYNC_EVENT, onCycleSync);
-    return () => window.removeEventListener(CLOUD_SYNC_EVENT, onCycleSync);
-  }, [compounds.length]);
-
   const setMainTab = useCallback((tab: MainTab) => {
     setState((s) => ({ ...s, mainTab: tab, showComparison: false }));
   }, []);
@@ -151,11 +113,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const setSecondaryTab = useCallback((tab: SecondaryTab) => {
     setState((s) => ({ ...s, secondaryTab: tab }));
-  }, []);
-
-  const setRangeMode = useCallback((mode: RangeMode) => {
-    rangeModeUserSet.current = true;
-    setState((s) => ({ ...s, rangeMode: mode }));
   }, []);
 
   const setMarkerValue = useCallback((markerId: string, value: number | null, unit: string) => {
@@ -246,7 +203,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       ...s,
       extractedMarkers: s.extractedMarkers.map((m) => ({
         ...m,
-        selected: m.labStatus !== "lab-normal",
+        selected: m.labStatus !== "in-range",
       })),
     }));
   }, []);
@@ -324,6 +281,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const startNewLabPanel = useCallback(() => {
+    setState((s) => ({
+      ...s,
+      currentValues: {},
+      activeReportId: null,
+      logView: "entry",
+      mainTab: "log",
+    }));
+  }, []);
+
   const loadReport = useCallback((id: string) => {
     setState((s) => {
       const report = s.reports.find((r) => r.id === id);
@@ -372,15 +339,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return buildMergedReviewFlags(
       Object.values(state.currentValues),
       panelDate,
-      state.rangeMode,
       compounds,
       state.currentValues
     );
-  }, [state.currentValues, state.rangeMode, state.reports, state.activeReportId, compounds]);
+  }, [state.currentValues, state.reports, state.activeReportId, compounds]);
 
   const categoryScores = useMemo(
-    () => calculateCategoryScores(state.currentValues, state.rangeMode),
-    [state.currentValues, state.rangeMode]
+    () => calculateCategoryScores(state.currentValues),
+    [state.currentValues]
   );
 
   const overallScore = useMemo(
@@ -398,7 +364,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setMainTab,
     setLogView,
     setSecondaryTab,
-    setRangeMode,
     setMarkerValue,
     setCurrentValues,
     parseAndExtract,
@@ -411,6 +376,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     applySelected,
     saveReport,
     loadReport,
+    startNewLabPanel,
     deleteReport,
     resetAll,
     setCompareReports,

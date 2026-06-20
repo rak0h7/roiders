@@ -13,11 +13,7 @@ export const ROUTE_TO_PATH: Record<AppRoute, string> = {
   "gym-history": "/gym/history",
   "gym-progress": "/gym/stats",
   "gym-exercises": "/gym/exercises",
-  "nutrition-diary": "/nutrition/diary",
-  "nutrition-search": "/nutrition/add",
-  "nutrition-micro": "/nutrition/micro",
-  "nutrition-goals": "/nutrition/goals",
-  "nutrition-foods": "/nutrition/foods",
+  articles: "/articles",
   settings: "/settings",
 };
 
@@ -34,9 +30,24 @@ export function pathFromRoute(route: AppRoute): string {
   return ROUTE_TO_PATH[route] ?? "/";
 }
 
+export function normalizePathname(pathname: string): string {
+  return pathname.endsWith("/") && pathname.length > 1 ? pathname.slice(0, -1) : pathname;
+}
+
+/** Slug segment for `/articles/[slug]`, or null on the index route. */
+export function articleSlugFromPathname(pathname: string): string | null {
+  const normalized = normalizePathname(pathname);
+  if (normalized === "/articles") return null;
+  const prefix = "/articles/";
+  if (!normalized.startsWith(prefix)) return null;
+  const slug = normalized.slice(prefix.length);
+  return slug.length > 0 ? slug : null;
+}
+
 export function routeFromPathname(pathname: string): AppRoute | null {
-  const normalized = pathname.endsWith("/") && pathname.length > 1
-    ? pathname.slice(0, -1)
-    : pathname;
+  const normalized = normalizePathname(pathname);
+  if (normalized === "/articles" || normalized.startsWith("/articles/")) {
+    return "articles";
+  }
   return LEGACY_PATH_ALIASES[normalized] ?? PATH_TO_ROUTE[normalized] ?? null;
 }

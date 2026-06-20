@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await fetchSiteSettings();
   return buildPageMetadata({
-    title: `Features — Labs, Gear, Training & Nutrition`,
-    description: `Explore ${settings.site_name} modules: bloodwork tracking, cycle planning, workout logging, and macro tracking. Free performance health tools at roiders.club.`,
+    title: `Features — Labs, Gear & Training`,
+    description: `Explore ${settings.site_name} modules: bloodwork tracking, cycle planning, and workout logging. Free performance health tools at roiders.club.`,
     path: "/features",
   });
 }

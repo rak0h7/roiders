@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import type { AppRoute } from "@/context/NavigationContext";
-import { pctOfGoal } from "@/lib/nutritionCalculations";
 import type { DashboardData } from "./useDashboardData";
 import { fade, Stat } from "./shared";
 import { cn } from "@/lib/utils";
@@ -22,9 +21,6 @@ type DashboardMetricsProps = Pick<
   | "weightUnit"
   | "personalRecords"
   | "topPRExercise"
-  | "todayLog"
-  | "todayMacros"
-  | "goals"
 > & {
   setRoute: (route: AppRoute) => void;
 };
@@ -43,13 +39,10 @@ export function DashboardMetrics({
   weightUnit,
   personalRecords,
   topPRExercise,
-  todayLog,
-  todayMacros,
-  goals,
   setRoute,
 }: DashboardMetricsProps) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
       {[
         { label: "Health score", value: overallScore?.score ?? "—", sub: overallScore?.status, route: "bloodwork-insights" as const },
         { label: "Lab flags", value: reviewFlags.length, sub: criticalFlags ? `${criticalFlags} critical` : "Review queue", route: "bloodwork-log" as const },
@@ -59,8 +52,6 @@ export function DashboardMetrics({
         { label: "Workouts", value: gymHistory.length, sub: `${gym30d.length} last 30d`, route: "gym-history" as const },
         { label: "Volume 30d", value: vol30d > 0 ? `${(vol30d / 1000).toFixed(0)}k` : "—", sub: weightUnit, route: "gym-progress" as const, hideMobile: true },
         { label: "PRs", value: personalRecords.length, sub: topPRExercise?.name?.split(" ")[0] ?? "Records", route: "gym-progress" as const, hideMobile: true },
-        { label: "Calories", value: todayLog.length > 0 ? todayMacros.calories : "—", sub: todayLog.length > 0 && goals.calories ? `/${goals.calories} goal` : "Food diary", route: "nutrition-diary" as const, hideMobile: true },
-        { label: "Protein", value: todayLog.length > 0 ? `${todayMacros.protein}g` : "—", sub: todayLog.length > 0 && goals.protein ? `${pctOfGoal(todayMacros.protein, goals.protein)}% goal` : "Macros", route: "nutrition-diary" as const, hideMobile: true },
       ].map((m, i) => (
         <motion.div
           key={m.label}

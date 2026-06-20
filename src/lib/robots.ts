@@ -21,7 +21,6 @@ export const PRIVATE_DISALLOW_PATHS = [
   "/labs/",
   "/cycle/",
   "/gym/",
-  "/nutrition/",
   "/settings",
 ] as const;
 

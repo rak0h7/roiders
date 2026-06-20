@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Archive, Apple, BarChart2, Blocks, BookOpen, ChevronLeft, ClipboardList, Compass,
-  Dumbbell, FlaskConical, History, Leaf, Library, Link2, Search, Settings2, Shield, Smartphone, Spline,
-  Target, TrendingUp, UtensilsCrossed,
+  Archive, BarChart2, Blocks, BookOpen, ChevronLeft, ClipboardList, Compass,
+  Dumbbell, FlaskConical, History, Library, Link2, Settings2, Shield, Smartphone, Spline,
+  TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
-import { useNavigation, type AppRoute, type NavItem } from "@/context/NavigationContext";
+import { useNavigation, type NavItem } from "@/context/NavigationContext";
 import { visibleNavItems } from "@/lib/navVisibility";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { useHomeScreenPrompt } from "@/context/HomeScreenPromptContext";
@@ -33,11 +33,6 @@ const ICONS: Record<string, LucideIcon> = {
   history: History,
   trending: TrendingUp,
   library: Library,
-  utensils: UtensilsCrossed,
-  "search-food": Search,
-  leaf: Leaf,
-  target: Target,
-  apple: Apple,
   sliders: Settings2,
 };
 
@@ -46,7 +41,6 @@ const GROUPS: { id: NavItem["group"]; label: string }[] = [
   { id: "labs", label: "Labs" },
   { id: "protocol", label: "Gear" },
   { id: "training", label: "Training" },
-  { id: "nutrition", label: "Nutrition" },
   { id: "misc", label: "Misc" },
 ];
 
@@ -128,20 +122,25 @@ export function Sidebar() {
                   </li>
                 )}
                 {items.map((item) => {
-                  const active = route === item.id;
+                  const active =
+                    item.id === "articles"
+                      ? route === "articles"
+                      : route === item.id;
                   const Icon = ICONS[item.icon] ?? Compass;
+                  const itemClass = cn(
+                    ui.navItem,
+                    active
+                      ? "glass-panel text-[var(--foreground)]"
+                      : "text-[var(--muted)] hover:bg-[var(--bg-hover)]/60 hover:text-[var(--foreground)]",
+                  );
+
                   return (
                     <li key={item.id}>
                       <motion.button
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setRoute(item.id as AppRoute)}
+                        onClick={() => setRoute(item.id)}
                         title={sidebarCollapsed ? item.label : undefined}
-                        className={cn(
-                          ui.navItem,
-                          active
-                            ? "glass-panel text-[var(--foreground)]"
-                            : "text-[var(--muted)] hover:bg-[var(--bg-hover)]/60 hover:text-[var(--foreground)]"
-                        )}
+                        className={itemClass}
                       >
                         {active && (
                           <motion.span

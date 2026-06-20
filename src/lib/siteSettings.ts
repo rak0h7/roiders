@@ -1,11 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SITE_DESCRIPTION } from "@/lib/seo";
 import type { AppRoute } from "@/context/NavigationContext";
-import type { RangeMode } from "@/lib/types";
 
 export type AnnouncementLevel = "info" | "warning" | "danger";
-export type SiteModule = "labs" | "cycle" | "gym" | "nutrition";
-export type SiteLabsRangeMode = RangeMode;
+export type SiteModule = "labs" | "cycle" | "gym" | "articles";
 
 export type SiteSettings = {
   site_name: string;
@@ -27,11 +25,10 @@ export type SiteSettings = {
   module_labs_enabled: boolean;
   module_cycle_enabled: boolean;
   module_gym_enabled: boolean;
-  module_nutrition_enabled: boolean;
+  module_articles_enabled: boolean;
   public_landing_enabled: boolean;
   premium_sources_enabled: boolean;
   vendor_portal_enabled: boolean;
-  default_labs_range_mode: SiteLabsRangeMode;
   legal_contact_email: string;
   signup_closed_message: string;
   site_description: string;
@@ -59,11 +56,10 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   module_labs_enabled: true,
   module_cycle_enabled: true,
   module_gym_enabled: true,
-  module_nutrition_enabled: true,
+  module_articles_enabled: true,
   public_landing_enabled: true,
   premium_sources_enabled: true,
   vendor_portal_enabled: true,
-  default_labs_range_mode: "optimized",
   legal_contact_email: "",
   signup_closed_message: "",
   site_description: DEFAULT_SITE_DESCRIPTION,
@@ -93,11 +89,10 @@ export type PublicSiteSettings = Pick<
   | "module_labs_enabled"
   | "module_cycle_enabled"
   | "module_gym_enabled"
-  | "module_nutrition_enabled"
+  | "module_articles_enabled"
   | "public_landing_enabled"
   | "premium_sources_enabled"
   | "vendor_portal_enabled"
-  | "default_labs_range_mode"
 >;
 
 export type SiteSettingsPatch = Partial<
@@ -122,11 +117,10 @@ export type SiteSettingsPatch = Partial<
     | "module_labs_enabled"
     | "module_cycle_enabled"
     | "module_gym_enabled"
-    | "module_nutrition_enabled"
+    | "module_articles_enabled"
     | "public_landing_enabled"
     | "premium_sources_enabled"
     | "vendor_portal_enabled"
-    | "default_labs_range_mode"
     | "legal_contact_email"
     | "signup_closed_message"
     | "site_description"
@@ -156,11 +150,10 @@ export function toPublicSettings(settings: SiteSettings): PublicSiteSettings {
     module_labs_enabled: settings.module_labs_enabled,
     module_cycle_enabled: settings.module_cycle_enabled,
     module_gym_enabled: settings.module_gym_enabled,
-    module_nutrition_enabled: settings.module_nutrition_enabled,
+    module_articles_enabled: settings.module_articles_enabled,
     public_landing_enabled: settings.public_landing_enabled,
     premium_sources_enabled: settings.premium_sources_enabled,
     vendor_portal_enabled: settings.vendor_portal_enabled,
-    default_labs_range_mode: settings.default_labs_range_mode,
   };
 }
 
@@ -176,13 +169,13 @@ export function routeModule(route: AppRoute): SiteModule | null {
   if (route.startsWith("bloodwork")) return "labs";
   if (route.startsWith("cycle")) return "cycle";
   if (route.startsWith("gym")) return "gym";
-  if (route.startsWith("nutrition")) return "nutrition";
+  if (route === "articles") return "articles";
   return null;
 }
 
 type ModuleToggleSettings = Pick<
   SiteSettings,
-  "module_labs_enabled" | "module_cycle_enabled" | "module_gym_enabled" | "module_nutrition_enabled"
+  "module_labs_enabled" | "module_cycle_enabled" | "module_gym_enabled" | "module_articles_enabled"
 >;
 
 export function isModuleEnabled(settings: ModuleToggleSettings, module: SiteModule): boolean {
@@ -193,8 +186,8 @@ export function isModuleEnabled(settings: ModuleToggleSettings, module: SiteModu
       return settings.module_cycle_enabled !== false;
     case "gym":
       return settings.module_gym_enabled !== false;
-    case "nutrition":
-      return settings.module_nutrition_enabled !== false;
+    case "articles":
+      return settings.module_articles_enabled !== false;
     default:
       return true;
   }
@@ -244,16 +237,14 @@ function normalizeRow(row: Record<string, unknown>): SiteSettings {
     module_cycle_enabled:
       row.module_cycle_enabled === undefined ? true : Boolean(row.module_cycle_enabled),
     module_gym_enabled: row.module_gym_enabled === undefined ? true : Boolean(row.module_gym_enabled),
-    module_nutrition_enabled:
-      row.module_nutrition_enabled === undefined ? true : Boolean(row.module_nutrition_enabled),
+    module_articles_enabled:
+      row.module_articles_enabled === undefined ? true : Boolean(row.module_articles_enabled),
     public_landing_enabled:
       row.public_landing_enabled === undefined ? true : Boolean(row.public_landing_enabled),
     premium_sources_enabled:
       row.premium_sources_enabled === undefined ? true : Boolean(row.premium_sources_enabled),
     vendor_portal_enabled:
       row.vendor_portal_enabled === undefined ? true : Boolean(row.vendor_portal_enabled),
-    default_labs_range_mode:
-      row.default_labs_range_mode === "lab" ? "lab" : "optimized",
     legal_contact_email:
       typeof row.legal_contact_email === "string" ? row.legal_contact_email : "",
     signup_closed_message:
@@ -375,10 +366,6 @@ export function validateSiteSettingsPatch(patch: SiteSettingsPatch): string | nu
     !["info", "warning", "danger"].includes(patch.announcement_level)
   ) {
     return "Invalid announcement level";
-  }
-
-  if (patch.default_labs_range_mode !== undefined && !["lab", "optimized"].includes(patch.default_labs_range_mode)) {
-    return "Default labs range mode must be lab or optimized";
   }
 
   if (patch.legal_contact_email !== undefined && patch.legal_contact_email.length > 120) {

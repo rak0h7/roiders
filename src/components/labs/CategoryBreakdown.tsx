@@ -7,11 +7,11 @@ import type { CategoryScore, MarkerCategory, ReviewFlag } from "@/lib/types";
 import { Panel } from "@/components/ui/Panel";
 import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
-import type { MarkerValue, RangeMode } from "@/lib/types";
+import type { MarkerValue } from "@/lib/types";
 import {
   CompoundPills,
   SeverityBadge,
-  rangeModeLabel,
+  optimalRangeLabel,
   scoreColor,
 } from "@/components/labs/labsUi";
 
@@ -20,7 +20,6 @@ interface CategoryBreakdownProps {
   categoryScore: CategoryScore;
   currentValues: Record<string, MarkerValue>;
   reviewFlags: ReviewFlag[];
-  rangeMode: RangeMode;
   onClose: () => void;
 }
 
@@ -29,15 +28,14 @@ export function CategoryBreakdown({
   categoryScore,
   currentValues,
   reviewFlags,
-  rangeMode,
   onClose,
 }: CategoryBreakdownProps) {
   const rows = useMemo(
-    () => buildCategoryMarkerRows(category, currentValues, reviewFlags, rangeMode),
-    [category, currentValues, reviewFlags, rangeMode]
+    () => buildCategoryMarkerRows(category, currentValues, reviewFlags),
+    [category, currentValues, reviewFlags]
   );
   const summary = summarizeCategoryRows(rows);
-  const rangeLabel = rangeModeLabel(rangeMode);
+  const rangeLabel = optimalRangeLabel();
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-3 pt-12 backdrop-blur-md sm:p-4 sm:pt-16">
@@ -135,12 +133,8 @@ export function CategoryBreakdown({
 
                   <div className="shrink-0 text-right text-[10px] text-[var(--muted)]">
                     <p>
-                      <span className="text-[var(--muted-2)]">Lab: </span>
-                      {row.labRange}
-                    </p>
-                    <p className="mt-0.5">
                       <span className="text-[var(--muted-2)]">{rangeLabel}: </span>
-                      {row.activeRange}
+                      {row.optimalRange}
                     </p>
                     {row.cautionRange && (
                       <p className="mt-0.5">

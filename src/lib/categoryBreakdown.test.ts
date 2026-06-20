@@ -60,8 +60,7 @@ describe("categoryBreakdown", () => {
         "total-testosterone": { markerId: "total-testosterone", value: 1200, unit: "ng/dL" },
         prolactin: { markerId: "prolactin", value: 8, unit: "ng/mL" },
       },
-      [],
-      "optimized"
+      []
     );
 
     const summary = summarizeCategoryRows(rows);
@@ -71,9 +70,9 @@ describe("categoryBreakdown", () => {
   });
 
   it("includes missing markers with reference ranges", () => {
-    const rows = buildCategoryMarkerRows("liver", {}, [], "lab");
+    const rows = buildCategoryMarkerRows("liver", {}, []);
     expect(rows.length).toBeGreaterThan(0);
-    expect(rows.every((r) => r.labRange.length > 0)).toBe(true);
+    expect(rows.every((r) => r.optimalRange.length > 0)).toBe(true);
     expect(rows.every((r) => !r.logged)).toBe(true);
   });
 
@@ -92,8 +91,7 @@ describe("categoryBreakdown", () => {
           source: "cycle",
           relatedCompounds: ["tren-e"],
         },
-      ],
-      "optimized"
+      ]
     );
     const prolactin = rows.find((r) => r.markerId === "prolactin");
     expect(prolactin?.severity).toBe("yellow");

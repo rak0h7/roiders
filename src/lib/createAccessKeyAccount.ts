@@ -5,6 +5,7 @@ import {
   hashAccessKey,
   internalEmail,
 } from "@/lib/accessKey.server";
+import { storeAccessKeyInVault } from "@/lib/accessKeyVault.server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export type CreatedAccessKeyAccount = {
@@ -20,6 +21,8 @@ export type CreatedAccessKeyAccount = {
 
 export type CreateAccessKeyAccountOptions = {
   issuedByVendorId?: string | null;
+  /** Auth user id of admin/vendor who created this account (for vault audit). */
+  issuedByUserId?: string | null;
 };
 
 export async function createAccessKeyAccount(
@@ -74,6 +77,13 @@ export async function createAccessKeyAccount(
   if (secretError) {
     await admin.auth.admin.deleteUser(created.user.id);
     throw new Error(secretError.message);
+  }
+
+  try {
+    await storeAccessKeyInVault(created.user.id, accessKey, options.issuedByUserId ?? null);
+  } catch (vaultError) {
+    await admin.auth.admin.deleteUser(created.user.id);
+    throw vaultError instanceof Error ? vaultError : new Error("Failed to store access key vault");
   }
 
   const { data: sessionData, error: sessionError } = await admin.auth.signInWithPassword({

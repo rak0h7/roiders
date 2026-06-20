@@ -4,12 +4,12 @@ import { useEffect } from "react";
 import { Command } from "cmdk";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Apple, Archive, Blocks, BookOpen, ClipboardList, Compass, Download, Dumbbell, FlaskConical,
-  History, Leaf, Library, Link2, Search, Settings2, Target, TrendingUp, Upload, UtensilsCrossed,
+  Archive, Blocks, BookOpen, ClipboardList, Compass, Download, Dumbbell, FlaskConical,
+  History, Library, Link2, Search, Settings2, TrendingUp, Upload,
 } from "lucide-react";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { isModuleEnabled } from "@/lib/siteSettings";
-import { useNavigation, type AppRoute } from "@/context/NavigationContext";
+import { useNavigation, type AppRoute, type NavItem } from "@/context/NavigationContext";
 import { visibleNavItems } from "@/lib/navVisibility";
 import { useApp } from "@/context/AppContext";
 import { useToast } from "@/context/ToastContext";
@@ -31,11 +31,6 @@ const ICONS: Record<string, React.ReactNode> = {
   history: <History className="h-4 w-4 text-[var(--protocol)]" />,
   trending: <TrendingUp className="h-4 w-4 text-[var(--intel)]" />,
   library: <Library className="h-4 w-4 text-[var(--muted)]" />,
-  utensils: <UtensilsCrossed className="h-4 w-4 text-[var(--intel)]" />,
-  "search-food": <Search className="h-4 w-4 text-[var(--intel)]" />,
-  leaf: <Leaf className="h-4 w-4 text-[var(--intel)]" />,
-  target: <Target className="h-4 w-4 text-[var(--intel)]" />,
-  apple: <Apple className="h-4 w-4 text-[var(--muted)]" />,
   sliders: <Settings2 className="h-4 w-4 text-[var(--muted)]" />,
 };
 
@@ -65,13 +60,16 @@ export function CommandPalette() {
     setCommandOpen(false);
   };
 
-  const groups = ["overview", "labs", "protocol", "training", "nutrition", "misc"] as const;
+  const navigateItem = (item: NavItem) => {
+    navigate(item.id);
+  };
+
+  const groups = ["overview", "labs", "protocol", "training", "misc"] as const;
   const groupLabels: Record<(typeof groups)[number], string> = {
     overview: "Overview",
     labs: "Labs",
     protocol: "Gear",
     training: "Training",
-    nutrition: "Nutrition",
     misc: "Misc",
   };
 
@@ -115,7 +113,7 @@ export function CommandPalette() {
                         <Command.Item
                           key={item.id}
                           value={`${item.label} ${item.description}`}
-                          onSelect={() => navigate(item.id)}
+                          onSelect={() => navigateItem(item)}
                           className="flex cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm text-[var(--foreground)] aria-selected:bg-[var(--bg-hover)]"
                         >
                           {ICONS[item.icon]}

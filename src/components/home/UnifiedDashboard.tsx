@@ -22,8 +22,6 @@ export function UnifiedDashboard() {
         hasReports={data.reports.length > 0}
         hasCompounds={data.compounds.length > 0}
         hasWorkouts={data.gymHistory.length > 0}
-        nutritionOnboardingComplete={data.nutritionOnboardingComplete}
-        hasNutritionLogs={data.daysLogged > 0}
         setRoute={setRoute}
       />
       <DashboardHero
@@ -48,9 +46,6 @@ export function UnifiedDashboard() {
         weightUnit={data.weightUnit}
         personalRecords={data.personalRecords}
         topPRExercise={data.topPRExercise}
-        todayLog={data.todayLog}
-        todayMacros={data.todayMacros}
-        goals={data.goals}
         setRoute={setRoute}
       />
       <DashboardModulePanels
@@ -70,10 +65,6 @@ export function UnifiedDashboard() {
         topPR={data.topPR}
         topPRExercise={data.topPRExercise}
         gymRoutines={data.gymRoutines}
-        todayLog={data.todayLog}
-        todayMacros={data.todayMacros}
-        daysLogged={data.daysLogged}
-        goals={data.goals}
         setRoute={setRoute}
         startEmptyWorkout={startEmptyWorkout}
       />

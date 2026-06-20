@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import {
   Activity, Blocks, BookOpen, ChevronRight, ClipboardList, Dumbbell, Droplet,
-  Leaf, Spline, TrendingUp, UtensilsCrossed,
+  Spline, TrendingUp,
 } from "lucide-react";
 import type { AppRoute } from "@/context/NavigationContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -21,7 +21,7 @@ const NAV_ITEMS: {
   desc: string;
   route: AppRoute;
   accent: "labs" | "protocol" | "intel";
-  module: "labs" | "cycle" | "gym" | "nutrition" | null;
+  module: "labs" | "cycle" | "gym" | null;
 }[] = [
   { icon: Droplet, label: "Log Labs", desc: "Upload or manual entry", route: "bloodwork-log", accent: "labs", module: "labs" },
   { icon: Activity, label: "Lab Analysis", desc: "Scores, flags & past logs", route: "bloodwork-insights", accent: "labs", module: "labs" },
@@ -31,8 +31,6 @@ const NAV_ITEMS: {
   { icon: Dumbbell, label: "Train", desc: "Active workout logging", route: "gym-workout", accent: "protocol", module: "gym" },
   { icon: ClipboardList, label: "Programs", desc: "Routines & templates", route: "gym-routines", accent: "protocol", module: "gym" },
   { icon: TrendingUp, label: "Training Stats", desc: "Volume, PRs & charts", route: "gym-progress", accent: "intel", module: "gym" },
-  { icon: UtensilsCrossed, label: "Food Diary", desc: "Daily macro tracking", route: "nutrition-diary", accent: "intel", module: "nutrition" },
-  { icon: Leaf, label: "Micronutrients", desc: "Vitamins & minerals", route: "nutrition-micro", accent: "intel", module: "nutrition" },
 ];
 
 export function DashboardQuickNav({ setRoute }: DashboardQuickNavProps) {

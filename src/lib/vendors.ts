@@ -303,7 +303,10 @@ export async function issueVendorCustomerKey(vendorId: string): Promise<{
   const limitError = assertVendorCanIssue(vendor);
   if (limitError) throw new Error(limitError);
 
-  const created = await createAccessKeyAccount({ issuedByVendorId: vendorId });
+  const created = await createAccessKeyAccount({
+    issuedByVendorId: vendorId,
+    issuedByUserId: vendor.profile_id,
+  });
   const admin = createAdminClient();
 
   const { error: countError } = await admin

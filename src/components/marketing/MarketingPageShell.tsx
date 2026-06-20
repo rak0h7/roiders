@@ -23,6 +23,9 @@ export function MarketingPageShell({ siteName, children }: MarketingPageShellPro
               <Link href="/features" className="hover:text-[var(--foreground)]">
                 Features
               </Link>
+              <Link href="/articles" className="hover:text-[var(--foreground)]">
+                Articles
+              </Link>
               <Link href="/about" className="hover:text-[var(--foreground)]">
                 About
               </Link>
@@ -50,6 +53,9 @@ export function MarketingPageShell({ siteName, children }: MarketingPageShellPro
               </Link>
               <Link href="/features" className="hover:text-[var(--foreground)]">
                 Features
+              </Link>
+              <Link href="/articles" className="hover:text-[var(--foreground)]">
+                Articles
               </Link>
               <Link href="/about" className="hover:text-[var(--foreground)]">
                 About

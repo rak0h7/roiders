@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   Blocks,
+  BookOpen,
   Cloud,
   FlaskConical,
   Globe,
@@ -15,7 +16,6 @@ import {
   Shield,
   Sparkles,
   Store,
-  UtensilsCrossed,
 } from "lucide-react";
 import { AdminToggleRow } from "@/components/admin/AdminToggleRow";
 import { useSiteConfig } from "@/context/SiteConfigContext";
@@ -30,7 +30,6 @@ type SettingsTab =
   | "general"
   | "access"
   | "modules"
-  | "labs"
   | "premium"
   | "messaging"
   | "announcements"
@@ -40,7 +39,6 @@ const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: "general", label: "General", icon: <Settings2 className="h-4 w-4" /> },
   { id: "access", label: "Access", icon: <Shield className="h-4 w-4" /> },
   { id: "modules", label: "Modules", icon: <LayoutGrid className="h-4 w-4" /> },
-  { id: "labs", label: "Labs", icon: <FlaskConical className="h-4 w-4" /> },
   { id: "premium", label: "Premium", icon: <Sparkles className="h-4 w-4" /> },
   { id: "messaging", label: "Messaging", icon: <MessageSquare className="h-4 w-4" /> },
   { id: "announcements", label: "Announcements", icon: <Megaphone className="h-4 w-4" /> },
@@ -401,10 +399,10 @@ export function AdminSiteSettings({ onSaved }: Props) {
                   icon: <LayoutGrid className="h-4 w-4" />,
                 },
                 {
-                  key: "module_nutrition_enabled" as const,
-                  label: "Nutrition",
-                  description: "Food diary, macros, and micronutrients",
-                  icon: <UtensilsCrossed className="h-4 w-4" />,
+                  key: "module_articles_enabled" as const,
+                  label: "Articles",
+                  description: "Public reference library at /articles",
+                  icon: <BookOpen className="h-4 w-4" />,
                 },
               ].map((mod) => (
                 <AdminToggleRow
@@ -415,42 +413,6 @@ export function AdminSiteSettings({ onSaved }: Props) {
                   onChange={(checked) => patch({ [mod.key]: checked })}
                 />
               ))}
-            </>
-          )}
-
-          {tab === "labs" && (
-            <>
-              <SectionHeader
-                icon={<FlaskConical className="h-5 w-5" />}
-                title="Bloodwork defaults"
-                description="Site-wide defaults for the labs module. Users can still switch per session."
-              />
-              <div>
-                <p className={cn(ui.overline, "mb-2")}>Default range mode</p>
-                <div className="flex flex-wrap gap-2">
-                  {(
-                    [
-                      { id: "optimized" as const, label: "Optimized", hint: "Performance-oriented ranges" },
-                      { id: "lab" as const, label: "Lab reference", hint: "Official lab reference ranges" },
-                    ] as const
-                  ).map((mode) => (
-                    <button
-                      key={mode.id}
-                      type="button"
-                      onClick={() => patch({ default_labs_range_mode: mode.id })}
-                      className={cn(
-                        "rounded-[var(--radius-sm)] border px-3 py-2 text-left text-xs transition",
-                        draft.default_labs_range_mode === mode.id
-                          ? "border-[var(--labs)]/40 bg-[var(--labs-dim)] text-[var(--labs)]"
-                          : "border-[var(--border)] text-[var(--muted)]"
-                      )}
-                    >
-                      <span className="font-semibold">{mode.label}</span>
-                      <span className="mt-0.5 block text-[10px] opacity-80">{mode.hint}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </>
           )}
 

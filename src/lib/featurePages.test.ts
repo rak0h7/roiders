@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { FEATURE_PAGES, FEATURE_SLUGS, getFeaturePage } from "./featurePages";
 
 describe("featurePages", () => {
-  it("defines four unique feature slugs", () => {
-    expect(FEATURE_SLUGS).toEqual(["labs", "gear", "training", "nutrition"]);
-    expect(new Set(FEATURE_SLUGS).size).toBe(4);
+  it("defines three unique feature slugs", () => {
+    expect(FEATURE_SLUGS).toEqual(["labs", "gear", "training"]);
+    expect(new Set(FEATURE_SLUGS).size).toBe(3);
   });
 
   it("provides unique meta descriptions and semantic headings per page", () => {
     const descriptions = FEATURE_PAGES.map((page) => page.metaDescription);
-    expect(new Set(descriptions).size).toBe(4);
+    expect(new Set(descriptions).size).toBe(3);
 
     for (const page of FEATURE_PAGES) {
       expect(page.h1.trim().length).toBeGreaterThan(10);

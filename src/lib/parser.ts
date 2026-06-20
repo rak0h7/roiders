@@ -1,6 +1,6 @@
 import { MARKERS } from "./markers";
 import type { ExtractedMarker, MarkerValue } from "./types";
-import { getLabStatus } from "./ranges";
+import { getOptimalStatus } from "./ranges";
 import { normalizeToDefaultUnit, normalizeUnitString } from "./units";
 
 function normalizeAlias(s: string): string {
@@ -85,7 +85,7 @@ function tryParseLine(line: string, reportDate: string, seen: Set<string>): Extr
     const unitFromMatch = match[3] ? extractUnitFromTail(match[3]) : undefined;
     const unit = unitFromMatch || marker.defaultUnit;
     const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
-    const labStatus = getLabStatus(marker, normalized.value, normalized.unit);
+    const labStatus = getOptimalStatus(marker, normalized.value, normalized.unit);
 
     seen.add(marker.id);
     return {
@@ -99,8 +99,8 @@ function tryParseLine(line: string, reportDate: string, seen: Set<string>): Extr
       converted: normalized.converted,
       date: reportDate,
       labStatus,
-      selected: labStatus !== "lab-normal",
-      needsReview: labStatus !== "lab-normal",
+      selected: labStatus !== "in-range",
+      needsReview: labStatus !== "in-range",
     };
   }
 
@@ -172,7 +172,7 @@ export function parseCSV(text: string): ExtractedMarker[] {
 
     const unit = parts[2] ? normalizeUnitString(parts[2]) : marker.defaultUnit;
     const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
-    const labStatus = getLabStatus(marker, normalized.value, normalized.unit);
+    const labStatus = getOptimalStatus(marker, normalized.value, normalized.unit);
 
     seen.add(marker.id);
     results.push({
@@ -186,8 +186,8 @@ export function parseCSV(text: string): ExtractedMarker[] {
       converted: normalized.converted,
       date: parts[3] || reportDate,
       labStatus,
-      selected: labStatus !== "lab-normal",
-      needsReview: labStatus !== "lab-normal",
+      selected: labStatus !== "in-range",
+      needsReview: labStatus !== "in-range",
     });
   }
 

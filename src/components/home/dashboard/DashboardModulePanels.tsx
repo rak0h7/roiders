@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import {
-  AlertTriangle, Beaker, Blocks, ClipboardList, Dumbbell, FlaskConical, UtensilsCrossed,
+  AlertTriangle, Beaker, Blocks, ClipboardList, Dumbbell, FlaskConical,
 } from "lucide-react";
 import {
   Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -11,7 +11,6 @@ import {
 import type { AppRoute } from "@/context/NavigationContext";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 import { getChartTheme } from "@/lib/charts";
-import { pctOfGoal } from "@/lib/nutritionCalculations";
 import type { DashboardData } from "./useDashboardData";
 import { fade, ModuleHeader, Stat } from "./shared";
 import { cn } from "@/lib/utils";
@@ -35,10 +34,6 @@ type DashboardModulePanelsProps = Pick<
   | "topPR"
   | "topPRExercise"
   | "gymRoutines"
-  | "todayLog"
-  | "todayMacros"
-  | "daysLogged"
-  | "goals"
 > & {
   setRoute: (route: AppRoute) => void;
   startEmptyWorkout: () => void;
@@ -61,10 +56,6 @@ export function DashboardModulePanels({
   topPR,
   topPRExercise,
   gymRoutines,
-  todayLog,
-  todayMacros,
-  daysLogged,
-  goals,
   setRoute,
   startEmptyWorkout,
 }: DashboardModulePanelsProps) {
@@ -75,7 +66,6 @@ export function DashboardModulePanels({
     moduleEnabled("labs") && "labs",
     moduleEnabled("cycle") && "cycle",
     moduleEnabled("gym") && "gym",
-    moduleEnabled("nutrition") && "nutrition",
   ].filter(Boolean);
 
   if (!panels.length) return null;
@@ -83,7 +73,7 @@ export function DashboardModulePanels({
   const gridCols =
     panels.length === 1 ? "lg:grid-cols-1" :
     panels.length === 2 ? "lg:grid-cols-2" :
-    panels.length === 3 ? "lg:grid-cols-3" : "xl:grid-cols-4";
+    "lg:grid-cols-3";
 
   return (
     <div className={cn("grid items-stretch gap-4 lg:grid-cols-2", gridCols)}>
@@ -244,59 +234,6 @@ export function DashboardModulePanels({
               className={cn(ui.btnProtocol, "mt-4 text-xs")}
             >
               Start workout
-            </button>
-          </div>
-        )}
-      </motion.div>
-      )}
-
-      {/* Nutrition */}
-      {moduleEnabled("nutrition") && (
-      <motion.div custom={3} variants={fade} initial="hidden" animate="show" className={cn(ui.cardIntel, ui.cardPad, "flex h-full flex-col gap-4")}>
-        <ModuleHeader
-          title="Nutrition"
-          status={
-            todayLog.length > 0
-              ? `${todayMacros.calories} kcal logged today`
-              : daysLogged > 0
-                ? `${daysLogged} day${daysLogged !== 1 ? "s" : ""} tracked`
-                : "No food logged"
-          }
-          statusColor={todayLog.length > 0 ? "text-[var(--success)]" : daysLogged > 0 ? "text-[var(--intel)]" : "text-[var(--muted)]"}
-          route="nutrition-diary"
-          routeLabel="Diary"
-          icon={UtensilsCrossed}
-          accentClass="bg-[var(--intel-dim)] text-[var(--intel)]"
-        />
-        {todayLog.length > 0 || daysLogged > 0 ? (
-          <>
-            <div className="grid grid-cols-2 items-stretch gap-2">
-              <Stat label="Protein" value={todayLog.length > 0 ? `${todayMacros.protein}g` : "—"} sub={goals.protein ? `${pctOfGoal(todayMacros.protein, goals.protein)}% goal` : undefined} />
-              <Stat label="Carbs" value={todayLog.length > 0 ? `${todayMacros.carbs}g` : "—"} />
-              <Stat label="Fat" value={todayLog.length > 0 ? `${todayMacros.fat}g` : "—"} />
-              <Stat label="Days logged" value={daysLogged} />
-            </div>
-            {todayLog.length > 0 && goals.calories && (
-              <div>
-                <div className="mb-1 flex justify-between text-[11px]">
-                  <span className="text-[var(--muted)]">Calories</span>
-                  <span className="font-medium">{todayMacros.calories} / {goals.calories}</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
-                  <div
-                    className="h-full rounded-full bg-[var(--intel)]"
-                    style={{ width: `${pctOfGoal(todayMacros.calories, goals.calories)}%` }}
-                  />
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <div className={cn(ui.cardInner, "flex min-h-[10rem] flex-1 flex-col items-center justify-center py-8 text-center")}>
-            <UtensilsCrossed className="app-icon mb-2 text-[var(--intel)]" />
-            <p className="text-sm text-[var(--muted)]">Track macros and micronutrients</p>
-            <button onClick={() => setRoute("nutrition-search")} className={cn(ui.btnSecondary, "mt-4 text-xs")}>
-              Log first meal
             </button>
           </div>
         )}

@@ -11,8 +11,6 @@ export type MarkerCategory =
   | "nutrients"
   | "immune";
 
-export type RangeMode = "lab" | "optimized";
-
 export type Severity = "normal" | "yellow" | "high" | "low" | "stop";
 
 export interface MarkerRange {
@@ -50,7 +48,7 @@ export interface ExtractedMarker extends MarkerValue {
   id: string;
   name: string;
   date?: string;
-  labStatus: "lab-normal" | "high" | "low";
+  labStatus: "in-range" | "high" | "low";
   selected: boolean;
   isHistorical?: boolean;
   needsReview?: boolean;
@@ -67,7 +65,6 @@ export interface ReviewFlag {
   sourceUnit?: string;
   date: string;
   severity: Severity;
-  labRange?: string;
   optimalRange?: string;
   cautionRange?: string;
   strictThreshold?: number;
@@ -105,7 +102,6 @@ export interface AppState {
   mainTab: MainTab;
   logView: LogView;
   secondaryTab: SecondaryTab;
-  rangeMode: RangeMode;
   currentValues: Record<string, MarkerValue>;
   extractedMarkers: ExtractedMarker[];
   extractionFileName: string;

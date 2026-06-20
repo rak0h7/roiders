@@ -1,56 +1,53 @@
 import { MARKER_MAP } from "./markers";
-import type { MarkerDefinition, MarkerRange, RangeMode, ReviewFlag, Severity } from "./types";
+import type { MarkerDefinition, MarkerRange, ReviewFlag, Severity } from "./types";
 import { normalizeToDefaultUnit } from "./units";
 
-export function formatRange(range: MarkerRange, mode: RangeMode, type: "lab" | "optimal" | "caution"): string {
-  const useOptimal = mode === "optimized";
-  if (type === "lab") {
-    if (range.upperOnly) return `<${range.labMax} `;
-    if (range.lowerOnly) return `>${range.labMin} `;
-    return `${range.labMin}-${range.labMax} `;
+export function formatOptimalRange(range: MarkerRange): string {
+  if (range.upperOnly && range.optimalMax !== undefined) return `<${range.optimalMax} `;
+  if (range.lowerOnly && range.optimalMin !== undefined) return `>${range.optimalMin} `;
+  if (range.optimalMin !== undefined && range.optimalMax !== undefined) {
+    return `${range.optimalMin}-${range.optimalMax} `;
   }
-  if (type === "optimal") {
-    if (range.upperOnly) return `<${useOptimal ? range.optimalMax : range.labMax} `;
-    if (range.lowerOnly) return `>${useOptimal ? range.optimalMin : range.labMin} `;
-    const min = useOptimal ? range.optimalMin : range.labMin;
-    const max = useOptimal ? range.optimalMax : range.labMax;
-    return `${min}-${max} `;
-  }
+  return "";
+}
+
+export function formatCautionRange(range: MarkerRange): string {
   if (range.cautionMin !== undefined && range.cautionMax !== undefined) {
     return `${range.cautionMin}-${range.cautionMax} `;
   }
   return "";
 }
 
-export function getLabStatus(
+/** Whether a value sits within optimal bounds (for extraction pre-selection). */
+export function getOptimalStatus(
   marker: MarkerDefinition,
   value: number,
-  unit: string
-): "lab-normal" | "high" | "low" {
+  unit: string,
+): "in-range" | "high" | "low" {
   const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
   const v = normalized.value;
   const r = marker.range;
 
-  if (r.upperOnly && r.labMax !== undefined && v > r.labMax) return "high";
-  if (r.lowerOnly && r.labMin !== undefined && v < r.labMin) return "low";
-  if (r.labMin !== undefined && v < r.labMin) return "low";
-  if (r.labMax !== undefined && v > r.labMax) return "high";
-  return "lab-normal";
+  if (r.upperOnly && r.optimalMax !== undefined && v > r.optimalMax) return "high";
+  if (r.lowerOnly && r.optimalMin !== undefined && v < r.optimalMin) return "low";
+  if (r.optimalMin !== undefined && v < r.optimalMin) return "low";
+  if (r.optimalMax !== undefined && v > r.optimalMax) return "high";
+  return "in-range";
 }
+
+/** @deprecated Use getOptimalStatus */
+export const getLabStatus = getOptimalStatus;
 
 export function evaluateSeverity(
   marker: MarkerDefinition,
   value: number,
   unit: string,
-  mode: RangeMode
 ): { severity: Severity; deviation: string; isHigh: boolean; isLow: boolean } {
   const normalized = normalizeToDefaultUnit(marker.id, value, unit, marker.defaultUnit);
   const v = normalized.value;
   const r = marker.range;
-  const useOptimal = mode === "optimized";
-
-  const optMin = useOptimal ? r.optimalMin : r.labMin;
-  const optMax = useOptimal ? r.optimalMax : r.labMax;
+  const optMin = r.optimalMin;
+  const optMax = r.optimalMax;
 
   let severity: Severity = "normal";
   let deviation = "";
@@ -71,7 +68,7 @@ export function evaluateSeverity(
       deviation += " above caution band";
     } else if (r.cautionMin && v >= r.cautionMin) {
       severity = "yellow";
-      deviation += " in app caution band";
+      deviation += " in caution band";
     } else {
       severity = "yellow";
     }
@@ -98,7 +95,7 @@ export function evaluateSeverity(
       deviation += " above strict app threshold";
     } else if (r.cautionMin !== undefined && r.cautionMax !== undefined && v >= r.cautionMin && v <= r.cautionMax) {
       severity = "yellow";
-      deviation += " in app caution band";
+      deviation += " in caution band";
     } else if (r.cautionMax && v > r.cautionMax) {
       severity = "high";
     } else {
@@ -112,7 +109,6 @@ export function evaluateSeverity(
 export function buildReviewFlags(
   values: { markerId: string; value: number; unit: string; sourceValue?: number; sourceUnit?: string }[],
   date: string,
-  mode: RangeMode
 ): ReviewFlag[] {
   const flags: ReviewFlag[] = [];
 
@@ -120,15 +116,14 @@ export function buildReviewFlags(
     const marker = MARKER_MAP.get(val.markerId);
     if (!marker) continue;
 
-    const { severity, deviation } = evaluateSeverity(marker, val.value, val.unit, mode);
+    const { severity, deviation } = evaluateSeverity(marker, val.value, val.unit);
     if (severity === "normal") continue;
 
     const normalized = normalizeToDefaultUnit(marker.id, val.value, val.unit, marker.defaultUnit);
-    const labRange = formatRange(marker.range, "lab", "lab") + marker.defaultUnit;
-    const optimalRange = formatRange(marker.range, mode, "optimal") + marker.defaultUnit;
+    const optimalRange = formatOptimalRange(marker.range) + marker.defaultUnit;
     const cautionRange =
       marker.range.cautionMin !== undefined
-        ? formatRange(marker.range, mode, "caution") + marker.defaultUnit
+        ? formatCautionRange(marker.range) + marker.defaultUnit
         : undefined;
 
     flags.push({
@@ -140,7 +135,6 @@ export function buildReviewFlags(
       sourceUnit: normalized.sourceUnit,
       date,
       severity,
-      labRange: labRange.trim(),
       optimalRange: optimalRange.trim(),
       cautionRange: cautionRange?.trim(),
       strictThreshold: marker.range.strictThreshold,

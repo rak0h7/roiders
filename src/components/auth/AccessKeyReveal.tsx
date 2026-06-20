@@ -9,7 +9,7 @@ export function AccessKeyReveal({
   accessKey,
   onConfirm,
   title = "Save your access key",
-  description = "This is shown once. Roiders Club does not store your key in plain text — if you lose it, your account cannot be recovered.",
+  description = "This is shown once. Save it securely — site administrators can retrieve escrowed keys if you lose yours.",
   confirmLabel = "Continue to Roiders Club",
   checkboxLabel = "I have saved my access key in a secure place",
 }: {
