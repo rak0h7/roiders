@@ -296,8 +296,26 @@ export const OMA_COMPOUND_PROFILES: CompoundProfile[] = [
     sections: [
       { heading: "Mechanism of Action", body: `Triple agonist at GIP, GLP-1, and glucagon receptors; glucagon agonism increases energy expenditure and fat oxidation.` },
       { heading: "Primary Uses", body: `Extremely potent weight loss agent in development, producing very high percentage body weight reductions in early trials.` },
-      { heading: "Typical Dosage", body: `Early strategies often start around 0.25 mg three times per week and titrate upward to manage tolerability.` },
-      { heading: "Side Effects", body: `Strong GLP-1-like GI issues (nausea, vomiting, diarrhea), potential increased heart rate due to glucagon action, and night sweats from elevated metabolic rate.` },
+      {
+        heading: "Typical Dosage",
+        body: `Early strategies often start around 0.25 mg three times per week and titrate upward to manage tolerability. Anecdotal approaches favor smaller, more frequent injections over jumping straight to a full weekly dose — nausea and GI sides scale sharply with exposure, and phase data show rates climbing from roughly 14% at low doses toward ~60% at higher trial doses. Slow ramps are the practical default. Formal trials use different once-weekly escalation schedules (4 / 9 / 12 mg targets); see Articles Part 2 (retatrutide-dosing-monitoring) for that research context.`,
+      },
+      {
+        heading: "Titration Notes",
+        body: `The main reason to titrate slowly is GI tolerance, not "easing into" fat loss. Hitting too much receptor activation too fast tends to produce nausea, vomiting, and food aversion that derails the run entirely. Micro-dosing more frequently through the week is a common anecdotal pattern to spread exposure rather than spike it on a single injection day. This is practical reference logic — not a replication of Lilly's trial protocols.`,
+      },
+      {
+        heading: "Side Effects",
+        body: `Strong GLP-1-like GI issues (nausea, vomiting, diarrhea, constipation), potential increased heart rate due to glucagon action, and night sweats from elevated metabolic rate. Dysesthesia (altered skin sensation) has shown up more with retatrutide than older GLP-1 drugs in trial reports — worth knowing about even when mild.`,
+      },
+      {
+        heading: "Awareness",
+        body: `Anecdotal monitoring literacy — not a medical protocol. Commonly watched signals: persistent nausea past the first titration steps, resting heart rate creeping up (trial data showed roughly +5–10 bpm dose-dependent), night sweats or feeling overheated (glucagon-driven metabolic rate), nipple sensitivity or unusual skin tingling, and GI dehydration if vomiting or diarrhea is heavy. Escalate to a clinician for chest symptoms, severe abdominal pain, or jaundice — class risks include pancreatitis and gallbladder events.`,
+      },
+      {
+        heading: "Research Context",
+        body: `Investigational only — not FDA-approved. For trial efficacy (up to ~28–30% loss in highest phase 3 cohorts), regulatory timeline, and what clinical studies actually measured, read the Retatrutide articles: Part 1 (retatrutide-triple-agonist) for mechanism and landscape; Part 2 (retatrutide-dosing-monitoring) for trial dosing and monitoring endpoints. This guide is the practical layer; those articles are the research layer.`,
+      },
     ],
   },
   {

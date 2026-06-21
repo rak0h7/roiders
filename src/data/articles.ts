@@ -466,6 +466,7 @@ export const ARTICLES: Article[] = [
     tagline:
       "What the triple agonist is, what trials show, side effects, and where it stands regulatorily — investigational only.",
     category: "health",
+    seriesOrder: 1,
     publishedAt: "2026-06-20",
     updatedAt: "2026-06-20",
     sections: [
@@ -536,7 +537,126 @@ export const ARTICLES: Article[] = [
       },
       {
         heading: "The bottom line",
-        body: "Retatrutide is a mechanistic step beyond single- and dual-agonist GLP-1 therapies, with glucagon receptor activity targeting energy expenditure as well as appetite and glycemic control. Phase 3 weight-loss signals (up to ~28–30% in highest-dose, longest-duration cohorts) are among the largest reported for the class. Tolerability is broadly similar to existing GLP-1 drugs, with GI effects dominant and dysesthesia as a newer class-specific finding. It remains investigational, with full approval likely still a year or more away pending remaining TRIUMPH readouts.",
+        body: "Retatrutide is a mechanistic step beyond single- and dual-agonist GLP-1 therapies, with glucagon receptor activity targeting energy expenditure as well as appetite and glycemic control. Phase 3 weight-loss signals (up to ~28–30% in highest-dose, longest-duration cohorts) are among the largest reported for the class. Tolerability is broadly similar to existing GLP-1 drugs, with GI effects dominant and dysesthesia as a newer class-specific finding. It remains investigational, with full approval likely still a year or more away pending remaining TRIUMPH readouts. Part 2 covers trial dosing structure and clinical monitoring — see retatrutide-dosing-monitoring.",
+      },
+    ],
+  },
+  {
+    id: "retatrutide-dosing-monitoring",
+    title: "Retatrutide: Dosing Structure, Pharmacokinetics, and Clinical Monitoring",
+    tagline:
+      "Trial titration schedules, PK logic, and what phase 2/3 protocols measured — investigational only.",
+    category: "health",
+    seriesOrder: 2,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Part 1 covered what retatrutide is, how the triple-agonist mechanism compares to semaglutide and tirzepatide, and what efficacy and safety trials have reported so far. This article focuses on a different question: how controlled studies structured dose escalation and what endpoints investigators monitored — the clinical protocol layer, not a self-administration guide. Practical, anecdotal reference approaches documented in the cycle compound guide serve a separate purpose; this piece is the research counterpart. Retatrutide remains investigational and is not FDA-approved for any indication as of mid-2026.",
+      },
+      {
+        heading: "Titration schedules used in trials",
+        body: "Every major retatrutide study used gradual dose escalation rather than fixed high-dose starts. The specific schedules differ by phase, but the pattern is consistent: start low, increase at regular intervals, and cap at protocol-defined maximums (4 mg, 9 mg, or 12 mg in phase 3).",
+        blocks: [
+          {
+            heading: "Phase 2 (NEJM 2023, obesity)",
+            body: "Participants escalated through multiple dose levels toward a 12 mg weekly maximum over months. GI tolerability was worst during upward steps — the trial design prioritized reaching therapeutic doses without dropout from nausea and vomiting.",
+          },
+          {
+            heading: "TRIUMPH-1 and TRIUMPH-4 (phase 3)",
+            body: "Fixed target-dose arms at 4 mg, 9 mg, and 12 mg weekly, with escalation typically advanced every four weeks until the assigned target was reached. Some cohorts compared a 2 mg starting dose versus 4 mg: lower starts produced meaningfully better early tolerability without changing the trial's efficacy framing at target dose.",
+          },
+          {
+            heading: "Maximum tolerated dose sub-study (TRIUMPH-1)",
+            body: "In BMI ≥35 participants, an additional 24-week period allowed escalation to each individual's maximum tolerated dose rather than a fixed cap. This cohort drove the highest reported losses (up to ~30%) — a protocol choice about dose ceiling, not a separate compound.",
+          },
+        ],
+        list: [
+          "Typical escalation cadence in phase 3: dose increases approximately every 4 weeks",
+          "Target dose arms: 4 mg, 9 mg, and 12 mg weekly at steady state",
+          "2 mg vs 4 mg starting comparison: lower start improved early GI tolerability in trial data",
+        ],
+      },
+      {
+        heading: "Why titration matters mechanistically",
+        body: "Retatrutide's GI profile is dose-dependent. Phase 2 reported nausea in roughly 14% of participants at lower doses versus ~60% at 12 mg — concentrated during escalation windows. GLP-1 receptor agonism slows gastric emptying and increases central satiety signaling; rapid exposure spikes tend to produce more nausea and vomiting than the same dose reached gradually, when some receptor-level adaptation has occurred.",
+        blocks: [
+          {
+            heading: "Exposure vs adaptation",
+            body: "Trial sponsors chose multi-week escalation intervals partly to let participants adapt between steps. The goal in protocols was not to minimize total drug exposure but to reduce peak-exposure GI events that cause discontinuation.",
+          },
+          {
+            heading: "Informal strategies (guide context)",
+            body: "The same tolerability logic underpins anecdotal reference approaches in the compound guide — for example, starting around 0.25 mg three times per week and titrating slowly. Those patterns are not trial replication; they reflect practical GI management observed outside formal protocols. Part 1's efficacy numbers apply to trial-defined regimens, not informal micro-titration schedules.",
+          },
+        ],
+      },
+      {
+        heading: "Pharmacokinetics",
+        body: "Retatrutide was developed as a once-weekly subcutaneous injection — matching the dosing cadence of semaglutide and tirzepatide in approved obesity protocols, though the molecules are not comparable on a milligram basis. Steady-state concentrations build over the titration period: each dose increase adds exposure until the protocol target is reached, rather than achieving full steady state from day one.",
+        list: [
+          "Once-weekly injection in all major trials — frequency driven by peptide PK supporting sustained receptor engagement",
+          "Steady-state at a given dose level develops over several weeks of repeated dosing; trials account for this by holding each step ~4 weeks before escalating",
+          "Compared to semaglutide (GLP-1 only, weekly titration from 0.25 mg toward 1–2.4 mg): same weekly philosophy, different receptor scope and mg scale",
+          "Compared to tirzepatide (GLP-1 + GIP, weekly steps from 2.5 mg toward 15 mg): same escalation logic, adds glucagon receptor activity retatrutide uniquely includes",
+        ],
+      },
+      {
+        heading: "Dose-for-dose comparison against tirzepatide and semaglutide",
+        body: "Part 1 noted retatrutide's larger matched-duration weight-loss signals versus single- and dual-agonist comparators. From a dosing perspective, the more important point is that milligram amounts are not interchangeable across molecules — each peptide has distinct receptor binding profiles, half-lives, and trial-defined targets.",
+        list: [
+          "12 mg retatrutide in phase 2/3 trials is not equivalent to 12 mg tirzepatide or 2.4 mg semaglutide in potency or receptor coverage",
+          "Efficacy comparisons use trial-defined regimens at steady state — not matched mg amounts",
+          "Tirzepatide's approved obesity ladder (2.5 → 5 → 7.5 → 10 → 15 mg weekly) and semaglutide's (0.25 → 0.5 → 1 → 2.4 mg weekly) are separate scales from retatrutide's 4 / 9 / 12 mg phase 3 arms",
+          "Cross-molecule decisions belong in clinical care with approved agents — not mg translation tables",
+        ],
+      },
+      {
+        heading: "Clinical monitoring considerations",
+        body: "TRIUMPH and phase 2 protocols collected safety data on predefined schedules. The following reflects what trials measured and why — not a personal monitoring checklist.",
+        blocks: [
+          {
+            heading: "Cardiovascular",
+            body: "Protocols tracked heart rate because phase 2 showed a dose-dependent increase of roughly 5–10 bpm, often peaking around week 24 — likely linked to glucagon receptor activity on top of GLP-1/GIP effects. TRIUMPH-3 (obesity with established cardiovascular disease) will add outcome-level CV data retatrutide-specific programs still lack.",
+          },
+          {
+            heading: "Pancreatic",
+            body: "Pancreatitis remains a class concern for incretin therapies. Trial safety labs included lipase and amylase monitoring in line with GLP-1 program standards; serious pancreatic events were rare in phase 2 (~4% SAE rate overall vs placebo) but remain a regulatory review focus.",
+          },
+          {
+            heading: "Hepatic",
+            body: "Liver enzyme elevations were reported and tracked. Weight-loss-mediated improvements in hepatic steatosis markers are a secondary interest in MASLD-related endpoints — distinct from watching for hepatotoxicity signals during escalation.",
+          },
+          {
+            heading: "Gallbladder",
+            body: "GLP-1 class drugs have established associations with gallbladder-related events, likely related to rapid weight loss and altered bile handling. Retatrutide trials captured biliary adverse events as part of standard incretin safety surveillance.",
+          },
+          {
+            heading: "Renal",
+            body: "Protocols monitored kidney function because large, rapid weight loss combined with GI fluid loss (vomiting, diarrhea) can affect hydration status and renal perfusion markers in any obesity trial — a general safety consideration, not retatrutide-specific nephrotoxicity. (General lab-reading context: kidney-markers-hydration in Health & labs.)",
+          },
+        ],
+      },
+      {
+        heading: "Combination and co-therapy in the literature",
+        body: "Retatrutide trials did not combine it with other GLP-1, GIP, or glucagon receptor agonists — triple agonism already saturates those pathways, and stacking would add GI and cardiovascular risk without trial justification.",
+        list: [
+          "No published retatrutide protocol adds semaglutide, tirzepatide, or other incretin agonists concurrently",
+          "TRANSCEND-T2D-1 enrolled type 2 diabetes participants on background insulin or insulin-sensitizing therapy; hypoglycemia monitoring was part of trial safety because retatrutide improves glycemic control on top of existing diabetes treatment",
+          "Combination framing in the literature is limited to protocol-defined background meds — not discretionary stacking",
+        ],
+      },
+      {
+        heading: "Regulatory and access status",
+        body: "As of mid-2026, retatrutide (LY3437943) remains investigational — not FDA-, EMA-, or otherwise approved. Eli Lilly's TRIUMPH program (5,800+ participants across obesity and T2D indications) is expected to support regulatory filing, with industry projections often placing submission in late 2026 and potential approval in 2027–2028 pending remaining readouts. Expanded access exists only for narrow, case-by-case serious-disease scenarios — not general availability.",
+      },
+      {
+        heading: "Trial protocols vs guide reference",
+        body: "Controlled trials used once-weekly dosing with protocol-fixed escalation every ~4 weeks to 4, 9, or 12 mg targets. The compound guide documents informal, anecdotal approaches — including more frequent micro-doses at lower starting amounts — aimed at GI tolerability in practice. Both layers help compound understanding: trials define efficacy and safety evidence regulators review; the guide captures practical reference patterns common in bodybuilding contexts. Neither replaces medical supervision, and investigational status applies regardless of which framing you read.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Retatrutide trial design centers on slow weekly escalation, dose-dependent GI management, and structured safety surveillance across cardiovascular, pancreatic, hepatic, biliary, and renal endpoints. Pharmacokinetics support once-weekly dosing with steady-state reached over the titration window — a different mg scale from semaglutide or tirzepatide, not a direct swap. For mechanism and headline efficacy, start with Part 1; for anecdotal titration and awareness notes, see the Retatrutide compound guide in cycle references.",
       },
     ],
   },
