@@ -540,4 +540,205 @@ export const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: "reverse-diet-after-cut",
+    title: "Reverse Dieting After a Cut: Finding Maintenance Without Regaining Fat",
+    tagline:
+      "The phase after your cut often matters more than the cut itself — add calories back deliberately, not reactively.",
+    category: "diet",
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Most people treat the end of a cut as a finish line — drop the deficit, eat normally again, and hope the scale stays put. That reactive approach is why so many people regain a meaningful chunk of what they lost within weeks. Reverse dieting is the opposite: a deliberate, gradual increase in calories until you find your new maintenance, giving your body time to adapt before you ask it to hold a new body composition long-term.",
+      },
+      {
+        heading: "Why jumping to maintenance fails",
+        body: "During a prolonged deficit, total daily energy expenditure drops — not just from less body mass, but from metabolic adaptation, reduced NEAT, and hormonal shifts that increase hunger and decrease satiety signaling. Your pre-cut maintenance number is almost never your post-cut maintenance number. Jumping straight to what you used to eat often overshoots actual needs, producing rapid scale rebound that is partly water and glycogen but also real fat regain if the overshoot persists.",
+        list: [
+          "Each pound of fat lost lowers maintenance by roughly 10 calories — a 20 lb cut might mean ~200 fewer calories at true maintenance",
+          "Ghrelin tends to rise and leptin tends to fall coming out of a deficit, increasing appetite at the worst possible moment",
+          "Glycogen and associated water refill quickly when carbs return — expect several pounds on the scale that are not fat",
+        ],
+      },
+      {
+        heading: "What reverse dieting actually is",
+        body: "Reverse dieting means adding calories back in small, consistent steps — typically 50–150 calories per week depending on how aggressive the cut was and how lean you finished — while watching your weekly average scale weight. The goal is to climb toward maintenance slowly enough that weight stabilizes rather than spikes. You are not trying to stay at deficit-level leanness forever; you are trying to land at a sustainable maintenance intake without overshooting into a surplus.",
+      },
+      {
+        heading: "A practical reverse protocol",
+        blocks: [
+          {
+            heading: "Step 1: Estimate your target",
+            body: "Start from your current intake at the end of the cut. Add back roughly 10 calories per pound of fat lost as a ballpark for where maintenance likely sits — then plan to reach that number over several weeks, not in one jump.",
+          },
+          {
+            heading: "Step 2: Add calories weekly",
+            body: "Increase by 50–100 calories per week if you finished lean (under ~15% body fat for men, proportionally higher for women). Heavier finishers or those who ran longer, more aggressive cuts can often tolerate 100–150 per week. Prioritize carbs first — they refill glycogen, support training performance, and are usually what got cut hardest.",
+          },
+          {
+            heading: "Step 3: Read the trend, not daily noise",
+            body: "Weigh daily if you want, but decide on weekly averages. If average weight rises more than ~0.5–1 lb/week after the initial glycogen rebound settles, you are probably adding too fast. If weight keeps dropping, add another increment.",
+          },
+          {
+            heading: "Step 4: Hold at maintenance",
+            body: "When weekly averages flatten for 2–3 consecutive weeks, you have likely found maintenance. Stay there — not in a surplus — for a meaningful period before considering a bulk. The body defends prior settling points; accepting a new normal takes time.",
+          },
+        ],
+      },
+      {
+        heading: "How long should maintenance last?",
+        body: "A common mistake is reverse dieting for two weeks and immediately entering a surplus. For most people who ran a serious cut, 4–12 weeks at true maintenance is a reasonable minimum before a bulk — longer if you finished very lean or the cut was long. This phase is where hormonal adaptation partially normalizes and you prove you can hold the new composition without constant restriction. Skipping it usually means the next cut or bulk starts from an unstable baseline.",
+      },
+      {
+        heading: "On-cycle context",
+        body: "Enhanced phases can blunt some muscle loss during a cut and accelerate strength recovery during a reverse, but they do not remove metabolic adaptation or hunger rebound. Coming off a cut into a blast without a maintenance phase often produces fast scale gain from glycogen, intramuscular water, and appetite — which feels like progress but can mask unnecessary fat accrual if surplus starts too early. A disciplined reverse at maintenance, even on cycle, sets up a cleaner bulk.",
+      },
+      {
+        heading: "Signs you are moving too fast",
+        list: [
+          "Weekly average weight climbing more than ~1 lb/week after the first 1–2 weeks post-cut",
+          "Waist measurement rising faster than scale alone would suggest",
+          "Constant hunger despite adding calories — may mean increments are too small and psychological restriction remains",
+          "Strength recovering but body composition visibly softening week over week",
+        ],
+      },
+      {
+        heading: "The bottom line",
+        body: "Reverse dieting is not a gimmick — it is the maintenance-finding phase that the cutting series points to but rarely gets enough attention. Add calories back on a schedule, watch weekly trends, expect initial water weight, and hold at maintenance long enough for your body to accept the new normal. The cut gets you lean; the reverse determines whether you stay there.",
+      },
+    ],
+  },
+  {
+    id: "bulking-without-tracking",
+    title: "Bulking Without a Food Diary: Principles That Still Work",
+    tagline:
+      "Educational reference — surplus discipline without apps, same philosophy as cutting without tracking.",
+    category: "diet",
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        heading: "Surplus still rules",
+        body: "Muscle gain requires sustained energy surplus over time. Without tracking apps, use consistent meal structure, portion templates, and weekly scale trends (same time, same conditions) to judge whether you are actually gaining. The goal is controlled surplus — enough to support progression, not enough to accumulate unnecessary fat.",
+      },
+      {
+        heading: "Rate of gain: the dial that matters",
+        body: "A practical target for most natural lifters is roughly 0.25–0.5% of body weight per week — about 0.5–1 lb/week for a 200 lb person. Faster gains rarely produce proportionally more muscle; they mostly add fat. Enhanced lifters can often tolerate slightly faster rates because anabolic signaling improves nutrient partitioning, but the same principle applies — runaway scale increases are not \"more gains,\" they are more cleanup later.",
+        list: [
+          "Under ~0.25%/week for multiple weeks with stalled lifts — surplus is probably too small",
+          "Over ~1%/week consistently — surplus is almost certainly too large unless you are very underweight",
+          "Use waist measurement alongside scale: rising waist with flat strength often means fat, not muscle",
+        ],
+      },
+      {
+        heading: "Protein anchor",
+        list: [
+          "Keep protein at roughly 0.7–1g per pound of body weight — similar to a cut, not dramatically lower",
+          "A palm-sized lean protein source every meal is a workable template without weighing food",
+          "Do not slash protein to make room for more junk calories — protein supports the surplus you actually want",
+        ],
+      },
+      {
+        heading: "Carbs and fats: where surplus lives",
+        body: "Once protein is set, surplus calories come from carbs and fats. Carbs fuel training volume and recovery; fats are calorie-dense and easy to over-add without noticing. A simple approach: add one carb-focused meal or snack around training first (extra rice, potatoes, oats, fruit), then adjust fats (olive oil, nuts, whole eggs) if scale trend is still flat after 2–3 weeks.",
+      },
+      {
+        heading: "Meal structure without math",
+        list: [
+          "Eat on a schedule — irregular eating makes surplus harder to judge",
+          "Anchor each meal with protein, then add starch or fruit for carbs",
+          "Liquid calories (shakes, milk, juice) are efficient for hard gainers but easy to overshoot — use deliberately",
+          "Keep hyper-palatable foods from dominating — they add calories without improving training quality",
+          "Weigh weekly, not daily — day-to-day fluctuation from sodium and glycogen obscures the trend",
+        ],
+      },
+      {
+        heading: "On-cycle considerations",
+        body: "Enhanced bulks can produce faster strength and scale gains with less perceived effort, which tempts people into excessive surplus. Orals and high-dose tren do not need aggressive bulking to work — they need adequate protein, training progression, and cardiovascular health support. A moderate surplus on cycle often yields better composition than eating everything in sight because \"I'm on gear.\"",
+      },
+      {
+        heading: "When to get structured",
+        body: "If scale weight stalls for 3+ weeks while lifts are flat, or if waist rises without strength gains for 2+ weeks, blind eating is failing. Short 2-week tracking audits — or a dietitian consult — beat guessing. The same trigger logic applies as cutting without tracking, just inverted: you need evidence you are in surplus, not deficit.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Bulking without a diary is viable if you respect trends, anchor protein, add surplus deliberately around training, and accept that enhanced or not, most extra scale weight beyond ~0.5%/week is fat. Patience and portion templates beat reactive binge eating.",
+      },
+    ],
+  },
+  {
+    id: "refeeds-diet-breaks",
+    title: "Refeeds and Diet Breaks: When a Pause Helps Your Cut",
+    tagline:
+      "Structured higher-calorie days are not cheat meals — they are tools with specific jobs in a long deficit.",
+    category: "diet",
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Long cuts eventually hit a wall — hunger climbs, training feels flat, sleep suffers, and willpower frays. Two structured tools address different problems: refeed days (short, carb-focused surplus within an ongoing cut) and diet breaks (multi-day return to maintenance calories). Both are often confused with cheat meals or untracked binge days. They are not the same thing, and using them correctly matters more than using them often.",
+      },
+      {
+        heading: "Refeed days vs diet breaks vs cheat meals",
+        blocks: [
+          {
+            heading: "Refeed day",
+            body: "Typically 24 hours at maintenance or a modest surplus, with calories coming primarily from carbohydrates while protein stays high and fat stays relatively low. Purpose: refill muscle glycogen, improve training performance and mood, and provide a psychological reset without exiting the cut.",
+          },
+          {
+            heading: "Diet break",
+            body: "Usually 3–14 days at estimated maintenance calories — not a surplus. Purpose: reduce cumulative deficit stress, partially normalize hunger hormones, and break up very long cuts. Research on intermittent dieting (e.g. MATADOR-style approaches) suggests diet breaks can improve long-term fat loss and adherence versus continuous aggressive restriction for some people.",
+          },
+          {
+            heading: "Cheat meal",
+            body: "Untracked, often hyper-palatable, and frequently much larger than a structured refeed. Can help adherence for some people when planned, but unplanned cheat spirals are one of the most common ways cuts fail. A refeed is structured; a cheat meal is optional and separate.",
+          },
+        ],
+      },
+      {
+        heading: "What refeeds actually do",
+        body: "The physiological case for refeeds centers on glycogen restoration and short-term leptin bumps from increased carbohydrate intake. The effect on metabolic rate from a single refeed is modest and temporary — do not expect a refeed to \"restart your metabolism.\" What refeeds reliably improve is training quality, perceived energy, and diet adherence over the following days. For many people, that is worth more than any hormonal theory.",
+        list: [
+          "Carb-focused refeeds refill glycogen and pull water into muscle — expect scale to jump 2–4 lbs, mostly not fat",
+          "Training sessions after a refeed often feel noticeably better if glycogen was depleted",
+          "Psychological relief from restriction can restore adherence for the rest of the week",
+        ],
+      },
+      {
+        heading: "When to use a refeed",
+        list: [
+          "Cuts longer than 6–8 weeks with declining training performance or persistent fatigue",
+          "Very low carb intake for extended periods — glycogen depletion is affecting workouts",
+          "Body fat still comfortably above essential levels — refeeds are less necessary early in a high-fat cut",
+          "Generally avoid frequent refeeds when already very lean (sub-12% men) — diet breaks or maintenance phases are usually more appropriate",
+        ],
+      },
+      {
+        heading: "Structuring a refeed without tracking",
+        body: "If you are not using apps, think in templates rather than exact grams. Keep protein similar to a normal day. Shift calories toward starches and fruit — rice, potatoes, oats, bread, bananas — and keep fats moderate for that day. Eat to satisfaction within that structure rather than treating it as a free-for-all. One day at maintenance with carb emphasis is the target; three days of uncontrolled eating is not a refeed.",
+      },
+      {
+        heading: "Diet breaks: who benefits most",
+        body: "Diet breaks shine for people running long cuts (12+ weeks), those who started with higher body fat and used aggressive deficits early, or anyone showing clear signs of cumulative fatigue — poor sleep, irritability, stalled scale trend despite consistent adherence, and declining gym performance across multiple weeks. A 1–2 week break at maintenance does not erase progress; it often makes the next deficit phase more productive.",
+      },
+      {
+        heading: "On-cycle context",
+        body: "Enhanced cuts can preserve performance longer than natural cuts, which sometimes means people skip refeeds when they still need them psychologically — or use refeeds when fat loss is already fast from compounds and additional calories just slow the cut. If running orals or appetite-suppressing compounds, structured refeeds may matter less physiologically but can still help adherence. If running nothing and training hard in a deep deficit, refeeds are more practically useful.",
+      },
+      {
+        heading: "Common mistakes",
+        list: [
+          "Turning a refeed into a high-fat binge — fat does not refill glycogen and adds calories without the training benefit",
+          "Refeeding too often — weekly refeeds on a moderate cut often just slow fat loss without improving adherence",
+          "Expecting the scale to drop immediately after — water weight from glycogen takes days to settle",
+          "Using diet breaks as an excuse to bulk — maintenance means maintenance, not surplus",
+        ],
+      },
+      {
+        heading: "The bottom line",
+        body: "Refeeds and diet breaks are precision tools for long cuts, not mandatory rituals. Use carb-focused refeeds when glycogen and adherence need a reset; use diet breaks when cumulative deficit fatigue is real. Neither replaces the reverse diet and maintenance phase after the cut ends — they just make getting there more sustainable.",
+      },
+    ],
+  },
 ];
