@@ -741,4 +741,302 @@ export const ARTICLES: Article[] = [
       },
     ],
   },
+  {
+    id: "bloodwork-timing-basics",
+    title: "Bloodwork Timing: When to Draw Labs on and Off Cycle",
+    tagline:
+      "The same marker means different things depending on when you drew it — timing is part of the result.",
+    category: "health",
+    seriesOrder: 1,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Bloodwork is only useful if you know why you drew it and what phase you are in. A mid-blast estradiol reading tells a different story than a trough reading on TRT. A liver panel drawn the morning after a heavy leg day can look worse than the same panel drawn mid-week. This series covers how to read individual markers on cycle — starting with when to actually pull blood.",
+      },
+      {
+        heading: "Baseline before you start",
+        body: "The most valuable labs you will ever have are the ones taken before any exogenous hormones. Baseline establishes your personal normal — not population reference ranges on a PDF, but what your body looked like untrained by compounds. At minimum, a pre-cycle draw should cover hormones (total and free testosterone, estradiol, LH, FSH), a CBC, a metabolic panel with liver enzymes, lipids, and kidney markers. If you have prior labs from a physical, use those — but recognize that lifestyle, sleep, and training state at draw time still matter.",
+        list: [
+          "Draw fasted, morning, hydrated normally — same conditions you will use for all future comparisons",
+          "Avoid drawing within 48 hours of an unusually heavy training session if liver enzymes are on the panel",
+          "Note every compound, dose, and pin date in your log so results are interpretable later",
+        ],
+      },
+      {
+        heading: "Mid-cycle checkpoints",
+        body: "For most blasts, two mid-cycle draws are a reasonable default: one at weeks 4–6 (early enough to catch rising hematocrit, lipids, and liver stress) and one near the end before PCT or cruise transition. Short 6-week orals-only runs may need only a single mid-point draw. Longer runs (16+ weeks) or stacks with 19-nors benefit from a third draw around the midpoint.",
+        blocks: [
+          {
+            heading: "Trough vs peak timing",
+            body: "Injectable esters have peaks and troughs. Drawing on pin day before injection captures a trough; drawing 24–48 hours after a pin captures closer to peak. Neither is wrong — but compare like with like every time. TRT users on stable weekly or twice-weekly protocols should pick one consistent offset from injection and stick to it.",
+          },
+          {
+            heading: "Orals and liver",
+            body: "If orals are in the stack, do not wait until week 8 for the first liver check. ALT and AST can move quickly on methylated compounds. An early draw at week 2–3 plus a follow-up at week 6 is a conservative approach for oral-inclusive blasts.",
+          },
+        ],
+      },
+      {
+        heading: "Post-cycle and PCT",
+        body: "Post-cycle labs confirm whether the axis is recovering — not whether you \"passed PCT.\" Draw 4–6 weeks after your last suppressive pin (longer for deca and other long esters) and again 4–6 weeks after PCT ends if markers were still suppressed. Comparing to baseline answers the only question that matters: are LH, FSH, and testosterone trending back toward your pre-cycle values?",
+      },
+      {
+        heading: "How often on TRT or cruise",
+        body: "Stable TRT or cruise doses still need periodic monitoring — hematocrit, lipids, estradiol, and PSA (where applicable) do not stay fixed forever. Twice yearly is a common minimum for stable protocols; quarterly for the first year or after any dose change. Treat dose adjustments like a new baseline: recheck affected markers 6–8 weeks after the change.",
+      },
+      {
+        heading: "Practical draw-day checklist",
+        list: [
+          "Fasted 8–12 hours (water is fine)",
+          "Normal hydration — not dehydrated, not over-hydrated",
+          "Same time of day as prior draws when possible",
+          "Consistent offset from last injection for injectables",
+          "No new supplements or medications in the 48 hours before draw unless that is the new normal",
+          "Log pin dates, orals, training load, and sleep for the week surrounding the draw",
+        ],
+      },
+      {
+        heading: "What to watch on labs",
+        body: "Roiders Club uses optimal targets calibrated for health on a minimal cycle — not lab-reference ranges and not \"bro optimal.\" Flags are monitoring prompts: yellow means worth watching and correlating with symptoms; strict thresholds mean stop-and-assess territory. A single out-of-range value is a reason to retest under controlled conditions, not a diagnosis.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Timing is not a footnote — it is part of the test. Baseline before you start, consistent draw conditions throughout, and phase-appropriate checkpoints (mid-blast, pre-PCT, post-recovery) turn random lab numbers into a usable trend. The rest of this series walks through the markers that move most often on cycle.",
+      },
+    ],
+  },
+  {
+    id: "liver-enzymes-on-cycle",
+    title: "Liver Enzymes on Cycle: ALT, AST, and When to Pause",
+    tagline:
+      "Orals move ALT and AST fast — but training, dehydration, and non-liver stress can muddy the picture.",
+    category: "health",
+    seriesOrder: 2,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        heading: "What ALT and AST actually reflect",
+        body: "ALT (alanine aminotransferase) and AST (aspartate aminotransferase) are enzymes released when liver cells — and, to a lesser extent, muscle tissue — are stressed or damaged. On cycle, the first question is always: orals in the stack? Methylated oral AAS are hepatotoxic by design; injectables alone rarely produce dramatic enzyme spikes unless something else is contributing.",
+      },
+      {
+        heading: "Oral AAS: expect movement",
+        body: "17-alpha-alkylated orals (methylated steroids, many designer orals) pass through the liver on first pass and predictably raise ALT and AST. Mild elevations on moderate doses are common; the question is magnitude, trajectory, and symptoms — not whether enzymes moved at all. Stacking multiple orals, running orals for 8+ weeks, or combining orals with other hepatotoxic drugs (certain NSAIDs, high-dose acetaminophen, heavy alcohol) compounds risk nonlinearly.",
+        list: [
+          "Draw liver enzymes at least once mid-oral run — earlier if dose is high or history of sensitivity",
+          "Rising enzymes week over week matter more than a single static elevation",
+          "Jaundice, dark urine, persistent right-upper-quadrant pain, or unexplained nausea are clinical red flags regardless of numbers",
+        ],
+      },
+      {
+        heading: "Injectables and non-oral causes",
+        body: "Testosterone and most injectable AAS are not first-pass liver toxins in the same way orals are. If ALT and AST are elevated on an injectable-only stack, look elsewhere first: a heavy training session within 48–72 hours (especially eccentric-heavy work), significant muscle damage, dehydration, viral illness, or medications. AST tends to rise more with muscle breakdown than ALT; an AST-predominant spike after leg day is a different conversation than both enzymes climbing steadily on week 4 of an oral.",
+      },
+      {
+        heading: "Reading the numbers in context",
+        body: "Roiders Club optimal targets for ALT and AST reflect health on a very minimal cycle — not the lab's wide reference range. Values in the caution band warrant retesting under controlled conditions (no heavy training for 3 days, normal hydration, no alcohol) before changing protocol. Strict-threshold flags mean stop orals, remove other hepatotoxic inputs, and involve a clinician if symptoms accompany the rise or retest confirms the trend.",
+        blocks: [
+          {
+            heading: "ALT-predominant elevation",
+            body: "More specific to hepatocellular stress. On orals, ALT often leads. Persistent ALT rise without oral exposure deserves medical workup — do not assume \"it's just the gear.\"",
+          },
+          {
+            heading: "AST-predominant elevation",
+            body: "Broader tissue distribution — muscle, heart, liver. Correlate with training timing. If AST is high but ALT is normal and you deadlifted yesterday, retest before reacting.",
+          },
+        ],
+      },
+      {
+        heading: "Support compounds: realistic expectations",
+        body: "TUDCA, NAC, and milk thistle are commonly discussed as liver support. Evidence for TUDCA reducing oral-induced enzyme rises is real but not a license to extend toxic oral runs. Support compounds may blunt enzyme peaks — they do not eliminate hepatotoxicity. If enzymes climb despite support, the answer is dose reduction or cessation, not more supplements.",
+      },
+      {
+        heading: "When to pause orals",
+        list: [
+          "Enzymes above caution band on retest under controlled draw conditions",
+          "Any strict-threshold flag with or without symptoms",
+          "Symptoms of liver dysfunction even if enzymes look \"acceptable\"",
+          "Week-over-week rise without a non-liver explanation",
+        ],
+      },
+      {
+        heading: "The bottom line",
+        body: "Liver enzymes on cycle are a trend and context problem. Orals will move them; injectables usually should not dramatically. Train timing, hydration, and draw consistency matter. Retest before panicking, escalate when trends or symptoms demand it, and treat strict flags as a pause signal — not a number to rationalize away.",
+      },
+    ],
+  },
+  {
+    id: "hematocrit-rbc",
+    title: "Hematocrit and RBC: Testosterone, Viscosity, and What to Do",
+    tagline:
+      "Elevated hematocrit is one of the most predictable testosterone side effects — and one of the most ignored.",
+    category: "health",
+    seriesOrder: 3,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        heading: "Why hematocrit rises on testosterone",
+        body: "Testosterone stimulates erythropoiesis — red blood cell production — through erythropoietin upregulation. Higher hematocrit (HCT) and hemoglobin mean thicker blood, higher oxygen-carrying capacity, and increased cardiovascular load from viscosity. This is dose-dependent and cumulative: many men see gradual HCT creep over months on TRT or blast doses, especially without mitigation habits.",
+      },
+      {
+        heading: "Reading the CBC",
+        body: "Hematocrit is the percentage of blood volume occupied by red cells. Hemoglobin (HGB) and red blood cell count (RBC) move together. Roiders Club optimal HCT targets sit below the levels where viscosity-related risk rises sharply — caution and strict bands flag when monitoring intensity should increase. A single high reading warrants retest; a sustained upward trend over multiple draws is the real signal.",
+        list: [
+          "Dehydration concentrates HCT — normalize hydration before drawing and before reacting",
+          "Living at altitude raises baseline HCT — compare to your own trend, not sea-level bro charts",
+          "Sleep apnea can independently raise RBC indices — worth ruling out if HCT climbs despite low dose",
+        ],
+      },
+      {
+        heading: "Symptoms and cardiovascular load",
+        body: "Many men run elevated HCT asymptomatically until they do not. Headaches (especially morning), flushing, elevated blood pressure, shortness of breath on exertion, and fatigue can correlate with high viscosity — but symptoms are unreliable alone. Pair how you feel with BP trends and repeated CBCs. Chest pain, severe headache, or neurological symptoms are emergency territory regardless of last lab date.",
+      },
+      {
+        heading: "Mitigation that actually moves the needle",
+        list: [
+          "Regular cardio — Zone 2 work multiple times per week is the most underused HCT tool",
+          "Consistent hydration and electrolyte balance (see hydration article in Diet category)",
+          "Donating blood or therapeutic phlebotomy — clinical decision based on sustained elevation",
+          "Dose reduction if HCT remains high despite lifestyle mitigation",
+          "Avoid stacking multiple erythropoiesis-stimulating factors (test + high-altitude training camps + dehydration) without monitoring",
+        ],
+      },
+      {
+        heading: "Therapeutic phlebotomy",
+        body: "When HCT stays above caution range despite cardio, hydration, and dose review, therapeutic blood donation or prescription phlebotomy is a standard clinical option on TRT. Frequency varies — some men need donation every 8–12 weeks; others stabilize with lifestyle alone. This is a conversation with a clinician who knows you are on testosterone, not a DIY schedule based on one lab.",
+      },
+      {
+        heading: "Compounds beyond testosterone",
+        body: "Testosterone is the primary driver in most stacks, but any compound that raises RBC production or concentrates blood through fluid shifts can worsen the picture. Trenbolone does not raise HCT through the same EPO pathway as testosterone but can still affect BP and cardiovascular stress. Orals and AI-driven E2 crashes do not lower HCT directly — do not chase HCT with inappropriate ancillary changes.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Hematocrit is predictable, dose-related, and manageable if you monitor it. Draw CBCs on schedule, retest dehydrated spikes, run cardio, stay hydrated, and escalate to phlebotomy or dose adjustment when trends stay high. Ignoring HCT because you feel fine is how manageable problems become urgent ones.",
+      },
+    ],
+  },
+  {
+    id: "estradiol-symptoms-not-numbers",
+    title: "Estradiol: Symptoms Matter More Than a Target Number",
+    tagline:
+      "E2 labs are useful — but chasing a single pg/mL value causes more problems than it solves.",
+    category: "health",
+    seriesOrder: 4,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Estradiol (E2) might be the most over-interpreted marker in performance pharmacology. Forums treat it like a thermostat with a single correct setting. In practice, estradiol exists in a range where men feel and function well, individual sensitivity varies, assay type matters, and the cost of driving E2 too low is often worse than letting it sit moderately elevated. Labs inform the picture; symptoms and trends complete it.",
+      },
+      {
+        heading: "Why E2 is not one number",
+        body: "Sensitive LC/MS assays and standard immunoassays can disagree meaningfully. SHBG, obesity, liver function, and aromatizing compound dose all shift the testosterone-to-estradiol ratio. Drawing on a testosterone peak vs trough changes the reading. A single E2 value without injection timing, compound list, and symptom log is half a data point.",
+        list: [
+          "Use the same lab and assay method for trend comparisons when possible",
+          "Note pin timing relative to draw — peak aromatization reads higher",
+          "Total testosterone context matters: high T with proportionally high E2 is a different scenario than low T with mid-range E2",
+        ],
+      },
+      {
+        heading: "High E2: what people actually notice",
+        body: "Elevated estradiol on aromatizing compounds can present as water retention, sensitive nipples, mood volatility, or reduced libido — but many men run elevated E2 without gynecomastia symptoms. Water retention overlaps with sodium intake, carbohydrate load, and compound-specific mineralocorticoid effects (not purely E2). Treat symptoms and trends, not a number in isolation.",
+        list: [
+          "Nipple sensitivity or tissue changes — act early, not after weeks of ignoring",
+          "Excessive water retention affecting BP or comfort",
+          "Mood symptoms that track with dose increases rather than life stress alone",
+        ],
+      },
+      {
+        heading: "Low E2: the under-discussed problem",
+        body: "Aggressive aromatase inhibitor use has left a generation of men with crashed E2 — joint pain, fatigue, depression, lipid worsening, and sexual dysfunction. Low E2 is not \"dry and aesthetic\"; it is physiologically miserable and counterproductive for muscle and mood. If you are on an AI and feel awful despite \"good\" labs, consider that your labs might be lying (assay timing) or that you have overshot.",
+        list: [
+          "Achy joints and sudden loss of training tolerance",
+          "Depressed mood or flat affect disproportionate to context",
+          "Libido collapse despite adequate androgen levels",
+          "Lipids worsening after AI introduction",
+        ],
+      },
+      {
+        heading: "Aromatase inhibitors: default should be none",
+        body: "AIs are not a mandatory cycle accessory. Many men on moderate testosterone doses never need them. Starting an AI preemptively \"to be safe\" is how low-E2 problems begin. If symptoms warrant intervention, dose the lowest effective amount and reassess with symptoms plus repeat labs — not a blanket protocol copied from a forum.",
+      },
+      {
+        heading: "Roiders Club optimal range framing",
+        body: "App optimal E2 targets reflect health on a minimal cycle — a band where most men function well, not a mandate to nail 30 pg/mL. Caution and strict flags prompt closer monitoring; they are not orders to slam an AI. Correlate flags with nipple symptoms, BP, mood, and injection timing before changing anything.",
+      },
+      {
+        heading: "When to escalate",
+        body: "Progressive gyno tissue changes, persistent high BP with symptoms, or inability to find a tolerable E2 balance after conservative AI adjustments belong in clinical care — not incremental bro-protocol tweaks. SERMs for acute gyno symptoms are a medical decision.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Estradiol is a range, not a bullseye. Draw consistently, log symptoms honestly, avoid preemptive AI use, and treat low E2 as seriously as high E2. The number on the page is a clue — how you feel, how tissue responds, and how trends move over time is the actual management problem.",
+      },
+    ],
+  },
+  {
+    id: "kidney-markers-hydration",
+    title: "Kidney Markers: Creatinine, BUN, and Hydration Effects",
+    tagline:
+      "Creatinine moves with muscle mass and hydration — context matters as much as the value.",
+    category: "health",
+    seriesOrder: 5,
+    publishedAt: "2026-06-20",
+    updatedAt: "2026-06-20",
+    sections: [
+      {
+        body: "Kidney panels get less attention than hormones and liver enzymes until something looks off. Creatinine, BUN (urea), and eGFR are routine on metabolic panels — and they are routinely misread by people who treat a single creatinine bump as kidney failure or a high-BUN reading as proof of inadequate protein. Both markers are sensitive to hydration, muscle mass, and training load. This article covers how to read them on cycle without unnecessary panic.",
+      },
+      {
+        heading: "Creatinine: not just kidney function",
+        body: "Creatinine is a breakdown product of muscle creatine phosphate. More muscle mass generally means higher baseline creatinine — a 220 lb lifter with significant lean mass will run higher than a sedentary reference population. Creatinine also rises with dehydration (concentrated blood) and can fall with over-hydration. eGFR is estimated from creatinine, age, and sex — it inherits all the same context problems.",
+        list: [
+          "High muscle mass raises baseline creatinine — trend matters more than one comparison to lab ranges",
+          "Dehydration artificially elevates creatinine; over-hydration can dilute it",
+          "Very high protein intake can modestly increase BUN without kidney injury",
+        ],
+      },
+      {
+        heading: "BUN and the protein question",
+        body: "Blood urea nitrogen reflects protein metabolism and hydration status. High BUN with normal creatinine often points to dehydration, high protein intake, or GI blood loss — not primary kidney disease. Low BUN is less commonly discussed but can appear with liver dysfunction or very low protein intake. Read BUN alongside creatinine as a ratio pattern, not in isolation.",
+      },
+      {
+        heading: "Hydration: the silent confounder",
+        body: "Kidney markers and hydration are tightly linked — the same steady water and electrolyte habits that affect day-to-day water retention (covered in the hydration article under Diet & body comp) also affect whether creatinine and BUN look artificially stressed on draw day. Drawing blood after a morning coffee-only fast, post-sauna, or mid-cut dehydration spike is a recipe for a scary PDF that normalizes on retest.",
+        blocks: [
+          {
+            heading: "Before your draw",
+            body: "Hydrate normally for 24 hours before the test — not extreme water loading, not intentional dehydration. Fasted does not mean dry.",
+          },
+          {
+            heading: "On-cycle fluid shifts",
+            body: "Aromatizing compounds, sodium-heavy diets, and certain steroids with mineralocorticoid activity change extracellular fluid. Kidney markers can move indirectly through hemoconcentration. Pair labs with blood pressure and how you actually drank that week.",
+          },
+        ],
+      },
+      {
+        heading: "What actually stresses kidneys on cycle",
+        body: "Exogenous testosterone and most injectables are not direct nephrotoxins in the way methylated orals are hepatotoxins. Kidney risk on cycle is more often indirect: sustained high blood pressure, rhabdomyolysis from extreme training, NSAID overuse, dehydration, or pre-existing kidney disease unmasked by hemodynamic stress. Oral AAS plus NSAIDs plus dehydration is a combination worth avoiding — not because creatinine will always spike, but because the margin for error shrinks.",
+        list: [
+          "Monitor BP alongside kidney markers — hypertension is a primary kidney stressor",
+          "Limit chronic NSAID use, especially with orals and dehydration",
+          "Extreme training with inadequate recovery can raise creatinine via muscle breakdown — correlate with CK if available",
+        ],
+      },
+      {
+        heading: "When to retest vs escalate",
+        body: "A single creatinine or eGFR flag without symptoms, with a plausible dehydration or training explanation, deserves a retest under controlled hydration and no heavy training for 48–72 hours. Persistent elevation across multiple draws, rising trend, proteinuria on urinalysis, or symptoms (edema, reduced urine output, fatigue disproportionate to training) warrant medical evaluation — not forum dosing changes.",
+      },
+      {
+        heading: "Roiders Club optimal framing",
+        body: "App optimal kidney targets assume adequate hydration and typical muscle mass for active men. Values outside optimal on a single draw are monitoring prompts. Combine with the hydration article's practical habits — consistent fluids, balanced sodium and potassium — before assuming kidney injury.",
+      },
+      {
+        heading: "The bottom line",
+        body: "Creatinine and BUN are context-heavy markers. Muscle mass, hydration, protein intake, and training all move them. Draw under consistent conditions, retest before catastrophizing, manage blood pressure and NSAID exposure, and escalate when trends persist or symptoms appear. Kidney health on cycle is mostly about indirect stressors — not a mysterious gear side effect you cannot influence.",
+      },
+    ],
+  },
 ];
