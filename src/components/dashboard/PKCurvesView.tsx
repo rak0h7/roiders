@@ -1,25 +1,42 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Legend,
 } from "recharts";
 import { useCycleStore } from "@/store/cycleStore";
 import { getCompoundById } from "@/data/compounds";
-import { generatePKData, generatePKCards, getSaturationMarkers } from "@/lib/cycleCalculations";
+import {
+  generatePKData,
+  generatePKDataPercentSteadyState,
+  generatePKCards,
+  getSaturationMarkers,
+} from "@/lib/cycleCalculations";
 import { SaturationExplainer } from "@/components/dashboard/SaturationExplainer";
 import { ui } from "@/lib/ui";
 import { getChartColors, getChartTheme } from "@/lib/charts";
 import { useSettings } from "@/context/SettingsContext";
+import { cn } from "@/lib/utils";
+
+const WASHOUT_WEEKS = 4;
 
 export function PKCurvesView() {
-  useSettings(); // re-render on theme change
+  useSettings();
   const chart = getChartTheme();
   const colors = getChartColors();
+  const [mode, setMode] = useState<"absolute" | "percent">("absolute");
   const { compounds, getEffectiveWeeks } = useCycleStore();
   const weeks = getEffectiveWeeks();
-  const data = generatePKData(weeks, compounds);
-  const cards = generatePKCards(weeks, compounds);
-  const saturationMarkers = getSaturationMarkers(weeks, compounds);
+
+  const cards = useMemo(() => generatePKCards(weeks, compounds), [weeks, compounds]);
+  const data = useMemo(
+    () =>
+      mode === "percent"
+        ? generatePKDataPercentSteadyState(weeks, compounds)
+        : generatePKData(weeks, compounds, { washoutWeeks: WASHOUT_WEEKS }),
+    [mode, weeks, compounds],
+  );
+  const saturationMarkers = useMemo(() => getSaturationMarkers(weeks, compounds), [weeks, compounds]);
 
   if (compounds.length === 0) {
     return (
@@ -40,7 +57,32 @@ export function PKCurvesView() {
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">Blood Level Projection</p>
-            <p className="text-xs text-[var(--muted)]">Dashed lines mark estimated full saturation (~4–5 half-lives)</p>
+            <p className="text-xs text-[var(--muted)]">
+              Dashed lines mark estimated full saturation (~4–5 half-lives)
+              {mode === "absolute" ? ` · +${WASHOUT_WEEKS}wk washout after cycle end` : ""}
+            </p>
+          </div>
+          <div className="flex gap-1 rounded-[var(--radius-sm)] border border-[var(--border)] p-0.5">
+            <button
+              type="button"
+              onClick={() => setMode("absolute")}
+              className={cn(
+                "rounded-[var(--radius-sm)] px-2.5 py-1 text-[10px] font-bold uppercase",
+                mode === "absolute" ? ui.pillProtocolActive : "text-[var(--muted)]",
+              )}
+            >
+              Absolute
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("percent")}
+              className={cn(
+                "rounded-[var(--radius-sm)] px-2.5 py-1 text-[10px] font-bold uppercase",
+                mode === "percent" ? ui.pillProtocolActive : "text-[var(--muted)]",
+              )}
+            >
+              % Steady
+            </button>
           </div>
         </div>
         <div className="h-[22rem] w-full sm:h-[24rem]">
@@ -48,8 +90,15 @@ export function PKCurvesView() {
             <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
               <XAxis dataKey="week" stroke={chart.axis} fontSize={11} tick={{ fill: chart.axis }} />
-              <YAxis stroke={chart.axis} fontSize={11} tick={{ fill: chart.axis }} width={40} />
+              <YAxis
+                stroke={chart.axis}
+                fontSize={11}
+                tick={{ fill: chart.axis }}
+                width={40}
+                domain={mode === "percent" ? [0, 100] : undefined}
+              />
               <Tooltip contentStyle={chart.tooltip} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
               <ReferenceLine
                 x={`W${weeks}`}
                 stroke={chart.accent}
@@ -66,7 +115,7 @@ export function PKCurvesView() {
                   label={{ value: marker.label, fill: marker.color, fontSize: 9, position: "insideTopLeft" }}
                 />
               ))}
-              {compounds.slice(0, 8).map((cc, i) => (
+              {compounds.map((cc, i) => (
                 <Line
                   key={cc.id}
                   type="monotone"

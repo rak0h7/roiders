@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Copy, Pencil, Plus, TrendingUp, Trash2 } from "lucide-react";
 import { useCycleStore } from "@/store/cycleStore";
 import { getCompoundById } from "@/data/compounds";
 import { frequencyLabel } from "@/data/frequencies";
@@ -15,6 +15,7 @@ export function ActiveStack() {
     setCompoundModalOpen,
     setConfiguringEntryId,
     removeCompound,
+    duplicateCompound,
     clearCycle,
   } = useCycleStore();
 
@@ -67,6 +68,28 @@ export function ActiveStack() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
+                  {compound.category === "anabolics" ? (
+                    <button
+                      type="button"
+                      title="Ramp up (duplicate at higher dose)"
+                      onClick={() =>
+                        duplicateCompound(cc.id, {
+                          doseMg: Math.round(cc.doseMg * 1.5 * 10) / 10,
+                        })
+                      }
+                      className={ui.btnIconSm}
+                    >
+                      <AppIcon icon={TrendingUp} size="sm" />
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    title="Duplicate entry"
+                    onClick={() => duplicateCompound(cc.id)}
+                    className={ui.btnIconSm}
+                  >
+                    <AppIcon icon={Copy} size="sm" />
+                  </button>
                   <button
                     type="button"
                     onClick={() => setConfiguringEntryId(cc.id)}

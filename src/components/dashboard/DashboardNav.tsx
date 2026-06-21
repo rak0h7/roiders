@@ -9,6 +9,7 @@ import {
   HeartPulse,
   Syringe,
   Shield,
+  ChartGantt,
 } from "lucide-react";
 import { useCycleStore } from "@/store/cycleStore";
 import { AppIcon } from "@/components/ui/AppIcon";
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
 
 const TABS = [
+  { id: "timeline", label: "Timeline", icon: ChartGantt },
   { id: "calendar", label: "Calendar", icon: Calendar },
   { id: "pk-curves", label: "Saturation", icon: LineChart },
   { id: "heatmap", label: "Heatmap", icon: Flame },

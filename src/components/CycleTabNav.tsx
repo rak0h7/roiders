@@ -13,7 +13,7 @@ const TABS = [
 ] as const;
 
 export function CycleTabNav() {
-  const { view, compounds, setSelectedGuideId } = useCycleStore();
+  const { view, setSelectedGuideId } = useCycleStore();
   const { route, setRoute } = useNavigation();
   const { settings } = useSiteConfig();
   const visibleTabs = TABS.filter(
@@ -26,7 +26,7 @@ export function CycleTabNav() {
         <ModuleTabButton
           key={tab.id}
           active={tab.route === "cycle-sources" ? route === "cycle-sources" : view === tab.id}
-          disabled={tab.id === "dashboard" && compounds.length === 0}
+          disabled={false}
           onClick={() => {
             if (tab.id === "guides") setSelectedGuideId(null);
             setRoute(tab.route);

@@ -1,7 +1,7 @@
 import { differenceInDays, addWeeks, addDays } from "date-fns";
 import type { CycleCompound } from "@/lib/cycleTypes";
-import { getCompoundById, type Compound } from "@/data/compounds";
-import type { FrequencyPattern } from "@/data/frequencies";
+import { getCompoundById, type Compound, type CompoundCategory } from "@/data/compounds";
+import { frequencyLabel, type FrequencyPattern } from "@/data/frequencies";
 import {
   findSaturationWeek,
   getSaturationProfile,
@@ -297,11 +297,17 @@ export function getCalendarDays(year: number, month: number) {
   return days;
 }
 
-export function generatePKData(weeks: number, compounds: CycleCompound[]) {
+export function generatePKData(
+  weeks: number,
+  compounds: CycleCompound[],
+  options?: { washoutWeeks?: number },
+) {
+  const washout = options?.washoutWeeks ?? 0;
+  const totalWeeks = weeks + washout;
   const levels = new Map<string, number>();
   const data: { week: string; [key: string]: string | number }[] = [];
 
-  for (let w = 0; w <= weeks; w++) {
+  for (let w = 0; w <= totalWeeks; w++) {
     const point: { week: string; [key: string]: string | number } = { week: `W${w}` };
 
     compounds.forEach((cc) => {
@@ -321,6 +327,160 @@ export function generatePKData(weeks: number, compounds: CycleCompound[]) {
   }
 
   return data;
+}
+
+export function generatePKDataPercentSteadyState(weeks: number, compounds: CycleCompound[]) {
+  const cards = generatePKCards(weeks, compounds);
+  const steadyById = new Map(
+    cards
+      .filter((c) => c.saturationPct !== null)
+      .map((c) => {
+        const level = c.level > 0 ? c.level : 1;
+        const steady = c.saturationPct! > 0 ? level / (c.saturationPct! / 100) : level;
+        return [c.id, steady] as const;
+      }),
+  );
+  const raw = generatePKData(weeks, compounds, { washoutWeeks: 4 });
+  return raw.map((point) => {
+    const next: { week: string; [key: string]: string | number } = { week: point.week };
+    for (const cc of compounds) {
+      const steady = steadyById.get(cc.id);
+      const val = (point[cc.id] as number) ?? 0;
+      next[cc.id] = steady && steady > 0 ? Math.min(100, Math.round((val / steady) * 1000) / 10) : val;
+    }
+    return next;
+  });
+}
+
+const TIMELINE_CATEGORY_ORDER: Record<string, number> = {
+  anabolics: 0,
+  estrogen: 1,
+  peptides: 2,
+  "fat-loss": 3,
+  support: 4,
+  cognitive: 5,
+  hair: 6,
+};
+
+const TIMELINE_CATEGORY_LABELS: Record<string, string> = {
+  anabolics: "AAS",
+  estrogen: "Estrogen",
+  peptides: "Peptide",
+  "fat-loss": "Fat loss",
+  support: "Support",
+  cognitive: "Cognitive",
+  hair: "Hair",
+};
+
+export interface TimelineRow {
+  entryId: string;
+  label: string;
+  color: string;
+  category: CompoundCategory;
+  categoryLabel: string;
+  startWeek: number;
+  endWeek: number;
+  doseLabel: string;
+  weeklyLoad: number;
+}
+
+export type TimelineMilestoneType = "start" | "end" | "pct" | "saturation";
+
+export interface TimelineMilestone {
+  week: number;
+  label: string;
+  type: TimelineMilestoneType;
+  color?: string;
+}
+
+export interface WeekProtocolEntry {
+  entryId: string;
+  name: string;
+  doseLabel: string;
+  weeklyDose: string;
+  color: string;
+}
+
+export function timelineCategoryLabel(category: string): string {
+  return TIMELINE_CATEGORY_LABELS[category] ?? "Support";
+}
+
+export function generateTimelineRows(compounds: CycleCompound[], weeks: number): TimelineRow[] {
+  const rows: TimelineRow[] = [];
+  for (const cc of compounds) {
+    const compound = getCompoundById(cc.compoundId);
+    if (!compound) continue;
+    rows.push({
+      entryId: cc.id,
+      label: compound.shortName,
+      color: compound.color,
+      category: compound.category,
+      categoryLabel: timelineCategoryLabel(compound.category),
+      startWeek: Math.max(1, cc.activeWeeks[0]),
+      endWeek: Math.min(weeks, cc.activeWeeks[1]),
+      doseLabel: `${formatDose(cc.doseMg, compound.unit)} • ${frequencyLabel(cc.frequency)}`,
+      weeklyLoad: weeklyMgLoad(cc),
+    });
+  }
+  return rows.sort((a, b) => {
+    const cat = (TIMELINE_CATEGORY_ORDER[a.category] ?? 99) - (TIMELINE_CATEGORY_ORDER[b.category] ?? 99);
+    if (cat !== 0) return cat;
+    if (a.startWeek !== b.startWeek) return a.startWeek - b.startWeek;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+export function generateTimelineMilestones(
+  weeks: number,
+  compounds: CycleCompound[],
+  startDate: Date,
+): TimelineMilestone[] {
+  const milestones: TimelineMilestone[] = [
+    { week: 1, label: "Start", type: "start" },
+    { week: weeks, label: "Cycle End", type: "end" },
+  ];
+
+  const end = getCycleEndDate(startDate, weeks);
+  const pct = calculatePctBegin(end, compounds);
+  if (pct && hasAnabolicCompounds(compounds)) {
+    const pctWeek = Math.min(
+      weeks + 4,
+      Math.max(1, Math.ceil(differenceInDays(pct, startDate) / 7)),
+    );
+    milestones.push({ week: pctWeek, label: "PCT Est.", type: "pct", color: "var(--warning)" });
+  }
+
+  const satMarkers = getSaturationMarkers(weeks, compounds);
+  const seenWeeks = new Set<number>();
+  for (const m of satMarkers.slice(0, 4)) {
+    if (seenWeeks.has(m.week)) continue;
+    seenWeeks.add(m.week);
+    milestones.push({
+      week: m.week,
+      label: m.label,
+      type: "saturation",
+      color: m.color,
+    });
+  }
+
+  return milestones.sort((a, b) => a.week - b.week);
+}
+
+export function generateWeekProtocol(week: number, compounds: CycleCompound[]): WeekProtocolEntry[] {
+  return compounds
+    .filter((cc) => week >= cc.activeWeeks[0] && week <= cc.activeWeeks[1])
+    .map((cc) => {
+      const compound = getCompoundById(cc.compoundId);
+      if (!compound) return null;
+      return {
+        entryId: cc.id,
+        name: compound.shortName,
+        doseLabel: formatDose(cc.doseMg, compound.unit),
+        weeklyDose: formatWeeklyDose(cc),
+        color: compound.color,
+      };
+    })
+    .filter((e): e is WeekProtocolEntry => e !== null);
 }
 
 export interface PKCardData {

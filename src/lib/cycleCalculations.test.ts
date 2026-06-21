@@ -5,11 +5,15 @@ import {
   generatePKCards,
   generatePKData,
   generateStackedLoadData,
+  generateTimelineMilestones,
+  generateTimelineRows,
+  generateWeekProtocol,
   weeklyDoseAmount,
   doseToMgEquivalent,
   weeklyMgLoad,
   weeklyMgLoadAtWeek,
 } from "@/lib/cycleCalculations";
+import { parseISO } from "date-fns";
 import type { CycleCompound } from "@/lib/cycleTypes";
 
 const ascendedStack: CycleCompound[] = [
@@ -108,5 +112,51 @@ describe("simulation series", () => {
     expect(testCard?.saturationPct).not.toBeNull();
     expect(testCard?.saturationPct).toBeGreaterThan(90);
     expect(testCard?.saturated).toBe(true);
+  });
+
+  it("extends PK data for washout weeks", () => {
+    const shortRun: CycleCompound = {
+      id: "tren-wash",
+      compoundId: "tren-a",
+      doseMg: 100,
+      frequency: "eod",
+      activeWeeks: [1, 8],
+      route: "injectable",
+    };
+    const data = generatePKData(8, [shortRun], { washoutWeeks: 4 });
+    expect(data).toHaveLength(13);
+    expect(data[12]["tren-wash"]).toBeLessThan(data[8]["tren-wash"] as number);
+  });
+});
+
+describe("timeline helpers", () => {
+  const bulkStack: CycleCompound[] = [
+    { id: "test", compoundId: "test-e", doseMg: 500, frequency: "2x-weekly", activeWeeks: [1, 16], route: "injectable" },
+    { id: "dbol", compoundId: "dbol", doseMg: 30, frequency: "daily", activeWeeks: [1, 4], route: "oral" },
+    { id: "tren-low", compoundId: "tren-a", doseMg: 50, frequency: "eod", activeWeeks: [5, 8], route: "injectable" },
+    { id: "tren-high", compoundId: "tren-a", doseMg: 100, frequency: "eod", activeWeeks: [9, 16], route: "injectable" },
+  ];
+
+  it("generates sorted timeline rows with week spans", () => {
+    const rows = generateTimelineRows(bulkStack, 16);
+    expect(rows).toHaveLength(4);
+    expect(rows[0].category).toBe("anabolics");
+    expect(rows.find((r) => r.entryId === "dbol")?.endWeek).toBe(4);
+    expect(rows.filter((r) => r.label === "Tren A")).toHaveLength(2);
+  });
+
+  it("lists active compounds per week in protocol", () => {
+    const w3 = generateWeekProtocol(3, bulkStack);
+    expect(w3.map((e) => e.name)).toContain("Test E");
+    expect(w3.map((e) => e.name)).toContain("Dbol");
+    const w10 = generateWeekProtocol(10, bulkStack);
+    expect(w10.map((e) => e.name)).toContain("Tren A");
+    expect(w10.map((e) => e.name)).not.toContain("Dbol");
+  });
+
+  it("includes cycle end and PCT milestones", () => {
+    const milestones = generateTimelineMilestones(16, bulkStack, parseISO("2026-01-01"));
+    expect(milestones.some((m) => m.type === "end" && m.week === 16)).toBe(true);
+    expect(milestones.some((m) => m.type === "pct")).toBe(true);
   });
 });

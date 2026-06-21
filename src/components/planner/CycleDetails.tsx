@@ -1,6 +1,7 @@
 "use client";
 
 import { useCycleStore } from "@/store/cycleStore";
+import { useNavigation } from "@/context/NavigationContext";
 import {
   calculateStats,
   getIntensityScore,
@@ -30,7 +31,8 @@ const INTENSITY_COLORS: Record<number, string> = {
 };
 
 export function CycleDetails() {
-  const { compounds, startDate, getEffectiveWeeks } = useCycleStore();
+  const { compounds, startDate, getEffectiveWeeks, setView } = useCycleStore();
+  const { setRoute } = useNavigation();
   const weeks = getEffectiveWeeks();
   const stats = calculateStats(compounds, weeks);
   const start = parseISO(startDate);
@@ -83,6 +85,18 @@ export function CycleDetails() {
               ? "Add compounds to see estimated level"
               : `Estimated: ${getIntensityLabel(score)} (${score}/5)`}
           </p>
+          {compounds.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setView("dashboard");
+                setRoute("cycle-dashboard");
+              }}
+              className={cn(ui.btnProtocolSm, "mt-3 w-full sm:w-auto")}
+            >
+              View simulation
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

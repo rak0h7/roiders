@@ -3,6 +3,7 @@
 import { CycleInputPanel } from "./planner/CycleInputPanel";
 import { StatsDashboard } from "./planner/StatsDashboard";
 import { CycleDetails } from "./planner/CycleDetails";
+import { CycleTimeline } from "./planner/CycleTimeline";
 import { ActiveStack } from "./planner/ActiveStack";
 import { QuickStartTemplates } from "./planner/QuickStartTemplates";
 import { CompoundBrowser } from "./compounds/CompoundBrowser";
@@ -27,6 +28,7 @@ export function CyclePlannerView() {
             <CycleInputPanel />
             <StatsDashboard />
             <CycleDetails />
+            <CycleTimeline variant="compact" />
             <ActiveStack />
             <QuickStartTemplates />
           </>

@@ -12,6 +12,38 @@ import { ui } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 import type { FrequencyPattern } from "@/data/frequencies";
 
+function WeekRangePreview({
+  totalWeeks,
+  start,
+  end,
+  color,
+  label,
+}: {
+  totalWeeks: number;
+  start: number;
+  end: number;
+  color: string;
+  label: string;
+}) {
+  const left = ((start - 1) / totalWeeks) * 100;
+  const width = ((end - start + 1) / totalWeeks) * 100;
+  return (
+    <div className="space-y-1.5">
+      <p className={ui.label}>Timeline position</p>
+      <div className="relative h-6 rounded-[var(--radius-sm)] bg-[var(--bg-elevated)]">
+        <div
+          className="absolute top-1/2 h-4 -translate-y-1/2 rounded-[var(--radius-sm)]"
+          style={{ left: `${left}%`, width: `${width}%`, background: color, opacity: 0.9 }}
+          title={`${label} W${start}–${end}`}
+        />
+      </div>
+      <p className="text-[10px] text-[var(--muted-2)]">
+        Week {start}–{end} of {totalWeeks}
+      </p>
+    </div>
+  );
+}
+
 function ConfigureForm({
   entry,
   compound,
@@ -64,6 +96,13 @@ function ConfigureForm({
             <input type="number" min={1} max={totalWeeks} value={weekEnd} onChange={(e) => setWeekEnd(e.target.value)} className={ui.input} />
           </div>
         </div>
+        <WeekRangePreview
+          totalWeeks={totalWeeks}
+          start={Math.max(1, parseInt(weekStart, 10) || 1)}
+          end={Math.min(totalWeeks, Math.max(parseInt(weekStart, 10) || 1, parseInt(weekEnd, 10) || totalWeeks))}
+          color={compound.color}
+          label={compound.shortName}
+        />
       </div>
       <div className="mt-6 flex items-center gap-2">
         <button onClick={handleSave} className={`flex-1 ${ui.btnProtocol}`}>Save</button>

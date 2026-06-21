@@ -2,6 +2,7 @@
 
 import { useCycleStore } from "@/store/cycleStore";
 import { DashboardNav } from "./DashboardNav";
+import { CycleTimelineView } from "./CycleTimelineView";
 import { CalendarView } from "./CalendarView";
 import { PKCurvesView } from "./PKCurvesView";
 import { IntensityHeatmapView } from "./IntensityHeatmapView";
@@ -13,6 +14,7 @@ import { DefenseCoverageView } from "./DefenseCoverageView";
 import { ui } from "@/lib/ui";
 
 const VIEWS: Record<string, React.ComponentType> = {
+  timeline: CycleTimelineView,
   calendar: CalendarView,
   "pk-curves": PKCurvesView,
   heatmap: IntensityHeatmapView,
@@ -25,7 +27,7 @@ const VIEWS: Record<string, React.ComponentType> = {
 
 export function Dashboard() {
   const { dashboardTab } = useCycleStore();
-  const View = VIEWS[dashboardTab] ?? CalendarView;
+  const View = VIEWS[dashboardTab] ?? CycleTimelineView;
 
   return (
     <div className="space-y-4">

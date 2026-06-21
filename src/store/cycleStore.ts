@@ -42,6 +42,7 @@ interface CycleState {
   openProfile: (profileId: string) => void;
   openGuidesAt: (profileId: string) => void;
   loadTemplate: (compounds: Omit<CycleCompound, "id">[], weeks?: number) => void;
+  duplicateCompound: (entryId: string, overrides?: Partial<CycleCompound>) => void;
   clearCycle: () => void;
   getEffectiveWeeks: () => number;
 }
@@ -100,7 +101,7 @@ export const useCycleStore = create<CycleState>()(
       configuringEntryId: null,
       compoundCategory: "anabolics",
       compoundSearch: "",
-      dashboardTab: "calendar",
+      dashboardTab: "timeline",
       view: "planner",
       selectedGuideId: null,
       profileModalId: null,
@@ -162,6 +163,28 @@ export const useCycleStore = create<CycleState>()(
           configuringEntryId: null,
           compoundModalOpen: false,
         }),
+      duplicateCompound: (entryId, overrides) => {
+        const source = get().compounds.find((c) => c.id === entryId);
+        if (!source) return;
+        const totalWeeks = get().getEffectiveWeeks();
+        const mid = Math.min(
+          totalWeeks,
+          Math.max(source.activeWeeks[0] + 1, Math.ceil((source.activeWeeks[0] + source.activeWeeks[1]) / 2)),
+        );
+        const entry: CycleCompound = {
+          ...source,
+          id: newEntryId(source.compoundId),
+          activeWeeks: overrides?.activeWeeks ?? ([mid, source.activeWeeks[1]] as [number, number]),
+          doseMg: overrides?.doseMg ?? source.doseMg,
+          frequency: overrides?.frequency ?? source.frequency,
+          route: overrides?.route ?? source.route,
+          compoundId: overrides?.compoundId ?? source.compoundId,
+        };
+        set({
+          compounds: [...get().compounds, entry],
+          configuringEntryId: entry.id,
+        });
+      },
       clearCycle: () => set({ compounds: [], configuringEntryId: null }),
       getEffectiveWeeks: () => {
         const { weeks, customWeeks } = get();

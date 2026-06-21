@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useCycleStore } from "@/store/cycleStore";
 import { getCalendarDays, getDayIntensity } from "@/lib/cycleCalculations";
 import { parseISO, addMonths, format } from "date-fns";
@@ -50,9 +51,17 @@ function MonthHeatmap({ year, month, startDate }: { year: number; month: number;
 }
 
 export function IntensityHeatmapView() {
-  const { startDate } = useCycleStore();
+  const { startDate, getEffectiveWeeks } = useCycleStore();
   const start = parseISO(startDate);
-  const next = addMonths(start, 1);
+  const weeks = getEffectiveWeeks();
+  const monthCount = Math.max(2, Math.ceil((weeks * 7) / 28));
+
+  const months = useMemo(() => {
+    return Array.from({ length: monthCount }, (_, i) => {
+      const d = addMonths(start, i);
+      return { year: d.getFullYear(), month: d.getMonth() };
+    });
+  }, [start, monthCount]);
 
   return (
     <div className={`${ui.card} ${ui.cardPad}`}>
@@ -71,8 +80,9 @@ export function IntensityHeatmapView() {
         </div>
       </div>
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
-        <MonthHeatmap year={start.getFullYear()} month={start.getMonth()} startDate={start} />
-        <MonthHeatmap year={next.getFullYear()} month={next.getMonth()} startDate={start} />
+        {months.map((m) => (
+          <MonthHeatmap key={`${m.year}-${m.month}`} year={m.year} month={m.month} startDate={start} />
+        ))}
       </div>
     </div>
   );
