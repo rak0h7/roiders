@@ -7,6 +7,7 @@ import {
   generateTimelineMilestones,
   generateTimelineRows,
   type TimelineMilestone,
+  type TimelinePhaseSegment,
   type TimelineRow,
 } from "@/lib/cycleCalculations";
 import { formatDate, getEndDate } from "@/lib/utils";
@@ -56,7 +57,45 @@ function MilestoneMarker({ milestone, weeks }: { milestone: TimelineMilestone; w
   );
 }
 
-function TimelineBar({
+function TimelinePhaseBar({
+  phase,
+  weeks,
+  maxDose,
+  onSelect,
+}: {
+  phase: TimelinePhaseSegment;
+  weeks: number;
+  maxDose: number;
+  onSelect: (id: string) => void;
+}) {
+  const span = phase.endWeek - phase.startWeek + 1;
+  const left = ((phase.startWeek - 1) / weeks) * 100;
+  const width = (span / weeks) * 100;
+  const heightPct = 55 + (phase.doseMg / maxDose) * 45;
+  const doseShort = phase.doseLabel.split(" • ")[0];
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(phase.entryId)}
+      className="absolute bottom-0 rounded-[var(--radius-sm)] px-0.5 text-left transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--protocol)]"
+      style={{
+        left: `${left}%`,
+        width: `${Math.max(width, 100 / weeks)}%`,
+        height: `${heightPct}%`,
+        background: phase.color,
+        opacity: 0.75 + (phase.doseMg / maxDose) * 0.25,
+      }}
+      title={`${phase.label}: ${phase.doseLabel} (W${phase.startWeek}–${phase.endWeek})`}
+    >
+      <span className="block truncate px-1 text-[8px] font-bold text-white sm:text-[9px]">
+        {doseShort}
+      </span>
+    </button>
+  );
+}
+
+function TimelineRowBar({
   row,
   weeks,
   onSelect,
@@ -65,28 +104,19 @@ function TimelineBar({
   weeks: number;
   onSelect: (id: string) => void;
 }) {
-  const span = row.endWeek - row.startWeek + 1;
-  const left = ((row.startWeek - 1) / weeks) * 100;
-  const width = (span / weeks) * 100;
-
+  const maxDose = Math.max(...row.phases.map((p) => p.doseMg), 1);
   return (
-    <button
-      type="button"
-      onClick={() => onSelect(row.entryId)}
-      className="absolute top-1/2 h-[calc(var(--control-height-xs)-4px)] min-h-[1.25rem] -translate-y-1/2 rounded-[var(--radius-sm)] px-1.5 text-left transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--protocol)]"
-      style={{
-        left: `${left}%`,
-        width: `${Math.max(width, 100 / weeks)}%`,
-        background: row.color,
-        opacity: 0.92,
-      }}
-      title={`${row.label}: ${row.doseLabel} (W${row.startWeek}–${row.endWeek})`}
-    >
-      <span className="block truncate text-[9px] font-bold text-white sm:text-[10px]">
-        {row.label}
-        <span className="hidden font-medium opacity-90 sm:inline"> · {row.doseLabel}</span>
-      </span>
-    </button>
+    <>
+      {row.phases.map((phase) => (
+        <TimelinePhaseBar
+          key={`${phase.entryId}-${phase.startWeek}-${phase.endWeek}`}
+          phase={phase}
+          weeks={weeks}
+          maxDose={maxDose}
+          onSelect={onSelect}
+        />
+      ))}
+    </>
   );
 }
 
@@ -102,9 +132,7 @@ export function CycleTimeline({ variant = "full", className }: Props) {
     [weeks, compounds, start],
   );
   const ticks = weekTicks(weeks);
-  const maxRows = variant === "compact" ? 6 : undefined;
-  const visibleRows = maxRows ? rows.slice(0, maxRows) : rows;
-  const hiddenCount = maxRows && rows.length > maxRows ? rows.length - maxRows : 0;
+  const visibleRows = rows;
 
   const cardClass = variant === "compact" ? ui.cardInner : ui.card;
 
@@ -154,7 +182,7 @@ export function CycleTimeline({ variant = "full", className }: Props) {
           <div
             className={cn(
               "space-y-1.5",
-              variant === "compact" && rows.length > 6 ? "max-h-[14rem] overflow-y-auto pr-1" : "",
+              variant === "compact" && rows.length > 6 ? "max-h-[18rem] overflow-y-auto pr-1" : "",
             )}
           >
             {visibleRows.map((row) => (
@@ -166,15 +194,15 @@ export function CycleTimeline({ variant = "full", className }: Props) {
                   </p>
                 </div>
                 <div className="relative h-8 flex-1 rounded-[var(--radius-sm)] bg-[var(--bg-elevated)]">
-                  <TimelineBar row={row} weeks={weeks} onSelect={setConfiguringEntryId} />
+                  <TimelineRowBar row={row} weeks={weeks} onSelect={setConfiguringEntryId} />
                 </div>
               </div>
             ))}
           </div>
 
-          {hiddenCount > 0 ? (
+          {variant === "compact" && rows.length > 6 ? (
             <p className="text-center text-[10px] text-[var(--muted)]">
-              +{hiddenCount} more — open Simulation for full timeline
+              {rows.length} entries — scroll for full stack
             </p>
           ) : null}
         </div>

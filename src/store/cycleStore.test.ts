@@ -43,4 +43,26 @@ describe("clampCompoundsToWeeks", () => {
     expect(clamped[0].activeWeeks).toEqual([1, 12]);
     expect(clamped[1].activeWeeks).toEqual([10, 12]);
   });
+
+  it("truncates dose phases when cycle duration shrinks", () => {
+    const compounds: CycleCompound[] = [
+      {
+        id: "test-1",
+        compoundId: "test-e",
+        doseMg: 500,
+        frequency: "weekly",
+        activeWeeks: [1, 16],
+        route: "injectable",
+        dosePhases: [
+          { startWeek: 1, endWeek: 8, doseMg: 250 },
+          { startWeek: 9, endWeek: 16, doseMg: 500 },
+        ],
+      },
+    ];
+    const clamped = clampCompoundsToWeeks(compounds, 10);
+    expect(clamped[0].dosePhases).toEqual([
+      { startWeek: 1, endWeek: 8, doseMg: 250 },
+      { startWeek: 9, endWeek: 10, doseMg: 500 },
+    ]);
+  });
 });

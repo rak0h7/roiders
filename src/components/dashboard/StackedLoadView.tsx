@@ -13,6 +13,7 @@ const SERIES = [
   { key: "anabolics", name: "Anabolics", color: "var(--protocol)" },
   { key: "estrogen", name: "Estrogen / SERM", color: "var(--intel)" },
   { key: "supplements", name: "Peptides", color: "var(--success)" },
+  { key: "fatLoss", name: "Fat loss", color: "#f97316" },
   { key: "health", name: "Support / Other", color: "var(--warning)" },
 ] as const;
 

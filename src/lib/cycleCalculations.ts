@@ -1,5 +1,6 @@
 import { differenceInDays, addWeeks, addDays } from "date-fns";
 import type { CycleCompound } from "@/lib/cycleTypes";
+import { doseForWeek, migrateToPhases, peakDoseMg } from "@/lib/dosePhases";
 import { getCompoundById, type Compound, type CompoundCategory } from "@/data/compounds";
 import { frequencyLabel, type FrequencyPattern } from "@/data/frequencies";
 import {
@@ -37,8 +38,16 @@ export function dosesPerWeek(freq: FrequencyPattern): number {
   }
 }
 
+export function weeklyDoseAmountForDose(cc: CycleCompound, doseMg: number): number {
+  return doseMg * dosesPerWeek(cc.frequency);
+}
+
 export function weeklyDoseAmount(cc: CycleCompound): number {
-  return cc.doseMg * dosesPerWeek(cc.frequency);
+  return weeklyDoseAmountForDose(cc, cc.doseMg);
+}
+
+export function weeklyDoseAmountAtWeek(cc: CycleCompound, week: number): number {
+  return weeklyDoseAmountForDose(cc, doseForWeek(cc, week));
 }
 
 /** Convert stored dose to mg-equivalent for load/intensity math across unit types. */
@@ -54,15 +63,33 @@ export function doseToMgEquivalent(dose: number, unit: Compound["unit"]): number
   }
 }
 
-/** Mg-equivalent weekly load used for intensity, stacked charts, and averages. */
-export function weeklyMgLoad(cc: CycleCompound): number {
+/** Mg-equivalent weekly load for a specific dose amount. */
+export function weeklyMgLoadForDose(cc: CycleCompound, doseMg: number): number {
   const compound = getCompoundById(cc.compoundId);
-  if (!compound) return 0;
+  if (!compound || doseMg <= 0) return 0;
   return (
-    doseToMgEquivalent(cc.doseMg, compound.unit) *
+    doseToMgEquivalent(doseMg, compound.unit) *
     dosesPerWeek(cc.frequency) *
     (compound.pkMultiplier ?? 1)
   );
+}
+
+/** Mg-equivalent weekly load used for intensity, stacked charts, and averages. */
+export function weeklyMgLoad(cc: CycleCompound): number {
+  return weeklyMgLoadForDose(cc, peakDoseMg(cc));
+}
+
+export function weeklyMgLoadAtWeekForEntry(cc: CycleCompound, week: number): number {
+  return weeklyMgLoadForDose(cc, doseForWeek(cc, week));
+}
+
+/** Weekly mg-equivalent input for PK compartment math (aligned with stacked load). */
+export function weeklyPkInputAtWeek(cc: CycleCompound, week: number): number {
+  return weeklyMgLoadAtWeekForEntry(cc, week);
+}
+
+export function formatChartWeek(weekIndex: number): string {
+  return weekIndex === 0 ? "Pre" : `W${weekIndex}`;
 }
 
 export function activeWeekCount(cc: CycleCompound): number {
@@ -104,7 +131,7 @@ export function weeklyMgLoadAtWeek(week: number, compounds: CycleCompound[]): nu
   let load = 0;
   for (const cc of compounds) {
     if (week < cc.activeWeeks[0] || week > cc.activeWeeks[1]) continue;
-    load += weeklyMgLoad(cc);
+    load += weeklyMgLoadAtWeekForEntry(cc, week);
   }
   return load;
 }
@@ -120,11 +147,27 @@ export function formatWeeklyDose(cc: CycleCompound): string {
   const compound = getCompoundById(cc.compoundId);
   if (!compound) return "—";
   const weekly = weeklyDoseAmount(cc);
-  if (compound.unit === "iu") return `${Math.round(weekly)}iu/wk`;
-  if (compound.unit === "mcg") {
+  return formatWeeklyAmount(weekly, compound.unit);
+}
+
+export function formatWeeklyAmount(weekly: number, unit: Compound["unit"]): string {
+  if (unit === "iu") return `${Math.round(weekly)}iu/wk`;
+  if (unit === "mcg") {
     return weekly < 1 ? `${Math.round(weekly * 1000)}mcg/wk` : `${Math.round(weekly * 10) / 10}mg/wk`;
   }
   return `${Math.round(weekly)}mg/wk`;
+}
+
+export function formatDoseRange(cc: CycleCompound, unit: string): string {
+  const phases = cc.dosePhases ?? migrateToPhases(cc);
+  if (phases.length <= 1) {
+    return formatDose(phases[0]?.doseMg ?? cc.doseMg, unit);
+  }
+  const doses = phases.map((p) => p.doseMg);
+  const min = Math.min(...doses);
+  const max = Math.max(...doses);
+  if (min === max) return formatDose(min, unit);
+  return `${formatDose(min, unit)}→${formatDose(max, unit)}`;
 }
 
 export function entryLabel(cc: CycleCompound): string {
@@ -238,16 +281,19 @@ export function generateDosesForDay(
     const compound = getCompoundById(cc.compoundId);
     if (!compound) return;
 
+    const doseMg = doseForWeek(cc, weekNum);
+    if (doseMg <= 0) return;
+
     if (shouldDoseOnDay(cc.frequency, dayIndex, dayOfWeek)) {
       doses.push({
         name: compound.shortName,
-        dose: formatDose(cc.doseMg, compound.unit),
+        dose: formatDose(doseMg, compound.unit),
         color: compound.color,
       });
       if (cc.frequency === "bid") {
         doses.push({
           name: compound.shortName,
-          dose: `${formatDose(cc.doseMg, compound.unit)} PM`,
+          dose: `${formatDose(doseMg, compound.unit)} PM`,
           color: compound.color,
         });
       }
@@ -269,9 +315,11 @@ export function getDayIntensity(date: Date, startDate: Date, compounds: CycleCom
     if (weekNum < cc.activeWeeks[0] || weekNum > cc.activeWeeks[1]) return;
     const compound = getCompoundById(cc.compoundId);
     if (!compound) return;
+    const doseMg = doseForWeek(cc, weekNum);
+    if (doseMg <= 0) return;
     if (shouldDoseOnDay(cc.frequency, dayIndex, dayOfWeek)) {
       load +=
-        doseToMgEquivalent(cc.doseMg, compound.unit) *
+        doseToMgEquivalent(doseMg, compound.unit) *
         (compound.pkMultiplier ?? 0.5) *
         doseMultiplierForDay(cc.frequency);
     }
@@ -308,7 +356,7 @@ export function generatePKData(
   const data: { week: string; [key: string]: string | number }[] = [];
 
   for (let w = 0; w <= totalWeeks; w++) {
-    const point: { week: string; [key: string]: string | number } = { week: `W${w}` };
+    const point: { week: string; [key: string]: string | number } = { week: formatChartWeek(w) };
 
     compounds.forEach((cc) => {
       const compound = getCompoundById(cc.compoundId);
@@ -317,7 +365,7 @@ export function generatePKData(
       const decay = decayPerWeek(compound.halfLife ?? 1);
       const prev = levels.get(cc.id) ?? 0;
       const inActive = w >= cc.activeWeeks[0] && w <= cc.activeWeeks[1];
-      const weeklyInput = inActive ? weeklyDoseAmount(cc) * (compound.pkMultiplier ?? 1) : 0;
+      const weeklyInput = inActive ? weeklyPkInputAtWeek(cc, w) : 0;
       const level = prev * decay + weeklyInput;
       levels.set(cc.id, level);
       point[cc.id] = Math.max(0, Math.round(level * 10) / 10);
@@ -372,6 +420,19 @@ const TIMELINE_CATEGORY_LABELS: Record<string, string> = {
   hair: "Hair",
 };
 
+export interface TimelinePhaseSegment {
+  entryId: string;
+  label: string;
+  color: string;
+  category: CompoundCategory;
+  categoryLabel: string;
+  startWeek: number;
+  endWeek: number;
+  doseMg: number;
+  doseLabel: string;
+  weeklyLoad: number;
+}
+
 export interface TimelineRow {
   entryId: string;
   label: string;
@@ -382,6 +443,7 @@ export interface TimelineRow {
   endWeek: number;
   doseLabel: string;
   weeklyLoad: number;
+  phases: TimelinePhaseSegment[];
 }
 
 export type TimelineMilestoneType = "start" | "end" | "pct" | "saturation";
@@ -405,21 +467,57 @@ export function timelineCategoryLabel(category: string): string {
   return TIMELINE_CATEGORY_LABELS[category] ?? "Support";
 }
 
+export function generateTimelinePhaseSegments(
+  compounds: CycleCompound[],
+  weeks: number,
+): TimelinePhaseSegment[] {
+  const segments: TimelinePhaseSegment[] = [];
+  for (const cc of compounds) {
+    const compound = getCompoundById(cc.compoundId);
+    if (!compound) continue;
+    const phases = cc.dosePhases ?? migrateToPhases(cc);
+    for (const phase of phases) {
+      if (phase.endWeek < 1 || phase.startWeek > weeks) continue;
+      segments.push({
+        entryId: cc.id,
+        label: entryLabel(cc),
+        color: compound.color,
+        category: compound.category,
+        categoryLabel: timelineCategoryLabel(compound.category),
+        startWeek: Math.max(1, phase.startWeek),
+        endWeek: Math.min(weeks, phase.endWeek),
+        doseMg: phase.doseMg,
+        doseLabel: `${formatDose(phase.doseMg, compound.unit)} • ${frequencyLabel(cc.frequency)}`,
+        weeklyLoad: weeklyMgLoadForDose(cc, phase.doseMg),
+      });
+    }
+  }
+  return segments.sort((a, b) => {
+    const cat = (TIMELINE_CATEGORY_ORDER[a.category] ?? 99) - (TIMELINE_CATEGORY_ORDER[b.category] ?? 99);
+    if (cat !== 0) return cat;
+    if (a.startWeek !== b.startWeek) return a.startWeek - b.startWeek;
+    return a.label.localeCompare(b.label);
+  });
+}
+
 export function generateTimelineRows(compounds: CycleCompound[], weeks: number): TimelineRow[] {
   const rows: TimelineRow[] = [];
   for (const cc of compounds) {
     const compound = getCompoundById(cc.compoundId);
     if (!compound) continue;
+    const phases = generateTimelinePhaseSegments([cc], weeks);
+    if (phases.length === 0) continue;
     rows.push({
       entryId: cc.id,
-      label: compound.shortName,
+      label: entryLabel(cc),
       color: compound.color,
       category: compound.category,
       categoryLabel: timelineCategoryLabel(compound.category),
-      startWeek: Math.max(1, cc.activeWeeks[0]),
-      endWeek: Math.min(weeks, cc.activeWeeks[1]),
-      doseLabel: `${formatDose(cc.doseMg, compound.unit)} • ${frequencyLabel(cc.frequency)}`,
-      weeklyLoad: weeklyMgLoad(cc),
+      startWeek: Math.min(...phases.map((p) => p.startWeek)),
+      endWeek: Math.max(...phases.map((p) => p.endWeek)),
+      doseLabel: `${formatDoseRange(cc, compound.unit)} • ${frequencyLabel(cc.frequency)}`,
+      weeklyLoad: Math.max(...phases.map((p) => p.weeklyLoad)),
+      phases,
     });
   }
   return rows.sort((a, b) => {
@@ -472,11 +570,13 @@ export function generateWeekProtocol(week: number, compounds: CycleCompound[]): 
     .map((cc) => {
       const compound = getCompoundById(cc.compoundId);
       if (!compound) return null;
+      const doseMg = doseForWeek(cc, week);
+      if (doseMg <= 0) return null;
       return {
         entryId: cc.id,
-        name: compound.shortName,
-        doseLabel: formatDose(cc.doseMg, compound.unit),
-        weeklyDose: formatWeeklyDose(cc),
+        name: entryLabel(cc),
+        doseLabel: formatDose(doseMg, compound.unit),
+        weeklyDose: formatWeeklyAmount(weeklyDoseAmountForDose(cc, doseMg), compound.unit),
         color: compound.color,
       };
     })
@@ -499,6 +599,50 @@ export interface PKCardData {
   color: string;
 }
 
+function resolveEntrySaturation(
+  cc: CycleCompound,
+  level: number,
+  evalWeek: number,
+  weeks: number,
+): { saturationWeek: number; saturationPct: number | null; saturated: boolean } {
+  const weeklyInput = weeklyPkInputAtWeek(cc, evalWeek);
+  if (weeklyInput <= 0) {
+    return { saturationWeek: evalWeek, saturationPct: null, saturated: false };
+  }
+
+  const compound = getCompoundById(cc.compoundId);
+  const halfLife = compound?.halfLife ?? 1;
+  const profile = getSaturationProfile(cc.compoundId);
+
+  if (usesClassicSaturation(cc.compoundId) || profile.model === "peptide" || profile.model === "hcg") {
+    const result = findSaturationWeek(
+      cc.activeWeeks[0],
+      cc.activeWeeks[1],
+      weeklyInput,
+      halfLife,
+      weeks,
+    );
+    return {
+      saturationWeek: result.saturationWeek,
+      saturationPct: percentOfSaturation(level, result.steadyState),
+      saturated: evalWeek >= result.saturationWeek && result.saturated,
+    };
+  }
+
+  if (profile.model === "gh") {
+    const rampWeeks = 10;
+    const weeksOn = Math.max(0, evalWeek - cc.activeWeeks[0] + 1);
+    const satWeek = Math.min(cc.activeWeeks[0] + rampWeeks - 1, cc.activeWeeks[1]);
+    return {
+      saturationWeek: satWeek,
+      saturationPct: Math.min(100, Math.round((weeksOn / rampWeeks) * 1000) / 10),
+      saturated: weeksOn >= rampWeeks && evalWeek >= satWeek,
+    };
+  }
+
+  return { saturationWeek: evalWeek, saturationPct: null, saturated: false };
+}
+
 export function generatePKCards(weeks: number, compounds: CycleCompound[]): PKCardData[] {
   const data = generatePKData(weeks, compounds);
   const cards: PKCardData[] = [];
@@ -511,33 +655,15 @@ export function generatePKCards(weeks: number, compounds: CycleCompound[]): PKCa
     const evalWeek = Math.min(cc.activeWeeks[1], weeks);
     const level = values[evalWeek] ?? values[values.length - 1] ?? 0;
     const profile = getSaturationProfile(cc.compoundId);
-    const weeklyInput = weeklyDoseAmount(cc) * (compound.pkMultiplier ?? 1);
-    const halfLife = compound.halfLife ?? 1;
-
-    let saturationWeek = evalWeek;
-    let saturationPct: number | null = null;
-    let saturated = false;
-
-    if (usesClassicSaturation(cc.compoundId) && weeklyInput > 0) {
-      const result = findSaturationWeek(
-        cc.activeWeeks[0],
-        cc.activeWeeks[1],
-        weeklyInput,
-        halfLife,
-        weeks
-      );
-      saturationWeek = result.saturationWeek;
-      saturationPct = percentOfSaturation(level, result.steadyState);
-      saturated = evalWeek >= result.saturationWeek && result.saturated;
-    }
+    const { saturationWeek, saturationPct, saturated } = resolveEntrySaturation(cc, level, evalWeek, weeks);
 
     cards.push({
       id: cc.id,
       short: entryLabel(cc),
       peak: Math.round(peak * 10) / 10,
       level: Math.round(level * 10) / 10,
-      peakW: `W${peakIdx}`,
-      levelW: `W${evalWeek}`,
+      peakW: (data[peakIdx]?.week as string) ?? formatChartWeek(peakIdx),
+      levelW: formatChartWeek(evalWeek),
       saturationWeek,
       saturationPct,
       saturated,
@@ -566,11 +692,20 @@ export function getSaturationMarkers(
 }
 
 export function generateStackedLoadData(weeks: number, compounds: CycleCompound[]) {
-  const data: { week: string; anabolics: number; estrogen: number; health: number; supplements: number; total: number }[] = [];
+  const data: {
+    week: string;
+    anabolics: number;
+    estrogen: number;
+    fatLoss: number;
+    health: number;
+    supplements: number;
+    total: number;
+  }[] = [];
 
-  for (let w = 0; w <= weeks; w++) {
+  for (let w = 1; w <= weeks; w++) {
     let anabolics = 0;
     let estrogen = 0;
+    let fatLoss = 0;
     let health = 0;
     let supplements = 0;
 
@@ -578,20 +713,22 @@ export function generateStackedLoadData(weeks: number, compounds: CycleCompound[
       if (w < cc.activeWeeks[0] || w > cc.activeWeeks[1]) return;
       const compound = getCompoundById(cc.compoundId);
       if (!compound) return;
-      const load = weeklyMgLoad(cc);
+      const load = weeklyMgLoadAtWeekForEntry(cc, w);
       if (compound.category === "anabolics") anabolics += load;
       else if (compound.category === "estrogen") estrogen += load;
       else if (compound.category === "peptides") supplements += load;
+      else if (compound.category === "fat-loss") fatLoss += load;
       else health += load;
     });
 
     data.push({
-      week: `W${w}`,
+      week: formatChartWeek(w),
       anabolics: Math.round(anabolics),
       estrogen: Math.round(estrogen),
+      fatLoss: Math.round(fatLoss),
       health: Math.round(health),
       supplements: Math.round(supplements),
-      total: Math.round(anabolics + estrogen + health + supplements),
+      total: Math.round(anabolics + estrogen + fatLoss + health + supplements),
     });
   }
 
@@ -618,32 +755,50 @@ export function calculateRiskProfile(compounds: CycleCompound[]): RiskAxis[] {
 
   compounds.forEach((cc) => {
     const compound = getCompoundById(cc.compoundId);
-    if (!compound || compound.category !== "anabolics") return;
+    if (!compound) return;
     const load = weeklyMgLoad(cc) / 100;
     const label = entryLabel(cc);
 
-    if (compound.hepatotoxic) {
-      risks.HEPATIC.score += load * 3;
-      risks.HEPATIC.contributors.push(label);
+    if (compound.category === "anabolics") {
+      if (compound.hepatotoxic) {
+        risks.HEPATIC.score += load * 3;
+        risks.HEPATIC.contributors.push(label);
+      }
+      if (compound.tags.includes("19-nor") || compound.id.includes("tren")) {
+        risks.CARDIO.score += load * 2;
+        risks.NEURO.score += load * 2.5;
+        risks.ENDOCRINE.score += load * 2;
+        risks.CARDIO.contributors.push(label);
+        risks.NEURO.contributors.push(label);
+      }
+      if (compound.tags.includes("DHT") || compound.id === "halo") {
+        risks.DERM.score += load * 1.5;
+        risks.DERM.contributors.push(label);
+      }
+      if (compound.route === "oral") {
+        risks.HEPATIC.score += load * 2;
+        risks.METABOLIC.score += load * 1.5;
+        risks.METABOLIC.contributors.push(label);
+      }
+      risks.ENDOCRINE.score += load;
+      risks.ENDOCRINE.contributors.push(label);
+      return;
     }
-    if (compound.tags.includes("19-nor") || compound.id.includes("tren")) {
-      risks.CARDIO.score += load * 2;
-      risks.NEURO.score += load * 2.5;
-      risks.ENDOCRINE.score += load * 2;
+
+    if (compound.category === "estrogen") {
+      risks.ENDOCRINE.score += load * 1.5;
+      risks.ENDOCRINE.contributors.push(label);
+    }
+    if (compound.category === "fat-loss") {
+      risks.CARDIO.score += load * 1.5;
+      risks.METABOLIC.score += load * 1.2;
       risks.CARDIO.contributors.push(label);
-      risks.NEURO.contributors.push(label);
-    }
-    if (compound.tags.includes("DHT") || compound.id === "halo") {
-      risks.DERM.score += load * 1.5;
-      risks.DERM.contributors.push(label);
-    }
-    if (compound.route === "oral" && compound.category === "anabolics") {
-      risks.HEPATIC.score += load * 2;
-      risks.METABOLIC.score += load * 1.5;
       risks.METABOLIC.contributors.push(label);
     }
-    risks.ENDOCRINE.score += load;
-    risks.ENDOCRINE.contributors.push(label);
+    if (compound.hepatotoxic) {
+      risks.HEPATIC.score += load * 2;
+      risks.HEPATIC.contributors.push(label);
+    }
   });
 
   const colors: Record<string, string> = {

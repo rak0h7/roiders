@@ -87,6 +87,7 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
       { heading: "Dosage Ranges", list: ["Beginner / intermediate: 200 – 600 mg/week", "Advanced: 600 – 1000 mg/week"] },
       { heading: "General Safety Profile", body: "Often called mild, but the hematocrit rise is a real cardiovascular concern — monitor CBC. Some guys add low-dose aspirin; kidney protection (e.g. SGLT2s) comes up in longer runs." },
       { heading: "Odd/Unique Effects", list: ["Hunger usually goes up noticeably.", "Gains tend to be hard and vascular but slow to show.", "Short cycles under ~12 weeks rarely get the full payoff from the long ester."] },
+      { heading: "Deep dives", body: "Articles: boldenone-mechanism-dosing (Part 1 — RBC, esters, dosing) and boldenone-estrogen-bloodwork (Part 2 — estrogen paradox, labs, harm reduction)." },
     ],
   },
   {
@@ -135,12 +136,13 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
       {
         heading: "Odd/Unique Effects",
         list: [
-          "Joint comfort and lubrication are the main reason people run it.",
+          "Joint comfort and lubrication are the main reason people run it (evidence is largely anecdotal).",
           "Water retention can show up at higher doses.",
           "Finasteride or dutasteride can paradoxically worsen hair loss with nandrolone.",
           "Very suppressive with a long decanoate tail — PCT is a grind.",
         ],
       },
+      { heading: "Deep dives", body: "Articles: nandrolone-in-bodybuilding (lean mass data from bodybuilder trials, real-world stacking, product quality, harms, and research gaps)." },
     ],
   },
   {
@@ -166,6 +168,33 @@ const STEROID_GUIDE_PROFILES: CompoundProfile[] = [
         ],
       },
       { heading: "Recommended Support", body: "Sleep hygiene (melatonin if needed), cardio support (cardarine/PPAR agonists where legal), NAC or glutathione, anti-inflammatory diet, thyroid labs if energy crashes." },
+      { heading: "Deep dives", body: "Articles: trenbolone-mechanism-dosing (Part 1 — mechanism, esters, low-dose philosophy) and trenbolone-harm-reduction (Part 2 — prolactin ladder, sleep/neuro tiers)." },
+    ],
+  },
+  {
+    id: "yk11",
+    title: "YK11",
+    aliases: ["YK-11"],
+    route: "injectable",
+    tagline: "Partial AR agonist / steroidal SARM — partitioning hype with a serious CNS liability and no human safety data.",
+    compoundIds: ["yk11"],
+    sections: [
+      { heading: "How to Use / Receptors", body: "Steroidal selective androgen receptor modulator (SARM) marketed as a myostatin inhibitor. Acts as a partial AR agonist — binds the receptor, can displace DHT, but activates downstream signaling weakly. Experience reports flag heavy hypothalamic/CNS AR binding; not a full androgen like testosterone or tren." },
+      { heading: "Aromatization?", body: "No aromatization pathway described in available literature." },
+      { heading: "Blood Markers Impacted", body: "Endogenous testosterone suppression is expected. Lipid/HDL risk is plausible but poorly characterized in humans. Preclinical rat data show hippocampal oxidative stress and neuroinflammation — functional markers (sleep, irritability, headache, cognition) may matter as much as standard labs." },
+      { heading: "Dosage Ranges", list: ["Reported floor: 10 mg/day (injectable)", "Reported ceiling: 50 mg/day", "Titrate +10 mg only after a plateau — experience reports only, not clinical guidance"] },
+      { heading: "General Safety Profile", body: "No human efficacy or safety trials. Rat studies at anabolic-equivalent exposures show mitochondrial dysfunction, BDNF/TrkB/CREB downregulation, neuroinflammation, and impaired memory consolidation. Megadose anecdotes (100–200 mg/day; gram single-day exposures) describe severe CNS intolerance and multi-day recovery — treat as documented failure modes, not exploration targets." },
+      {
+        heading: "Odd/Unique Effects",
+        list: [
+          "Nutrient partitioning / caloric flexibility at maintenance — myostatin-inhibition theory, not established human outcome",
+          "Not a site-enhancement compound",
+          "Transient irritability 1–2 hours post-injection reported",
+          "Pinning not required pre-workout — not an injectable-oral timing drug",
+          "DHT displacement: knocks DHT off AR in brain and peripheral tissue, activates weakly — CNS downside is the main concern",
+        ],
+      },
+      { heading: "Deep dives", body: "Article: yk11-mechanism-dosing — mechanism, injectable framing, CNS safety, and literature touchpoints." },
     ],
   },
   {

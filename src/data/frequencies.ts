@@ -52,6 +52,7 @@ export const DEFAULT_DOSES: Record<string, { doseMg: number; frequency: Frequenc
   "t3": { doseMg: 25, frequency: "daily" },
   "gh": { doseMg: 2, frequency: "daily" },
   "bpc157": { doseMg: 0.25, frequency: "daily" },
+  "yk11": { doseMg: 10, frequency: "daily" },
 };
 
 function inferFrequency(info: string, route: Compound["route"]): FrequencyPattern {

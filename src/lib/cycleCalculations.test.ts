@@ -97,12 +97,44 @@ describe("simulation series", () => {
 
   it("stacked load has no artificial oscillation", () => {
     const data = generateStackedLoadData(20, ascendedStack);
-    const w1 = data[1].total;
-    const w2 = data[2].total;
-    const w11 = data[11].total;
+    const w1 = data[0].total;
+    const w2 = data[1].total;
+    const w11 = data[10].total;
     expect(w1).toBe(weeklyMgLoadAtWeek(1, ascendedStack));
     expect(w2).toBe(w1);
     expect(w11).toBeGreaterThan(w2);
+  });
+
+  it("PK curves use mg-equivalent weekly input for IU compounds", () => {
+    const gh: CycleCompound = {
+      id: "gh-pk",
+      compoundId: "gh",
+      doseMg: 4,
+      frequency: "daily",
+      activeWeeks: [1, 12],
+      route: "injectable",
+    };
+    const weeklyInput = weeklyMgLoad(gh);
+    const data = generatePKData(12, [gh]);
+    const w1 = data[1]["gh-pk"] as number;
+    expect(w1).toBeCloseTo(weeklyInput, 1);
+    expect(weeklyInput).toBeLessThan(10);
+    expect(weeklyDoseAmount(gh)).toBe(28);
+  });
+
+  it("GH cards expose gradual saturation percent", () => {
+    const gh: CycleCompound = {
+      id: "gh-sat",
+      compoundId: "gh",
+      doseMg: 4,
+      frequency: "daily",
+      activeWeeks: [1, 16],
+      route: "injectable",
+    };
+    const cards = generatePKCards(16, [gh]);
+    const ghCard = cards.find((c) => c.id === "gh-sat");
+    expect(ghCard?.saturationPct).not.toBeNull();
+    expect(ghCard?.saturationPct).toBeGreaterThan(0);
   });
 
   it("PK cards expose saturation percent for classic compounds", () => {
@@ -112,6 +144,42 @@ describe("simulation series", () => {
     expect(testCard?.saturationPct).not.toBeNull();
     expect(testCard?.saturationPct).toBeGreaterThan(90);
     expect(testCard?.saturated).toBe(true);
+  });
+
+  it("PK reflects titration phases on a single entry", () => {
+    const tren: CycleCompound = {
+      id: "tren-ramp",
+      compoundId: "tren-a",
+      doseMg: 150,
+      frequency: "eod",
+      activeWeeks: [7, 12],
+      route: "injectable",
+      dosePhases: [
+        { startWeek: 7, endWeek: 8, doseMg: 50 },
+        { startWeek: 9, endWeek: 12, doseMg: 150 },
+      ],
+    };
+    const data = generatePKData(12, [tren]);
+    const w8 = data[8]["tren-ramp"] as number;
+    const w12 = data[12]["tren-ramp"] as number;
+    expect(w12).toBeGreaterThan(w8);
+  });
+
+  it("stacked load steps up at phase boundary", () => {
+    const tren: CycleCompound = {
+      id: "tren-ramp",
+      compoundId: "tren-a",
+      doseMg: 150,
+      frequency: "eod",
+      activeWeeks: [1, 8],
+      route: "injectable",
+      dosePhases: [
+        { startWeek: 1, endWeek: 4, doseMg: 50 },
+        { startWeek: 5, endWeek: 8, doseMg: 150 },
+      ],
+    };
+    const data = generateStackedLoadData(8, [tren]);
+    expect(data[3].total).toBeLessThan(data[4].total);
   });
 
   it("extends PK data for washout weeks", () => {
@@ -142,16 +210,16 @@ describe("timeline helpers", () => {
     expect(rows).toHaveLength(4);
     expect(rows[0].category).toBe("anabolics");
     expect(rows.find((r) => r.entryId === "dbol")?.endWeek).toBe(4);
-    expect(rows.filter((r) => r.label === "Tren A")).toHaveLength(2);
+    expect(rows.filter((r) => r.label.startsWith("Tren A"))).toHaveLength(2);
   });
 
   it("lists active compounds per week in protocol", () => {
     const w3 = generateWeekProtocol(3, bulkStack);
-    expect(w3.map((e) => e.name)).toContain("Test E");
-    expect(w3.map((e) => e.name)).toContain("Dbol");
+    expect(w3.some((e) => e.name.startsWith("Test E"))).toBe(true);
+    expect(w3.some((e) => e.name.startsWith("Dbol"))).toBe(true);
     const w10 = generateWeekProtocol(10, bulkStack);
-    expect(w10.map((e) => e.name)).toContain("Tren A");
-    expect(w10.map((e) => e.name)).not.toContain("Dbol");
+    expect(w10.some((e) => e.name.startsWith("Tren A"))).toBe(true);
+    expect(w10.some((e) => e.name.startsWith("Dbol"))).toBe(false);
   });
 
   it("includes cycle end and PCT milestones", () => {

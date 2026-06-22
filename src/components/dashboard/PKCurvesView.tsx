@@ -58,7 +58,7 @@ export function PKCurvesView() {
           <div>
             <p className="text-sm font-semibold text-[var(--foreground)]">Blood Level Projection</p>
             <p className="text-xs text-[var(--muted)]">
-              Dashed lines mark estimated full saturation (~4–5 half-lives)
+              Pre = baseline before week 1 · dashed lines mark ~4–5 half-life saturation
               {mode === "absolute" ? ` · +${WASHOUT_WEEKS}wk washout after cycle end` : ""}
             </p>
           </div>

@@ -1,10 +1,11 @@
 "use client";
 
+import { useMemo } from "react";
 import { Copy, Pencil, Plus, TrendingUp, Trash2 } from "lucide-react";
 import { useCycleStore } from "@/store/cycleStore";
 import { getCompoundById } from "@/data/compounds";
 import { frequencyLabel } from "@/data/frequencies";
-import { formatDose, formatWeeklyDose } from "@/lib/cycleCalculations";
+import { entryLabel, formatDoseRange, formatWeeklyDose } from "@/lib/cycleCalculations";
 import { AppIcon } from "@/components/ui/AppIcon";
 import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui";
@@ -16,8 +17,20 @@ export function ActiveStack() {
     setConfiguringEntryId,
     removeCompound,
     duplicateCompound,
+    splitDosePhase,
+    getEffectiveWeeks,
     clearCycle,
   } = useCycleStore();
+
+  const duplicateCompoundIds = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const c of compounds) {
+      counts.set(c.compoundId, (counts.get(c.compoundId) ?? 0) + 1);
+    }
+    return new Set([...counts.entries()].filter(([, n]) => n > 1).map(([id]) => id));
+  }, [compounds]);
+
+  const totalWeeks = getEffectiveWeeks();
 
   return (
     <div className={`${ui.cardProtocol} ${ui.cardPad}`}>
@@ -52,6 +65,12 @@ export function ActiveStack() {
           {compounds.map((cc) => {
             const compound = getCompoundById(cc.compoundId);
             if (!compound) return null;
+            const hasDuplicate = duplicateCompoundIds.has(cc.compoundId);
+            const phaseCount = cc.dosePhases?.length ?? 1;
+            const titrationWeek = Math.min(
+              totalWeeks,
+              Math.max(cc.activeWeeks[0] + 1, Math.ceil((cc.activeWeeks[0] + cc.activeWeeks[1]) / 2)),
+            );
             return (
               <div
                 key={cc.id}
@@ -62,26 +81,33 @@ export function ActiveStack() {
                   style={{ background: compound.color }}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-[var(--foreground)]">{compound.name}</p>
+                  <p className="truncate text-sm font-semibold text-[var(--foreground)]">
+                    {hasDuplicate ? entryLabel(cc) : compound.name}
+                    {phaseCount > 1 ? (
+                      <span className="ml-1.5 text-[10px] font-medium text-[var(--protocol)]">
+                        {phaseCount} phases
+                      </span>
+                    ) : null}
+                  </p>
                   <p className="text-xs text-[var(--muted)]">
-                    {formatDose(cc.doseMg, compound.unit)} • {frequencyLabel(cc.frequency)} • {formatWeeklyDose(cc)} • Wk {cc.activeWeeks[0]}–{cc.activeWeeks[1]}
+                    {formatDoseRange(cc, compound.unit)} • {frequencyLabel(cc.frequency)} • {formatWeeklyDose(cc)} • Wk {cc.activeWeeks[0]}–{cc.activeWeeks[1]}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  {compound.category === "anabolics" ? (
-                    <button
-                      type="button"
-                      title="Ramp up (duplicate at higher dose)"
-                      onClick={() =>
-                        duplicateCompound(cc.id, {
-                          doseMg: Math.round(cc.doseMg * 1.5 * 10) / 10,
-                        })
-                      }
-                      className={ui.btnIconSm}
-                    >
-                      <AppIcon icon={TrendingUp} size="sm" />
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    title="Add titration step"
+                    onClick={() => {
+                      splitDosePhase(
+                        cc.id,
+                        titrationWeek,
+                        Math.round(cc.doseMg * 1.5 * 10) / 10,
+                      );
+                    }}
+                    className={ui.btnIconSm}
+                  >
+                    <AppIcon icon={TrendingUp} size="sm" />
+                  </button>
                   <button
                     type="button"
                     title="Duplicate entry"

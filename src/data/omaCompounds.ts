@@ -112,4 +112,5 @@ export const OMA_COMPOUNDS: Compound[] = [
   { id: "taurine", name: "Taurine", shortName: "Taurine", category: "support", route: "oral", tags: ["Guide"], dosageInfo: `2–6 g daily.`, color: "#22c55e", unit: "mg" },
   { id: "ketoconazole-shampoo", name: "Ketoconazole Shampoo", shortName: "Keto Shampoo", category: "hair", route: "topical", tags: ["Guide"], dosageInfo: `2% shampoo, 3–5 min contact 2–3×/week.`, color: "#14b8a6", unit: "mg" },
   { id: "ru58841", name: "RU58841", shortName: "RU58841", category: "hair", route: "topical", tags: ["Guide"], dosageInfo: `50–100 mg/day in ethanol/PG carrier.`, color: "#14b8a6", unit: "mg" },
+  { id: "yk11", name: "YK11", shortName: "YK11", category: "anabolics", route: "injectable", tags: ["IM", "SARM", "Guide"], dosageInfo: `10–50 mg/day reported (injectable).`, color: "#8b5cf6", unit: "mg" },
 ];

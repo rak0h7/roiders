@@ -6,7 +6,13 @@ import { createCloudPersistStorage } from "@/lib/persistStorage";
 import type { CompoundCategory } from "@/data/compounds";
 import { getCompoundById } from "@/data/compounds";
 import { DEFAULT_DOSES, inferDefaultDose } from "@/data/frequencies";
-import type { CycleCompound } from "@/lib/cycleTypes";
+import type { CycleCompound, DosePhase } from "@/lib/cycleTypes";
+import {
+  addTitrationStep,
+  ensureCompoundPhases,
+  migrateToPhases,
+  normalizeCompoundPhases,
+} from "@/lib/dosePhases";
 import { format } from "date-fns";
 
 export type { CycleCompound };
@@ -43,6 +49,7 @@ interface CycleState {
   openGuidesAt: (profileId: string) => void;
   loadTemplate: (compounds: Omit<CycleCompound, "id">[], weeks?: number) => void;
   duplicateCompound: (entryId: string, overrides?: Partial<CycleCompound>) => void;
+  splitDosePhase: (entryId: string, week: number, newDoseMg: number) => void;
   clearCycle: () => void;
   getEffectiveWeeks: () => number;
 }
@@ -64,15 +71,25 @@ export function ensureCompoundIds(compounds: CycleCompound[]): CycleCompound[] {
 
 export function clampCompoundsToWeeks(
   compounds: CycleCompound[],
-  effectiveWeeks: number
+  effectiveWeeks: number,
 ): CycleCompound[] {
   return compounds.map((c) => {
-    const start = Math.min(c.activeWeeks[0], effectiveWeeks);
-    const end = Math.min(c.activeWeeks[1], effectiveWeeks);
-    if (start > end) {
-      return { ...c, activeWeeks: [effectiveWeeks, effectiveWeeks] as [number, number] };
+    const phases = migrateToPhases(c)
+      .map((p) => ({
+        ...p,
+        startWeek: Math.min(p.startWeek, effectiveWeeks),
+        endWeek: Math.min(p.endWeek, effectiveWeeks),
+      }))
+      .filter((p) => p.startWeek <= p.endWeek);
+
+    if (phases.length === 0) {
+      return normalizeCompoundPhases(
+        { ...c, activeWeeks: [effectiveWeeks, effectiveWeeks] },
+        effectiveWeeks,
+      );
     }
-    return { ...c, activeWeeks: [start, end] };
+
+    return normalizeCompoundPhases({ ...c, dosePhases: phases }, effectiveWeeks);
   });
 }
 
@@ -80,14 +97,23 @@ function makeDefaultCompound(compoundId: string, totalWeeks: number): CycleCompo
   const compound = getCompoundById(compoundId);
   if (!compound) return null;
   const defaults = DEFAULT_DOSES[compoundId] ?? inferDefaultDose(compound);
-  return {
-    id: newEntryId(compoundId),
-    compoundId,
-    doseMg: defaults.doseMg,
-    frequency: defaults.frequency,
-    activeWeeks: [1, totalWeeks],
-    route: compound.route,
-  };
+  const dosePhases: DosePhase[] = [{ startWeek: 1, endWeek: totalWeeks, doseMg: defaults.doseMg }];
+  return normalizeCompoundPhases(
+    {
+      id: newEntryId(compoundId),
+      compoundId,
+      doseMg: defaults.doseMg,
+      frequency: defaults.frequency,
+      activeWeeks: [1, totalWeeks],
+      route: compound.route,
+      dosePhases,
+    },
+    totalWeeks,
+  );
+}
+
+function normalizeAll(compounds: CycleCompound[], totalWeeks: number): CycleCompound[] {
+  return ensureCompoundPhases(ensureCompoundIds(compounds), totalWeeks);
 }
 
 export const useCycleStore = create<CycleState>()(
@@ -132,10 +158,14 @@ export const useCycleStore = create<CycleState>()(
         });
       },
       updateCompound: (entryId, updates) =>
-        set({
-          compounds: get().compounds.map((c) =>
-            c.id === entryId ? { ...c, ...updates } : c
-          ),
+        set((state) => {
+          const totalWeeks = get().getEffectiveWeeks();
+          return {
+            compounds: state.compounds.map((c) => {
+              if (c.id !== entryId) return c;
+              return normalizeCompoundPhases({ ...c, ...updates }, totalWeeks);
+            }),
+          };
         }),
       removeCompound: (entryId) =>
         set({
@@ -155,14 +185,16 @@ export const useCycleStore = create<CycleState>()(
       openProfile: (profileId) => set({ profileModalId: profileId }),
       openGuidesAt: (profileId) =>
         set({ view: "guides", selectedGuideId: profileId, profileModalId: null }),
-      loadTemplate: (compounds, weeks) =>
+      loadTemplate: (compounds, weeks) => {
+        const totalWeeks = weeks ?? get().weeks;
         set({
-          compounds: ensureCompoundIds(compounds as CycleCompound[]),
-          weeks: weeks ?? get().weeks,
+          compounds: normalizeAll(compounds as CycleCompound[], totalWeeks),
+          weeks: totalWeeks,
           customWeeks: "",
           configuringEntryId: null,
           compoundModalOpen: false,
-        }),
+        });
+      },
       duplicateCompound: (entryId, overrides) => {
         const source = get().compounds.find((c) => c.id === entryId);
         if (!source) return;
@@ -171,20 +203,37 @@ export const useCycleStore = create<CycleState>()(
           totalWeeks,
           Math.max(source.activeWeeks[0] + 1, Math.ceil((source.activeWeeks[0] + source.activeWeeks[1]) / 2)),
         );
-        const entry: CycleCompound = {
-          ...source,
-          id: newEntryId(source.compoundId),
-          activeWeeks: overrides?.activeWeeks ?? ([mid, source.activeWeeks[1]] as [number, number]),
-          doseMg: overrides?.doseMg ?? source.doseMg,
-          frequency: overrides?.frequency ?? source.frequency,
-          route: overrides?.route ?? source.route,
-          compoundId: overrides?.compoundId ?? source.compoundId,
-        };
+        const phases = overrides?.dosePhases ?? migrateToPhases(source);
+        const entry = normalizeCompoundPhases(
+          {
+            ...source,
+            id: newEntryId(source.compoundId),
+            activeWeeks: overrides?.activeWeeks ?? ([mid, source.activeWeeks[1]] as [number, number]),
+            doseMg: overrides?.doseMg ?? source.doseMg,
+            frequency: overrides?.frequency ?? source.frequency,
+            route: overrides?.route ?? source.route,
+            compoundId: overrides?.compoundId ?? source.compoundId,
+            dosePhases: phases.map((p) => ({ ...p })),
+          },
+          totalWeeks,
+        );
         set({
           compounds: [...get().compounds, entry],
           configuringEntryId: entry.id,
         });
       },
+      splitDosePhase: (entryId, week, newDoseMg) =>
+        set((state) => {
+          const totalWeeks = get().getEffectiveWeeks();
+          return {
+            compounds: state.compounds.map((c) => {
+              if (c.id !== entryId) return c;
+              const phases = addTitrationStep(migrateToPhases(c), week, newDoseMg);
+              return normalizeCompoundPhases({ ...c, dosePhases: phases }, totalWeeks);
+            }),
+            configuringEntryId: entryId,
+          };
+        }),
       clearCycle: () => set({ compounds: [], configuringEntryId: null }),
       getEffectiveWeeks: () => {
         const { weeks, customWeeks } = get();
@@ -204,12 +253,16 @@ export const useCycleStore = create<CycleState>()(
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<CycleState> | undefined;
-        const compounds = ensureCompoundIds(p?.compounds ?? current.compounds);
+        const totalWeeks = (() => {
+          const custom = parseInt(p?.customWeeks ?? current.customWeeks, 10);
+          return custom > 0 ? custom : (p?.weeks ?? current.weeks);
+        })();
+        const compounds = normalizeAll(p?.compounds ?? current.compounds, totalWeeks);
         return {
           ...current,
           ...p,
           compounds,
-          configuringEntryId: p?.configuringEntryId ?? null,
+          configuringEntryId: null,
         };
       },
     }
